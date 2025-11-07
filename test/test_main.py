@@ -1,6 +1,6 @@
+from utils import *
 import pytest
-import requests
+import os
 
-def test_get_index():
-    response = requests.get("http://example.com")
-    assert response.status_code == 200
+def test_get_index(url):
+    assert_response(url)
