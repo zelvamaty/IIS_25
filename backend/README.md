@@ -22,23 +22,23 @@ Right-click your new database (my_project_db) and go to Properties... > Security
 Create a Virtual Environment:
 
 ### On Windows
-python -m venv venv
-venv\Scripts\activate
+- python -m venv venv
+- venv\Scripts\activate
 
 ### On macOS/Linux
-python3 -m venv venv
-source venv/bin/activate
+- python3 -m venv venv
+- source venv/bin/activate
 
 ### Install Dependencies:
 
-pip install -r requirements.txt
+- pip install -r requirements.txt
 
 ### Settings
-in backend_iis/settings.py set your user and password same as in postgres server
+- in backend_iis/settings.py set your user and password same as in postgres server
 
 ## RUN
-python manage.py makemigrations
-python manage.py migrate
-python manage.py runserver
+- python manage.py makemigrations
+- python manage.py migrate
+- python manage.py runserver
 
 
