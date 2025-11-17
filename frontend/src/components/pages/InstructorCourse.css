@@ -1,0 +1,167 @@
+.instructor-course {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.course-info-header {
+  background: #3498db;
+  color: white;
+  padding: 25px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 2px solid #2980b9;
+}
+
+.course-info-header h1 {
+  margin: 0 0 10px 0;
+  font-size: 32px;
+}
+
+.course-meta {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.95;
+}
+
+.tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #ddd;
+}
+
+.tab {
+  background: #bdc3c7;
+  border: 2px solid #333;
+  border-bottom: none;
+  padding: 12px 30px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  color: #2c3e50;
+  transition: all 0.3s;
+  margin-right: -2px;
+}
+
+.tab:first-child {
+  border-top-left-radius: 8px;
+}
+
+.tab:hover {
+  background: #95a5a6;
+}
+
+.tab.active {
+  background: #ecf0f1;
+  border-bottom: 2px solid #ecf0f1;
+  position: relative;
+  bottom: -2px;
+}
+
+.tab-content {
+  background: white;
+  padding: 30px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  min-height: 400px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.table-container {
+  margin-bottom: 40px;
+  overflow-x: auto;
+}
+
+.waiting-students {
+  margin-top: 40px;
+  padding-top: 30px;
+  border-top: 2px solid #ddd;
+}
+
+.waiting-students h3 {
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+.waiting-list {
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.waiting-student-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid #ffc107;
+}
+
+.waiting-student-item:last-child {
+  border-bottom: none;
+}
+
+.student-info {
+  font-size: 14px;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.student-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.info-box {
+  margin-top: 30px;
+  padding: 20px;
+  background: #e3f2fd;
+  border: 2px solid #2196f3;
+  border-radius: 8px;
+}
+
+.info-box p {
+  margin: 0;
+  color: #1976d2;
+}
+
+.settings-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f8f9fa;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+}
+
+.settings-section h3 {
+  margin-bottom: 10px;
+  color: #2c3e50;
+}
+
+.settings-section p {
+  margin-bottom: 15px;
+  color: #7f8c8d;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #2c3e50;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}

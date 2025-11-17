@@ -1,0 +1,41 @@
+.admin-users {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .search-section {
+    background: #f8f9fa;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+  }
+  
+  .search-inputs {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  
+  .search-inputs .form-group {
+    flex: 1;
+    min-width: 250px;
+    margin-bottom: 0;
+  }
+  
+  .users-table-container {
+    overflow-x: auto;
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  
+  .badge-info {
+    background: #d1ecf1;
+    color: #0c5460;
+  }

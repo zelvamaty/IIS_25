@@ -1,0 +1,85 @@
+.create-course {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .course-form {
+    background: #f8f9fa;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 30px;
+  }
+  
+  .form-section {
+    margin-bottom: 40px;
+  }
+  
+  .form-row {
+    margin-bottom: 25px;
+  }
+  
+  .form-row.two-columns {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  
+  .textarea {
+    resize: vertical;
+    font-family: inherit;
+  }
+  
+  .checkbox-group {
+    margin-top: 10px;
+  }
+  
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .checkbox-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+  }
+  
+  .terms-section {
+    margin-bottom: 40px;
+  }
+  
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .terms-list {
+    background: white;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    min-height: 200px;
+  }
+  
+  .empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    color: #7f8c8d;
+    font-size: 16px;
+  }
+  
+  .form-actions {
+    display: flex;
+    gap: 15px;
+  }
+  
+  .form-actions .button {
+    min-width: 150px;
+  }

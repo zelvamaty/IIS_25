@@ -1,0 +1,57 @@
+.admin-courses {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+  
+  .courses-table-container {
+    margin-bottom: 40px;
+    overflow-x: auto;
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .button-small {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  .statistics-section {
+    margin-top: 50px;
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+  }
+  
+  .stat-card {
+    background: #ecf0f1;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+  }
+  
+  .stat-value {
+    font-size: 48px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 10px;
+  }
+  
+  .stat-label {
+    font-size: 16px;
+    color: #7f8c8d;
+  }
