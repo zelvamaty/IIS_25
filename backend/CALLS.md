@@ -54,7 +54,7 @@ vrati kurzy - admin vsechny, garant ty co garantuje a ty co jsou approved, zbyte
         "guarantee": 1,
         "approved": false
     },
-    ```
+```
 ### - method: "PATCH" - http://127.0.0.1:8000/api/courses/<id>/patch_course/       
 patchne to co zadate ze chcete patchnout, admin/garant patchuje
 ```input:
