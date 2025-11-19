@@ -38,7 +38,6 @@ const CreateCourse = () => {
 
   return (
     <div className="create-course">
-      <h1 className="page-title">Nový kurz</h1>
 
       <form onSubmit={handleSaveCourse} className="course-form">
         <div className="form-section">
@@ -130,17 +129,7 @@ const CreateCourse = () => {
           </div>
 
           <div className="form-row">
-            <div className="checkbox-group">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  name="allowNews"
-                  checked={formData.allowNews}
-                  onChange={handleChange}
-                />
-                <span>Povolit aktuality pro tento kurz</span>
-              </label>
-            </div>
+            
           </div>
         </div>
 

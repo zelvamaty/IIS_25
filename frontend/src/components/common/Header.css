@@ -1,50 +1,120 @@
 .header {
-    background: #ecf0f1;
-    border-bottom: 2px solid #333;
-    padding: 20px 0;
-    margin-bottom: 20px;
-  }
-  
+  background: white;
+  border-bottom: 1px solid #e0e7ff;
+  padding: 20px 0;
+  box-shadow: 0 2px 8px rgba(30, 64, 175, 0.05);
+}
+
+.header-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+
+.header-left {
+  /* Prázdny priestor vľavo */
+}
+
+.header-right {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.logo {
+  display: flex;
+  justify-content: center;
+}
+
+.app-name {
+  margin: 0;
+  padding: 0;
+  font-weight: 900;
+  font-size: 36px;
+  color: #1e40af;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  background: #1e40af;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border: 2px solid #e0e7ff;
+  padding: 10px 20px;
+  background: #f0f4f8;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.user-info:hover {
+  border-color: #3b82f6;
+  background: #e0e7ff;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #1e40af;
+  font-size: 15px;
+}
+
+.button {
+  padding: 10px 24px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.button:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+}
+
+.button-secondary {
+  background: #60a5fa;
+}
+
+.button-secondary:hover {
+  background: #3b82f6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
   .header-content {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
   
-  .logo {
-    text-decoration: none;
+  .app-name {
+    font-size: 32px;
+    letter-spacing: 3px;
   }
   
-  .logo-box {
-    border: 2px solid #333;
-    padding: 12px 24px;
-    background: white;
-    font-weight: bold;
-    font-size: 18px;
-    color: #2c3e50;
-    border-radius: 4px;
-  }
-  
-  .user-section {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+  .header-right {
+    justify-content: center;
   }
   
   .user-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    border: 2px solid #333;
-    padding: 10px 20px;
-    background: white;
-    border-radius: 4px;
+    flex-direction: column;
+    text-align: center;
   }
-  
-  .user-name {
-    font-weight: 600;
-    color: #2c3e50;
-  }
+}

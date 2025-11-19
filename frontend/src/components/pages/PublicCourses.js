@@ -69,7 +69,6 @@ const PublicCourses = () => {
 
   return (
     <div className="public-courses">
-      <h1 className="page-title">Dostupné kurzy</h1>
 
       <div className="filter-section">
         <h3>Filtr kurzů:</h3>

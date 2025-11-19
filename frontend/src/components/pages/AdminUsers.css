@@ -1,41 +1,68 @@
 .admin-users {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 20px;
-  }
-  
-  .search-section {
-    background: #f8f9fa;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 30px;
-  }
-  
-  .search-inputs {
-    display: flex;
-    gap: 15px;
-    align-items: flex-start;
-    flex-wrap: wrap;
-  }
-  
-  .search-inputs .form-group {
-    flex: 1;
-    min-width: 250px;
-    margin-bottom: 0;
-  }
-  
-  .users-table-container {
-    overflow-x: auto;
-  }
-  
-  .action-buttons {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  
-  .badge-info {
-    background: #d1ecf1;
-    color: #0c5460;
-  }
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  background: #f0f4f8;
+  min-height: 100vh;
+}
+
+.page-title {
+  color: #1e40af;
+  font-size: 48px;
+  font-weight: 700;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.search-section {
+  background: white;
+  border: none;
+  border-radius: 20px;
+  padding: 32px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
+}
+
+.search-inputs {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 42px;
+
+}
+
+.search-inputs .form-group {
+  flex: 1;
+  min-width: 250px;
+  margin-bottom: 0;
+}
+
+.users-table-container {
+  overflow-x: auto;
+  background: white;
+  border-radius: 20px;
+  padding: 8px;
+  box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.button-small {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.badge-info {
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+}

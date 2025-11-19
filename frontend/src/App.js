@@ -10,6 +10,12 @@ import InstructorCourse from './components/pages/InstructorCourse';
 import StudentCourseRegistration from './components/pages/StudentCourseRegistration';
 import MyCourses from './components/pages/MyCourses';
 import MySchedule from './components/pages/MySchedule';
+import UserProfile from './components/pages/UserProfile';
+import AdminDashboard from './components/pages/AdminDashboard';
+import AdminRooms from './components/pages/AdminRooms';
+
+
+
 import './App.css';
 
 function App() {
@@ -53,9 +59,9 @@ function App() {
   const getNavigationItems = () => {
     if (!user) {
       return [
-        { label: 'Domů', path: '/' },
+        // { label: 'Domů', path: '/' },
         { label: 'Kurzy', path: '/courses' },
-        { label: 'O systému', path: '/about' }
+        // { label: 'O systému', path: '/about' }
       ];
     }
 
@@ -101,10 +107,10 @@ function App() {
           <Route path="/about" element={<div className="container"><h1>O systému</h1><p>Informace o systému...</p></div>} />
           
           {/* Admin routes */}
-          <Route path="/admin/dashboard" element={user?.role === 'Administrátor' ? <AdminCourses /> : <Navigate to="/" />} />
+          <Route path="/admin/dashboard" element={user?.role === 'Administrátor' ? <AdminDashboard /> : <Navigate to="/" />} />
           <Route path="/admin/courses" element={user?.role === 'Administrátor' ? <AdminCourses /> : <Navigate to="/" />} />
           <Route path="/admin/users" element={user?.role === 'Administrátor' ? <AdminUsers /> : <Navigate to="/" />} />
-          <Route path="/admin/rooms" element={user?.role === 'Administrátor' ? <div className="container"><h1>Správa místností</h1></div> : <Navigate to="/" />} />
+          <Route path="/admin/rooms" element={user?.role === 'Administrátor' ? <AdminRooms /> : <Navigate to="/" />} />
           
           {/* Instructor/Guarantor routes */}
           <Route path="/create-course" element={user?.role === 'Garant' || user?.role === 'Lektor' ? <CreateCourse /> : <Navigate to="/" />} />
@@ -116,7 +122,7 @@ function App() {
           <Route path="/course/:id" element={user?.role === 'Student' ? <StudentCourseRegistration /> : <Navigate to="/" />} />
           
           {/* Common routes */}
-          <Route path="/profile" element={user ? <div className="container"><h1>Můj profil</h1><p>Uživatel: {user.name}</p><p>Role: {user.role}</p></div> : <Navigate to="/" />} />
+          <Route path="/profile" element={user ? <UserProfile user={user} /> : <Navigate to="/" />} />
         </Routes>
       </div>
     </Router>
