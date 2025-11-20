@@ -39,6 +39,7 @@ Create a Virtual Environment:
 ## RUN
 - python manage.py makemigrations
 - python manage.py migrate
+- python manage.py seeder 
 - python manage.py runserver
 
 
