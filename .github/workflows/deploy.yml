@@ -20,4 +20,4 @@ jobs:
         VPS_USER: petra
         VPS_HOST: ssh.rtsvk.xyz
       run: |
-        ssh -o StrictHostKeyChecking=no $VPS_USER@‍$VPS_HOST '~/deploy_iis.sh'
+        ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST '~/deploy_iis.sh'
