@@ -6,6 +6,12 @@ __pycache__/
 # C extensions
 *.so
 
+# OS-specific stuff
+.DS_Store
+
+# Node.js stuff
+node_modules/
+
 # Distribution / packaging
 .Python
 build/

@@ -99,7 +99,6 @@ const MySchedule = () => {
   return (
     <div className="my-schedule">
       <div className="schedule-header">
-        <h1 className="page-title">Můj rozvrh</h1>
         
         <div className="schedule-controls">
           <button className="button button-secondary" onClick={() => changeWeek(-1)}>

@@ -25,7 +25,6 @@ const AdminCourses = () => {
   return (
     <div className="admin-courses">
       <div className="page-header">
-        <h1 className="page-title">Správa kurzů</h1>
         <button className="button button-success" onClick={handleNewCourse}>
           + Nový kurz
         </button>

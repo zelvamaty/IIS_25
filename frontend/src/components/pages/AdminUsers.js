@@ -74,7 +74,6 @@ const AdminUsers = () => {
 
   return (
     <div className="admin-users">
-      <h1 className="page-title">Správa uživatelů</h1>
 
       <div className="search-section">
         <div className="search-inputs">

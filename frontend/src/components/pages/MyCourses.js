@@ -95,7 +95,6 @@ const MyCourses = () => {
 
   return (
     <div className="my-courses">
-      <h1 className="page-title">Moje kurzy</h1>
 
       {/* Summary Statistics */}
       <div className="stats-summary">
