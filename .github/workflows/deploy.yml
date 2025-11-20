@@ -1,0 +1,23 @@
+name: Django CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: debian-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@‍v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    - name: Deploy via SSH
+      env:
+        VPS_USER: petra
+        VPS_HOST: ssh.rtsvk.xyz
+      run: |
+        ssh -o StrictHostKeyChecking=no $VPS_USER@‍$VPS_HOST '~/deploy_iis.sh'
