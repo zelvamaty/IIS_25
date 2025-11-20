@@ -9,6 +9,9 @@ __pycache__/
 # OS-specific stuff
 .DS_Store
 
+# Node.js stuff
+node_modules/
+
 # Distribution / packaging
 .Python
 build/
