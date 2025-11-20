@@ -63,6 +63,7 @@ AUTH_USER_MODEL = 'core.User'
 REST_AUTH = {
     'USER_DETAILS_SERIALIZER': 'core.serializers.UserSerializer',
     'REGISTER_SERIALIZER': 'core.serializers.BetterRegisterSerializer',
+    'PASSWORD_CHANGE_SERIALIZER': 'core.serializers.MyPasswordChangeSerializer',
 }
 
 MIDDLEWARE = [
