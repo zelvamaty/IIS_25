@@ -181,6 +181,25 @@ Garant zamítne studenta.
 
 Vrátí seznam studentů v kurzu (vidí Garant, Admin a Lektoři).
 
+```json
+[
+    {
+        "id": 1,
+        "username": "testuserrr",
+        "first_name": "miluju_patchovani",
+        "last_name": "miluju_patchovaniprijmeni",
+        "role": "APPROVED"
+    },
+    {
+        "id": 5,
+        "username": "testzefungujejmeno",
+        "first_name": "",
+        "last_name": "",
+        "role": "PENDING"
+    }
+]
+```
+
 -----
 
 ## 4\. Rooms (Místnosti)
@@ -188,6 +207,17 @@ Vrátí seznam studentů v kurzu (vidí Garant, Admin a Lektoři).
 ### \- method: "GET" - [http://127.0.0.1:8000/api/rooms/](http://127.0.0.1:8000/api/rooms/)
 
 Seznam všech místností.
+
+```json
+[
+    {
+        "id": 1,
+        "name": "room1",
+        "capacity": 20,
+        "location": "Márnice (tam skoncim brzy aaa)"
+    }
+]
+```
 
 ### \- method: "POST" - [http://127.0.0.1:8000/api/rooms/](http://127.0.0.1:8000/api/rooms/)
 
@@ -216,6 +246,41 @@ Smaže místnost (Admin).
 ### \- method: "GET" - [http://127.0.0.1:8000/api/terms/](https://www.google.com/search?q=http://127.0.0.1:8000/api/terms/)
 
 Seznam všech termínů výuky.
+
+```json
+[
+    {
+        "id": 1,
+        "course": {
+            "id": 3,
+            "code": "testkurz3",
+            "title": "vetsitest",
+            "type": "",
+            "description": "efwrwerwerwerewrwerwerewrwererI",
+            "capacity": 30,
+            "guarantee": {
+                "id": 2,
+                "username": "testadmina",
+                "email": "",
+                "first_name": "",
+                "last_name": "",
+                "role": "USER"
+            },
+            "approved": true,
+            "price": "0.00",
+            "lecturers": [],
+            "auto_confirm": false,
+            "enrolled_count": 2
+        },
+        "type": "LECTURE",
+        "requires_registration": true,
+        "capacity": 50,
+        "room": 1,
+        "start_time": "2023-10-01T10:00:00Z",
+        "end_time": "2023-10-01T12:00:00Z"
+    }
+]
+```
 
 ### \- method: "POST" - [http://127.0.0.1:8000/api/terms/](https://www.google.com/search?q=http://127.0.0.1:8000/api/terms/)
 
@@ -253,6 +318,29 @@ Rozvrh přihlášeného studenta (vrátí termíny, na které je registrován).
 
 Vrátí seznam mých registrací na termíny.
 
+```json
+[
+    {
+        "id": 2,
+        "user": 3,
+        "user_id": 3,
+        "term": 1,
+        "registered_at": "2025-11-20T16:06:32.067271Z",
+        "grade": {
+            "id": 1,
+            "registration": 2,
+            "registration_id": 2,
+            "value": "90.50",
+            "graded_at": "2025-11-20T16:12:58.218017Z",
+            "graded_by": 2
+        },
+        "graded_by": [
+            "testadmina"
+        ]
+    }
+]
+```
+
 ### \- method: "POST" - [http://127.0.0.1:8000/api/registrations/](https://www.google.com/search?q=http://127.0.0.1:8000/api/registrations/)
 
 Registrace na konkrétní termín (lekci/zkoušku). Musíte být schválený student kurzu.
@@ -274,6 +362,19 @@ Odhlášení z termínu.
 ### \- method: "GET" - [http://127.0.0.1:8000/api/grades/](https://www.google.com/search?q=http://127.0.0.1:8000/api/grades/)
 
 Admin vidí vše, Lektor své kurzy, Student své známky.
+
+```json
+[
+    {
+        "id": 1,
+        "registration": 2,
+        "registration_id": 2,
+        "value": "90.50",
+        "graded_at": "2025-11-20T16:12:58.218017Z",
+        "graded_by": 2
+    }
+]
+```
 
 ### \- method: "POST" - [http://127.0.0.1:8000/api/grades/](https://www.google.com/search?q=http://127.0.0.1:8000/api/grades/)
 
