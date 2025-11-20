@@ -1,93 +1,297 @@
-## 1. registrace a users
 
+## 1\. Registrace a Users
 
-### - method: "POST" - http://127.0.0.1:8000/api/auth/registration/       
-```input:
+### \- method: "POST" - [http://127.0.0.1:8000/api/auth/registration/](http://127.0.0.1:8000/api/auth/registration/)
+
+Registrace nového uživatele (defaultně role USER).
+
+```json
 {
-    "username": "testzefungujeasdjmeno",
+    "username": "jakub_student",
+    "email": "jakub@example.com",
     "first_name": "Jakub",
     "last_name": "Rotschild",
     "password1": "SuperHeslo23",
     "password2": "SuperHeslo23"
 }
 ```
-### - method: "POST" - http://127.0.0.1:8000/api/auth/login/       
-```input:
+
+### \- method: "POST" - [http://127.0.0.1:8000/api/auth/login/](http://127.0.0.1:8000/api/auth/login/)
+
+Přihlášení (vrátí token).
+
+```json
 {
-    "username": "testzefungujeasdjmeno",
+    "username": "jakub_student",
     "password": "SuperHeslo23"
 }
 ```
 
-### - method: "GET" - http://127.0.0.1:8000/api/users/
-Získání users, adminovi to vrati vsechny, normalnimu userovi jen jeho
-### - method: "GET" - http://127.0.0.1:8000/api/users/me
-ziskani sebe
-```output:
+### \- method: "POST" - [http://127.0.0.1:8000/api/auth/logout/](https://www.google.com/search?q=http://127.0.0.1:8000/api/auth/logout/)
+
+Odhlášení (zneplatní token).
+
+### \- method: "GET" - [http://127.0.0.1:8000/api/users/](http://127.0.0.1:8000/api/users/)
+
+Získání users. Adminovi to vrátí všechny, normálnímu userovi jen jeho samotného.
+
+### \- method: "GET" - [http://127.0.0.1:8000/api/users/me/](https://www.google.com/search?q=http://127.0.0.1:8000/api/users/me/)
+
+Získání detailu přihlášeného uživatele.
+
+```json
 {
     "id": 1,
     "username": "testuserrr",
-    "email": "",
+    "email": "test@test.cz",
     "first_name": "miluju_patchovani",
-    "last_name": "",
+    "last_name": "Novak",
     "role": "USER"
 }
 ```
-### - method: "PATCH" - http://127.0.0.1:8000/api/users/<id>/patch_user/       
-patchne to co zadate ze chcete patchnout, admin patchuje
-```input:
+
+### \- method: "PATCH" - [http://127.0.0.1:8000/api/users/](http://127.0.0.1:8000/api/users/)\<id\>/patch\_user/
+
+Patchne to, co zadáte. Admin patchuje kohokoliv, user (pokud by měl práva) sebe.
+
+```json
 {
-    "first_name": "testzefungujeasdjmeno"
+    "first_name": "Pavel"
 }
 ```
 
-## 2. Courses
-### - method: "GET" - http://127.0.0.1:8000/api/courses/
-vrati kurzy - admin vsechny, garant ty co garantuje a ty co jsou approved, zbytek vidi jen ty approved
-```outnput:
+### \- method: "DELETE" - [http://127.0.0.1:8000/api/users/](http://127.0.0.1:8000/api/users/)\<id\>/delete\_user/
+
+Smaže uživatele. Může jen Admin nebo uživatel sám sebe.
+
+### \- method: "POST" - [http://127.0.0.1:8000/api/users/change\_password/](https://www.google.com/search?q=http://127.0.0.1:8000/api/users/change_password/)
+
+Změna hesla pro přihlášeného uživatele.
+
+```json
 {
-        "id": 2,
-        "code": "test",
-        "title": "vetsitest",
-        "description": "efwrwerwerwerewrwerwerewrwererI",
-        "capacity": 30,
-        "guarantee": 1,
-        "approved": false
-    },
-```
-### - method: "PATCH" - http://127.0.0.1:8000/api/courses/<id>/patch_course/       
-patchne to co zadate ze chcete patchnout, admin/garant patchuje
-```input:
-{
-    "code": "IIS42"
+    "old_password": "SuperHeslo23",
+    "new_password1": "NoveSuperHeslo24",
+    "new_password2": "NoveSuperHeslo24"
 }
 ```
-### - method: "DELETE" - http://127.0.0.1:8000/api/courses/<id>/delete_course/       
-patchne to co zadate ze chcete patchnout, admin/garant patchuje
-### - method: "POST" - http://127.0.0.1:8000/api/courses/
-vytvori kurz a vas to da jako garanta
-```input:
+
+### \- method: "GET" - [http://127.0.0.1:8000/api/users/](http://127.0.0.1:8000/api/users/)\<id\>/dashboard/
+
+Vrátí statistiky uživatele (počet garantovaných kurzů, učených kurzů, zapsaných kurzů).
+
+-----
+
+## 2\. Courses (Kurzy)
+
+### \- method: "GET" - [http://127.0.0.1:8000/api/courses/](http://127.0.0.1:8000/api/courses/)
+
+Vrátí kurzy. Admin vidí všechny, Garant své + schválené, Ostatní jen schválené.
+
+### \- method: "POST" - [http://127.0.0.1:8000/api/courses/](http://127.0.0.1:8000/api/courses/)
+
+Vytvoří kurz a vás to tam hodí jako garanta.
+
+```json
 {
-    "code": "test",
-    "title": "vetsitest",
-    "description": "efwrwerwerwerewrwerwerewrwererI"
+    "code": "IIS101",
+    "title": "Informační systémy",
+    "description": "Nejlepší předmět ever.",
+    "price": 0.00,
+    "capacity": 100,
+    "auto_confirm": false
 }
 ```
-### - method: "POST" - http://127.0.0.1:8000/api/courses/<id>/approve
-schvaleni kurzu adminem
 
-### - method: "POST" - http://127.0.0.1:8000/api/courses/<id>/reject
-zamitnuti kurzu adminem
+### \- method: "GET" - [http://127.0.0.1:8000/api/courses/](http://127.0.0.1:8000/api/courses/)\<id\>/
 
+Detail jednoho kurzu.
 
+### \- method: "PATCH" - [http://127.0.0.1:8000/api/courses/](http://127.0.0.1:8000/api/courses/)\<id\>/patch\_course/
 
-## 3. Rooms
-### - method: "POST" - http://127.0.0.1:8000/api/rooms/
-vytvori mistnost (admin muze jenom)
-```input:
+Úprava kurzu (Garant nebo Admin).
+
+```json
 {
-    "name": "room1",
-    "capacity": "20",
-    "location": "Márnice (tam skoncim brzy aaa)"
+    "description": "Změna popisu, už to není nejlepší předmět."
+}
+```
+
+### \- method: "DELETE" - [http://127.0.0.1:8000/api/courses/](http://127.0.0.1:8000/api/courses/)\<id\>/delete\_course/
+
+Smazání kurzu (Garant nebo Admin).
+
+### \- method: "POST" - [http://127.0.0.1:8000/api/courses/](http://127.0.0.1:8000/api/courses/)\<id\>/approve/
+
+Schválení kurzu adminem (aby byl vidět pro ostatní).
+
+### \- method: "POST" - [http://127.0.0.1:8000/api/courses/](http://127.0.0.1:8000/api/courses/)\<id\>/reject/
+
+Zamítnutí kurzu adminem.
+
+-----
+
+## 3\. Course People (Lektoři a Studenti)
+
+### \- method: "POST" - [http://127.0.0.1:8000/api/courses/](http://127.0.0.1:8000/api/courses/)\<id\>/add\_lecturer/
+
+Přidá lektora do kurzu (Garant/Admin).
+
+```json
+{
+    "lecturer_id": 5
+}
+```
+
+### \- method: "POST" - [http://127.0.0.1:8000/api/courses/](http://127.0.0.1:8000/api/courses/)\<id\>/remove\_lecturer/
+
+Odebere lektora z kurzu.
+
+```json
+{
+    "lecturer_id": 5
+}
+```
+
+### \- method: "POST" - [http://127.0.0.1:8000/api/courses/](http://127.0.0.1:8000/api/courses/)\<id\>/enroll/
+
+Přihlášení studenta na kurz. Pokud je `auto_confirm` true, rovnou schváleno, jinak PENDING.
+
+### \- method: "POST" - [http://127.0.0.1:8000/api/courses/](http://127.0.0.1:8000/api/courses/)\<id\>/approve\_enrollment/
+
+Garant schválí studenta v kurzu.
+
+```json
+{
+    "enrollment_id": 12
+}
+```
+
+### \- method: "POST" - [http://127.0.0.1:8000/api/courses/](http://127.0.0.1:8000/api/courses/)\<id\>/reject\_enrollment/
+
+Garant zamítne studenta.
+
+```json
+{
+    "enrollment_id": 12
+}
+```
+
+### \- method: "GET" - [http://127.0.0.1:8000/api/courses/](http://127.0.0.1:8000/api/courses/)\<id\>/list\_students/
+
+Vrátí seznam studentů v kurzu (vidí Garant, Admin a Lektoři).
+
+-----
+
+## 4\. Rooms (Místnosti)
+
+### \- method: "GET" - [http://127.0.0.1:8000/api/rooms/](http://127.0.0.1:8000/api/rooms/)
+
+Seznam všech místností.
+
+### \- method: "POST" - [http://127.0.0.1:8000/api/rooms/](http://127.0.0.1:8000/api/rooms/)
+
+Vytvoří místnost (jen Admin).
+
+```json
+{
+    "name": "A112",
+    "capacity": 50,
+    "location": "Božetěchova, 1. patro"
+}
+```
+
+### \- method: "PATCH" - [http://127.0.0.1:8000/api/rooms/](http://127.0.0.1:8000/api/rooms/)\<id\>/patch\_room/
+
+Upraví místnost (Admin).
+
+### \- method: "DELETE" - [http://127.0.0.1:8000/api/rooms/](http://127.0.0.1:8000/api/rooms/)\<id\>/delete\_room/
+
+Smaže místnost (Admin).
+
+-----
+
+## 5\. Terms (Výuka - Lekce/Zkoušky)
+
+### \- method: "GET" - [http://127.0.0.1:8000/api/terms/](https://www.google.com/search?q=http://127.0.0.1:8000/api/terms/)
+
+Seznam všech termínů výuky.
+
+### \- method: "POST" - [http://127.0.0.1:8000/api/terms/](https://www.google.com/search?q=http://127.0.0.1:8000/api/terms/)
+
+Vytvoření termínu (Garant/Admin). Kontroluje kolizi místnosti a času.
+
+```json
+{
+    "course_id": 2,
+    "room": 1,
+    "type": "LECTURE",
+    "start_time": "2025-11-21T10:00:00Z",
+    "end_time": "2025-11-21T12:00:00Z",
+    "capacity": 50,
+    "requires_registration": true
+}
+```
+
+### \- method: "PATCH" - [http://127.0.0.1:8000/api/terms/](https://www.google.com/search?q=http://127.0.0.1:8000/api/terms/)\<id\>/patch\_term/
+
+Úprava termínu (Admin).
+
+### \- method: "DELETE" - [http://127.0.0.1:8000/api/terms/](https://www.google.com/search?q=http://127.0.0.1:8000/api/terms/)\<id\>/delete\_term/
+
+Smazání termínu (Admin).
+
+### \- method: "GET" - [http://127.0.0.1:8000/api/terms/schedule/](https://www.google.com/search?q=http://127.0.0.1:8000/api/terms/schedule/)
+
+Rozvrh přihlášeného studenta (vrátí termíny, na které je registrován).
+
+-----
+
+## 6\. Registrations (Registrace na konkrétní termíny)
+
+### \- method: "GET" - [http://127.0.0.1:8000/api/registrations/](https://www.google.com/search?q=http://127.0.0.1:8000/api/registrations/)
+
+Vrátí seznam mých registrací na termíny.
+
+### \- method: "POST" - [http://127.0.0.1:8000/api/registrations/](https://www.google.com/search?q=http://127.0.0.1:8000/api/registrations/)
+
+Registrace na konkrétní termín (lekci/zkoušku). Musíte být schválený student kurzu.
+
+```json
+{
+    "term_id": 5
+}
+```
+
+### \- method: "DELETE" - [http://127.0.0.1:8000/api/registrations/](https://www.google.com/search?q=http://127.0.0.1:8000/api/registrations/)\<id\>/delete\_registration/
+
+Odhlášení z termínu.
+
+-----
+
+## 7\. Grades (Známky)
+
+### \- method: "GET" - [http://127.0.0.1:8000/api/grades/](https://www.google.com/search?q=http://127.0.0.1:8000/api/grades/)
+
+Admin vidí vše, Lektor své kurzy, Student své známky.
+
+### \- method: "POST" - [http://127.0.0.1:8000/api/grades/](https://www.google.com/search?q=http://127.0.0.1:8000/api/grades/)
+
+Lektor/Garant zadá známku studentovi (přes ID registrace na termín).
+
+```json
+{
+    "registration": 15,
+    "value": 95.50
+}
+```
+
+### \- method: "PATCH" - [http://127.0.0.1:8000/api/grades/](https://www.google.com/search?q=http://127.0.0.1:8000/api/grades/)\<id\>/patch\_grade/
+
+Oprava známky (Lektor/Garant).
+
+```json
+{
+    "value": 100.00
 }
 ```
