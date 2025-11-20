@@ -42,14 +42,14 @@ INSTALLED_APPS = [
     #added
     'rest_framework',
     'django_extensions',
+    'django_seed',
     'core',
     'dj_rest_auth',
     'dj_rest_auth.registration',
     'rest_framework.authtoken',
     'allauth',
     'allauth.account',
-    'allauth.socialaccount',
-
+    'allauth.socialaccount'
 ]
 
 REST_FRAMEWORK = {
