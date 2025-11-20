@@ -1,7 +1,9 @@
+from datetime import datetime
+
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from backend_iis.core.models import ( 
+from core.models import (
     Course, Room, Term, Registration, UserRole
 )
 
@@ -94,28 +96,28 @@ class Command(BaseCommand):
 
                 room1 = Room.objects.create(
                     name="A112",
-                    capacity=64
+                    capacity=64,
                     location="B/A112"
                 )
 
                 room2 = Room.objects.create(
                     name="A113",
-                    capacity=64
+                    capacity=64,
                     location="B/A113"
                 )
 
                 term1 = Term.objects.create(
                     course=course1,
                     room=room1,
-                    start_time='08:00',
-                    end_time='10:00'
+                    start_time=datetime.strptime('2025-11-20 08:00', '%Y-%m-%d %H:%M'),
+                    end_time=datetime.strptime('2025-11-20 10:00', '%Y-%m-%d %H:%M')
                 )
 
                 term2 = Term.objects.create(
                     course=course2,
                     room=room2,
-                    start_time='08:00',
-                    end_time='10:00'
+                    start_time=datetime.strptime('2025-11-20 08:00', '%Y-%m-%d %H:%M'),
+                    end_time=datetime.strptime('2025-11-20 10:00', '%Y-%m-%d %H:%M')
                 )
 
                 reg1 = Registration.objects.create(
@@ -145,5 +147,5 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('Successfully seeded database!'))
         self.stdout.write(f'Admin: {admin_user.username} / {common_password}')
         self.stdout.write(f'Guarantee: {guarantee_user.username}')
-        self.stdout.write(f'Lecturers: {lecturer_1.username}, {lecturer_2.username}')
+        # self.stdout.write(f'Lecturers: {lecturer_1.username}, {lecturer_2.username}')
         self.stdout.write(f'Students: {student_1.username}, {student_2.username}')
