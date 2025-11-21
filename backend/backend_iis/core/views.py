@@ -253,7 +253,16 @@ class CourseViewSet(viewsets.ModelViewSet):
             return Response(student_data)
         return Response({'detail': 'You do not have permission to view students of this course.'}, status=403)
 
-
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    # method to show courses im enrolled in
+    def my_courses(self, request, pk=None):
+        user = request.user
+        enrollments = CourseEnrollment.objects.filter(user=user).select_related('course')
+        course_data = [{'id': enrollment.course.id, 'code': enrollment.course.code,
+                        'title': enrollment.course.title, 'guarantee': enrollment.course.guarantee.username,
+                        'role': enrollment.role}
+                       for enrollment in enrollments]
+        return Response(course_data)
 
 
 class RoomViewSet(viewsets.ModelViewSet):
