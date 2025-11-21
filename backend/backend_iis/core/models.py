@@ -20,6 +20,17 @@ class TermType(models.TextChoices):
     ASSIGNMENT = 'ASSIGNMENT', 'Assignment'
     EXAM = 'EXAM', 'Exam'
 
+class CourseType(models.TextChoices):
+    HARDWARE = 'HARDWARE', 'Hardware'
+    OS = 'OS', 'Operating Systems'
+    AI = 'AI', 'Artificial Intelligence'
+    WEB = 'WEB', 'Web Development'
+    SECURITY = 'SECURITY', 'Security'
+    NETWORKS = 'NETWORKS', 'Networks'
+    OTHER = 'OTHER', 'Other'
+
+
+
 
 # model for users
 class User(AbstractUser):
@@ -54,7 +65,13 @@ class Course(models.Model):
     code = models.CharField(max_length=20, unique=True)
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    type = models.CharField(max_length=100, blank=True)
+    type = models.CharField(
+        max_length=25,
+        choices=CourseType.choices,
+        default=CourseType.OTHER,
+        blank=False,
+        null=False
+    )
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     capacity = models.PositiveIntegerField(default=30)
     guarantee = models.ForeignKey(User, on_delete=models.CASCADE, related_name='guaranteed_courses')

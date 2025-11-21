@@ -40,10 +40,11 @@ class CourseSerializer(serializers.ModelSerializer):
     lecturers = UserSerializer(many=True, read_only=True)
     enrolled_count = serializers.SerializerMethodField()
 
+    show_type = serializers.CharField(source='get_type_display', read_only=True)
 
     class Meta:
         model = Course
-        fields = ['id', 'code', 'title','type', 'description', 'capacity', 'guarantee', 'approved', 'price', 'lecturers', 'auto_confirm', 'enrolled_count']
+        fields = ['id', 'code', 'title','type','show_type', 'description', 'capacity', 'guarantee', 'approved', 'price', 'lecturers', 'auto_confirm', 'enrolled_count']
         read_only_fields = ['guarantee', 'approved', 'enrolled_count']
 
     def get_enrolled_count(self, obj):
