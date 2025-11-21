@@ -205,6 +205,13 @@ export const coursesAPI = {
     });
     return handleResponse(response);
   },
+  getMyCourses: async () => {
+    const response = await fetch(`${API_BASE_URL}/courses/my_courses/`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+    return handleResponse(response);
+  },
 
   // Approve course (admin)
   approveCourse: async (id) => {
@@ -381,15 +388,14 @@ export const termsAPI = {
     });
     return handleResponse(response);
   },
-  
-registerTerm: async (termId) => {
-  const response = await fetch(`${API_BASE_URL}/terms/${termId}/register/`, {
-    method: 'POST',
-    headers: getAuthHeaders()
-  });
-  return handleResponse(response);
-}
-};
+
+  registerTerm: async (termId) => {
+    const response = await fetch(`${API_BASE_URL}/terms/${termId}/register/`, {
+      method: 'POST',
+      headers: getAuthHeaders()
+    });
+    return handleResponse(response);
+  }};
 
 // ============================================
 // 6. REGISTRATIONS API
@@ -409,14 +415,14 @@ export const registrationsAPI = {
     const response = await fetch(`${API_BASE_URL}/registrations/`, {
       method: 'POST',
       headers: getAuthHeaders(),
-      body: JSON.stringify({ term_id: termId })
+      body: JSON.stringify({ term_id: termId })  
     });
     return handleResponse(response);
   },
 
   // Unregister from term
-  unregisterFromTerm: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/registrations/${id}/delete_registration/`, {
+  unregisterFromTerm: async (registrationId) => {
+    const response = await fetch(`${API_BASE_URL}/registrations/${registrationId}/delete_registration/`, {
       method: 'DELETE',
       headers: getAuthHeaders()
     });

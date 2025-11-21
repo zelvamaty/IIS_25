@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './StudentCourseRegistration.css';
-import { coursesAPI, termsAPI } from '../services/api';
+import { coursesAPI, termsAPI, registrationsAPI } from '../services/api'; // PRIDANÉ registrationsAPI
 
 const StudentCourseRegistration = () => {
-  const { id } = useParams(); // ID kurzu z URL
+  const { id } = useParams();
   const navigate = useNavigate();
   
   const [course, setCourse] = useState(null);
@@ -22,11 +22,9 @@ const StudentCourseRegistration = () => {
       setLoading(true);
       setError(null);
 
-      // Load course details
       const courseData = await coursesAPI.getCourseDetail(id);
       setCourse(courseData);
 
-      // Load all terms and filter for this course
       const allTerms = await termsAPI.getTerms();
       const courseTerms = allTerms.filter(t => t.course?.id === parseInt(id));
       setTerms(courseTerms);
@@ -46,9 +44,9 @@ const StudentCourseRegistration = () => {
 
     try {
       setRegistering(true);
-      await termsAPI.registerTerm(termId);
+      await registrationsAPI.registerForTerm(termId); // ZMENENÉ
       alert('Úspěšně jste se zaregistrovali na termín!');
-      await loadCourseDetails(); // Reload to get updated capacity
+      await loadCourseDetails();
     } catch (err) {
       alert(err.message || 'Registrace na termín se nezdařila');
       console.error('Error registering for term:', err);
@@ -56,6 +54,7 @@ const StudentCourseRegistration = () => {
       setRegistering(false);
     }
   };
+
 
   const handleEnrollCourse = async () => {
     if (!window.confirm(`Opravdu se chcete zapsat do kurzu "${course.title}"?`)) {
