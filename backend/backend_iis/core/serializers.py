@@ -40,7 +40,7 @@ class UserSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
 
 
-        if user.role != 'ADMIN' or not user.is_authenticated:
+        if not user.is_authenticated or user.role != 'ADMIN':
             user_data.pop('role', None)
 
         return user_data
