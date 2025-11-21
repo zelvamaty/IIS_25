@@ -277,3 +277,59 @@
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     }
   }
+  .page-title {
+    color: #1e40af;
+    font-size: 48px;
+    font-weight: 700;
+    margin-bottom: 40px;
+  }
+  
+  .loading-state,
+  .error-state {
+    text-align: center;
+    padding: 80px 20px;
+    background: white;
+    border-radius: 20px;
+    margin: 40px auto;
+    max-width: 600px;
+    box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
+  }
+  
+  .empty-message {
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
+    font-size: 16px;
+  }
+  
+  .upcoming-time {
+    color: #64748b;
+    font-size: 13px;
+    margin-top: 4px;
+  }
+  
+  .quick-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  .quick-stat-item {
+    padding: 20px;
+    background: #f8fafc;
+    border-radius: 12px;
+    text-align: center;
+  }
+  
+  .quick-stat-label {
+    color: #64748b;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  
+  .quick-stat-value {
+    color: #1e40af;
+    font-size: 32px;
+    font-weight: 700;
+  }

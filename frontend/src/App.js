@@ -94,7 +94,9 @@ function App() {
         { label: 'Dashboard', path: '/admin/dashboard' },
         { label: 'Kurzy', path: '/admin/courses' },
         { label: 'Uživatelé', path: '/admin/users' },
-        { label: 'Místnosti', path: '/admin/rooms' }
+        { label: 'Místnosti', path: '/admin/rooms' },
+        { label: 'Moje výukové kurzy', path: '/instructor/courses' }, // PRIDANÉ
+        { label: 'Založit kurz', path: '/create-course' } // PRIDANÉ
       ];
     }
 
@@ -109,10 +111,10 @@ function App() {
     if (mappedUser.role === 'Student') {
       return [
         { label: 'Můj profil', path: '/profile' },
-        { label: 'Zapsané kurzy', path: '/student/my-courses' },  // Premenované
+        { label: 'Zapsané kurzy', path: '/student/my-courses' },
         { label: 'Můj rozvrh', path: '/student/schedule' },
         { label: 'Dostupné kurzy', path: '/courses' },
-        { label: 'Moje výukové kurzy', path: '/instructor/courses' }, // PRIDANÉ - kurzy kde som Garant
+        { label: 'Moje výukové kurzy', path: '/instructor/courses' },
         { label: 'Vytvořit kurz', path: '/create-course' }
       ];
     }
@@ -152,10 +154,14 @@ function App() {
           <Route path="/admin/users" element={mappedUser?.role === 'Administrátor' ? <AdminUsers /> : <Navigate to="/" />} />
           <Route path="/admin/rooms" element={mappedUser?.role === 'Administrátor' ? <AdminRooms /> : <Navigate to="/" />} />
           
+          {/* Create course - dostupné pre Admin, Garant, Lektor, Student */}
           <Route path="/create-course" element={mappedUser ? <CreateCourse /> : <Navigate to="/" />} />
 
-          {/* Instructor/Guarantor routes */}
-          <Route path="/instructor/courses" element={mappedUser ? <InstructorCourse userRole={mappedUser?.role} /> : <Navigate to="/" />} />
+          {/* Instructor/Guarantor/Admin routes - UPRAVENÉ: Admin má tiež prístup */}
+          <Route 
+            path="/instructor/courses" 
+            element={mappedUser ? <InstructorCourse userRole={mappedUser?.role} /> : <Navigate to="/" />} 
+          />
           
           {/* Student routes */}
           <Route path="/student/my-courses" element={mappedUser?.role === 'Student' ? <MyCourses /> : <Navigate to="/" />} />

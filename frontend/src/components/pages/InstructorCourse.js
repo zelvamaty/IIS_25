@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './InstructorCourse.css';
 import { coursesAPI, termsAPI, usersAPI, roomsAPI } from '../services/api';
 
 const InstructorCourse = ({ userRole = 'Student' }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState('courses');
   const [myCourses, setMyCourses] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
@@ -18,6 +19,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   const [showAddLecturerForm, setShowAddLecturerForm] = useState(false);
   const [selectedLecturerId, setSelectedLecturerId] = useState('');
   const [lecturerError, setLecturerError] = useState('');
+  
   // Term form state
   const [termFormData, setTermFormData] = useState({
     type: '',
@@ -33,7 +35,15 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   useEffect(() => {
     loadCurrentUserAndCourses();
     loadRooms();
+    loadUsers();
   }, []);
+
+  useEffect(() => {
+    // Ak prišiel courseId z AdminCourses, otvor ho automaticky
+    if (location.state?.selectedCourseId && currentUser) {
+      loadCourseDetails(location.state.selectedCourseId);
+    }
+  }, [location.state, currentUser]);
 
   const loadRooms = async () => {
     try {
@@ -41,6 +51,15 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       setRooms(roomsData);
     } catch (err) {
       console.error('Error loading rooms:', err);
+    }
+  };
+
+  const loadUsers = async () => {
+    try {
+      const users = await usersAPI.getUsers();
+      setAvailableUsers(users);
+    } catch (err) {
+      console.error('Error loading users:', err);
     }
   };
 
@@ -82,22 +101,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       setLoading(false);
     }
   };
-  useEffect(() => {
-    loadCurrentUserAndCourses();
-    loadRooms();
-    loadUsers();
-  }, []);
-  
-  const loadUsers = async () => {
-    try {
-      const users = await usersAPI.getUsers();
-      setAvailableUsers(users);
-    } catch (err) {
-      console.error('Error loading users:', err);
-    }
-  };
-  
-  // Funkcie na pridanie/odobratie lektora
+
   const handleAddLecturer = async (e) => {
     e.preventDefault();
     setLecturerError('');
@@ -112,7 +116,6 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       alert('Lektor byl úspěšně přidán');
       setShowAddLecturerForm(false);
       setSelectedLecturerId('');
-      // Reload course details
       await loadCourseDetails(selectedCourse.id);
     } catch (err) {
       setLecturerError(err.message || 'Přidání lektora se nezdařilo');
@@ -128,13 +131,13 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
     try {
       await coursesAPI.removeLecturer(selectedCourse.id, lecturerId);
       alert('Lektor byl odebrán');
-      // Reload course details
       await loadCourseDetails(selectedCourse.id);
     } catch (err) {
       alert(err.message || 'Odebrání lektora se nezdařilo');
       console.error('Error removing lecturer:', err);
     }
   };
+
   const loadCourseDetails = async (courseId) => {
     try {
       setLoading(true);
@@ -191,7 +194,6 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
         requires_registration: termFormData.requires_registration
       };
 
-      // Pridať room len ak je vybraná
       if (termFormData.room) {
         termData.room = parseInt(termFormData.room);
       }
@@ -199,7 +201,6 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       await termsAPI.createTerm(termData);
       alert('Termín byl úspěšně vytvořen!');
       
-      // Reset form
       setTermFormData({
         type: '',
         start_time: '',
@@ -209,7 +210,6 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
         requires_registration: true
       });
       
-      // Reload course details
       await loadCourseDetails(selectedCourse.id);
       setActiveTab('terms');
     } catch (err) {
@@ -274,6 +274,8 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   };
 
   const isGuarantor = selectedCourse && currentUser && selectedCourse.guarantee?.id === currentUser.id;
+  const isAdmin = currentUser?.role === 'ADMIN';
+  const canManageCourse = isGuarantor || isAdmin;
   
   const pendingEnrollments = courseEnrollments.filter(e => !e.approved);
   const approvedEnrollments = courseEnrollments.filter(e => e.approved);
@@ -305,6 +307,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   if (!selectedCourse) {
     return (
       <div className="instructor-course">
+        <h1 className="page-title">Moje výukové kurzy</h1>
         
         {myCourses.length === 0 ? (
           <div className="empty-state">
@@ -401,7 +404,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
         >
           Zápisy ({approvedEnrollments.length})
         </button>
-        {isGuarantor && pendingEnrollments.length > 0 && (
+        {canManageCourse && pendingEnrollments.length > 0 && (
           <button 
             className={`tab ${activeTab === 'pending' ? 'active' : ''}`}
             onClick={() => setActiveTab('pending')}
@@ -409,21 +412,21 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
             Čekající ({pendingEnrollments.length})
           </button>
         )}
-     {isGuarantor && (
-    <button 
-      className={`tab ${activeTab === 'lecturers' ? 'active' : ''}`}
-      onClick={() => setActiveTab('lecturers')}
-    >
-      Lektoři ({selectedCourse.lecturers?.length || 0})
-    </button>
-  )}
-</div>
+        {canManageCourse && (
+          <button 
+            className={`tab ${activeTab === 'lecturers' ? 'active' : ''}`}
+            onClick={() => setActiveTab('lecturers')}
+          >
+            Lektoři ({selectedCourse.lecturers?.length || 0})
+          </button>
+        )}
+      </div>
 
       {activeTab === 'terms' && (
         <div className="tab-content">
           <div className="section-header">
             <h2 className="section-title">Termíny kurzu</h2>
-            {isGuarantor && (
+            {canManageCourse && (
               <button 
                 className="button button-success"
                 onClick={() => setActiveTab('create-term')}
@@ -436,7 +439,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
           {courseTerms.length === 0 ? (
             <div className="empty-state">
               <p>Zatím nejsou vytvořené žádné termíny</p>
-              {isGuarantor && (
+              {canManageCourse && (
                 <button 
                   className="button button-success"
                   onClick={() => setActiveTab('create-term')}
@@ -455,7 +458,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                     <th>Místnost</th>
                     <th>Kapacita</th>
                     <th>Registrací</th>
-                    {isGuarantor && <th>Akce</th>}
+                    {canManageCourse && <th>Akce</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -474,7 +477,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                       <td>{getRoomName(term.room)}</td>
                       <td>{term.capacity}</td>
                       <td>{term.registered_count || 0}</td>
-                      {isGuarantor && (
+                      {canManageCourse && (
                         <td>
                           <button 
                             className="button button-danger button-small"
@@ -493,7 +496,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
         </div>
       )}
 
-      {activeTab === 'create-term' && isGuarantor && (
+      {activeTab === 'create-term' && canManageCourse && (
         <div className="tab-content">
           <div className="section-header">
             <h2 className="section-title">Vytvořit nový termín</h2>
@@ -660,120 +663,122 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
           )}
         </div>
       )}
-{activeTab === 'lecturers' && isGuarantor && (
-  <div className="tab-content">
-    <div className="section-header">
-      <h2 className="section-title">Lektoři kurzu</h2>
-      {!showAddLecturerForm && (
-        <button 
-          className="button button-success"
-          onClick={() => setShowAddLecturerForm(true)}
-        >
-          + Přidat lektora
-        </button>
-      )}
-    </div>
 
-    {showAddLecturerForm && (
-      <div className="add-lecturer-form">
-        <h3>Přidat lektora</h3>
-        
-        {lecturerError && (
-          <div className="error-message">
-            {lecturerError}
-          </div>
-        )}
-
-        <form onSubmit={handleAddLecturer}>
-          <div className="form-group">
-            <label className="form-label">Vyberte uživatele *</label>
-            <select
-              className="input-field"
-              value={selectedLecturerId}
-              onChange={(e) => setSelectedLecturerId(e.target.value)}
-              required
-            >
-              <option value="">-- Vyberte lektora --</option>
-              {availableUsers
-  .filter(u => 
-    u.id !== selectedCourse.guarantee?.id && 
-    !selectedCourse.lecturers?.some(l => l.id === u.id) &&  
-    u.role !== 'ADMIN' 
-  )
-  .map(user => (
-    <option key={user.id} value={user.id}>
-      {user.first_name} {user.last_name} ({user.username})
-    </option>
-  ))
-}
-            </select>
+      {activeTab === 'lecturers' && canManageCourse && (
+        <div className="tab-content">
+          <div className="section-header">
+            <h2 className="section-title">Lektoři kurzu</h2>
+            {!showAddLecturerForm && (
+              <button 
+                className="button button-success"
+                onClick={() => setShowAddLecturerForm(true)}
+              >
+                + Přidat lektora
+              </button>
+            )}
           </div>
 
-          <div className="form-actions">
-            <button type="submit" className="button button-success">
-              ✓ Přidat lektora
-            </button>
-            <button 
-              type="button" 
-              className="button button-secondary"
-              onClick={() => {
-                setShowAddLecturerForm(false);
-                setSelectedLecturerId('');
-                setLecturerError('');
-              }}
-            >
-              Zrušit
-            </button>
-          </div>
-        </form>
-      </div>
-    )}
+          {showAddLecturerForm && (
+            <div className="add-lecturer-form">
+              <h3>Přidat lektora</h3>
+              
+              {lecturerError && (
+                <div className="error-message">
+                  {lecturerError}
+                </div>
+              )}
 
-    {selectedCourse.lecturers && selectedCourse.lecturers.length > 0 ? (
-      <div className="lecturers-list">
-        <h3>Seznam lektorů</h3>
-        <div className="table-container">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Jméno</th>
-                <th>Uživatelské jméno</th>
-                <th>Email</th>
-                <th>Akce</th>
-              </tr>
-            </thead>
-            <tbody>
-              {selectedCourse.lecturers.map(lecturer => (
-                <tr key={lecturer.id}>
-                  <td>{lecturer.first_name} {lecturer.last_name}</td>
-                  <td>{lecturer.username}</td>
-                  <td>{lecturer.email || '-'}</td>
-                  <td>
-                    <button 
-                      className="button button-danger button-small"
-                      onClick={() => handleRemoveLecturer(lecturer.id)}
-                    >
-                      Odebrat
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+              <form onSubmit={handleAddLecturer}>
+                <div className="form-group">
+                  <label className="form-label">Vyberte uživatele *</label>
+                  <select
+                    className="input-field"
+                    value={selectedLecturerId}
+                    onChange={(e) => setSelectedLecturerId(e.target.value)}
+                    required
+                  >
+                    <option value="">-- Vyberte lektora --</option>
+                    {availableUsers
+                      .filter(u => 
+                        u.id !== selectedCourse.guarantee?.id && 
+                        !selectedCourse.lecturers?.some(l => l.id === u.id) &&  
+                        u.role !== 'ADMIN' 
+                      )
+                      .map(user => (
+                        <option key={user.id} value={user.id}>
+                          {user.first_name} {user.last_name} ({user.username})
+                        </option>
+                      ))
+                    }
+                  </select>
+                </div>
+
+                <div className="form-actions">
+                  <button type="submit" className="button button-success">
+                    ✓ Přidat lektora
+                  </button>
+                  <button 
+                    type="button" 
+                    className="button button-secondary"
+                    onClick={() => {
+                      setShowAddLecturerForm(false);
+                      setSelectedLecturerId('');
+                      setLecturerError('');
+                    }}
+                  >
+                    Zrušit
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {selectedCourse.lecturers && selectedCourse.lecturers.length > 0 ? (
+            <div className="lecturers-list">
+              <h3>Seznam lektorů</h3>
+              <div className="table-container">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Jméno</th>
+                      <th>Uživatelské jméno</th>
+                      <th>Email</th>
+                      <th>Akce</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedCourse.lecturers.map(lecturer => (
+                      <tr key={lecturer.id}>
+                        <td>{lecturer.first_name} {lecturer.last_name}</td>
+                        <td>{lecturer.username}</td>
+                        <td>{lecturer.email || '-'}</td>
+                        <td>
+                          <button 
+                            className="button button-danger button-small"
+                            onClick={() => handleRemoveLecturer(lecturer.id)}
+                          >
+                            Odebrat
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : (
+            <div className="empty-state">
+              <p>Kurz zatím nemá žádné lektory</p>
+            </div>
+          )}
+
+          <div className="info-box">
+            <p><strong>ℹ️ Info:</strong> Lektoři mohou hodnotit studenty a spravovat termíny kurzu.</p>
+          </div>
         </div>
-      </div>
-    ) : (
-      <div className="empty-state">
-        <p>Kurz zatím nemá žádné lektory</p>
-      </div>
-    )}
+      )}
 
-    <div className="info-box">
-      <p><strong>ℹ️ Info:</strong> Lektoři mohou hodnotit studenty a spravovat termíny kurzu.</p>
-    </div>
-  </div>
-)}
-      {activeTab === 'pending' && isGuarantor && (
+      {activeTab === 'pending' && canManageCourse && (
         <div className="tab-content">
           <h2 className="section-title">Čekající studenti na schválení</h2>
           

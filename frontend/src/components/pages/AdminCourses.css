@@ -99,3 +99,58 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.page-title {
+  color: #1e40af;
+  font-size: 48px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.filter-section {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
+}
+
+.filter-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.loading-state,
+.error-state,
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  background: white;
+  border-radius: 20px;
+  margin: 40px auto;
+  max-width: 600px;
+  box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
+}
+
+.capacity-full {
+  color: #ef4444;
+  font-weight: 700;
+}
+
+.capacity-available {
+  color: #10b981;
+  font-weight: 700;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
