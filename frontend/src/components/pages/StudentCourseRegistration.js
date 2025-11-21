@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './StudentCourseRegistration.css';
-import { coursesAPI, termsAPI, registrationsAPI } from '../services/api'; // PRIDANÉ registrationsAPI
+import { coursesAPI, termsAPI, registrationsAPI } from '../services/api';
 
 const StudentCourseRegistration = () => {
   const { id } = useParams();
@@ -9,6 +9,7 @@ const StudentCourseRegistration = () => {
   
   const [course, setCourse] = useState(null);
   const [terms, setTerms] = useState([]);
+  const [myRegistrations, setMyRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [registering, setRegistering] = useState(false);
@@ -29,6 +30,14 @@ const StudentCourseRegistration = () => {
       const courseTerms = allTerms.filter(t => t.course?.id === parseInt(id));
       setTerms(courseTerms);
 
+      // Načítaj moje registrácie (vrátane známok)
+      try {
+        const registrations = await registrationsAPI.getMyRegistrations();
+        setMyRegistrations(registrations);
+      } catch (err) {
+        console.error('Error loading registrations:', err);
+      }
+
     } catch (err) {
       setError('Nepodařilo se načíst detail kurzu');
       console.error('Error loading course:', err);
@@ -44,17 +53,20 @@ const StudentCourseRegistration = () => {
 
     try {
       setRegistering(true);
-      await registrationsAPI.registerForTerm(termId); // ZMENENÉ
+      await registrationsAPI.registerForTerm(termId);
       alert('Úspěšně jste se zaregistrovali na termín!');
       await loadCourseDetails();
     } catch (err) {
-      alert(err.message || 'Registrace na termín se nezdařila');
+      if (err.message.includes('Already registered')) {
+        alert('Již jste registrováni na tento termín');
+      } else {
+        alert(err.message || 'Registrace na termín se nezdařila');
+      }
       console.error('Error registering for term:', err);
     } finally {
       setRegistering(false);
     }
   };
-
 
   const handleEnrollCourse = async () => {
     if (!window.confirm(`Opravdu se chcete zapsat do kurzu "${course.title}"?`)) {
@@ -98,7 +110,26 @@ const StudentCourseRegistration = () => {
   };
 
   const isTermFull = (term) => {
-    return term.registered_count >= term.capacity;
+    return term.registrations_count >= term.capacity;
+  };
+
+  const getMyRegistrationForTerm = (termId) => {
+    return myRegistrations.find(reg => reg.term === termId);
+  };
+
+  const getGradeDisplay = (grade) => {
+    if (!grade) return null;
+    return (
+      <div className="grade-display">
+        <span className="grade-label">Hodnocení:</span>
+        <span className="grade-value">{grade.value}</span>
+        {grade.graded_at && (
+          <span className="grade-date">
+            ({new Date(grade.graded_at).toLocaleDateString('cs-CZ')})
+          </span>
+        )}
+      </div>
+    );
   };
 
   if (loading) {
@@ -177,12 +208,15 @@ const StudentCourseRegistration = () => {
           {terms.map(term => {
             const { date, time } = formatDateTime(term.start_time);
             const isFull = isTermFull(term);
+            const myRegistration = getMyRegistrationForTerm(term.id);
+            const isRegistered = !!myRegistration;
             
             return (
-              <div key={term.id} className="term-card">
+              <div key={term.id} className={`term-card ${isRegistered ? 'registered' : ''}`}>
                 <div className="term-card-header">
                   <h3>{getTermTypeName(term.type)}</h3>
                   {isFull && <span className="badge badge-warning">Plno</span>}
+                  {isRegistered && <span className="badge badge-success">✓ Registrován</span>}
                 </div>
                 
                 <div className="term-card-body">
@@ -200,11 +234,18 @@ const StudentCourseRegistration = () => {
                   </div>
                   <div className="term-info-item">
                     <span className="term-icon">👥</span>
-                    <span>Obsazeno: {term.registered_count || 0}/{term.capacity}</span>
+                    <span>Obsazeno: {term.registrations_count || 0}/{term.capacity}</span>
                   </div>
+
+                  {/* Zobraz hodnotenie ak existuje */}
+                  {isRegistered && myRegistration.grade && (
+                    <div className="term-grade">
+                      {getGradeDisplay(myRegistration.grade)}
+                    </div>
+                  )}
                 </div>
                 
-                {term.requires_registration && (
+                {term.requires_registration && !isRegistered && (
                   <div className="term-card-footer">
                     <button 
                       className={`button full-width ${isFull ? '' : 'button-success'}`}

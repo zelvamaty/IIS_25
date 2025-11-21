@@ -154,19 +154,21 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       try {
         const students = await coursesAPI.getEnrollments(courseId);
         
-        // Backend teraz vracia enrollment_id!
-        const enrollments = students.map(student => ({
-          id: student.enrollment_id, // POUŽIJEME enrollment_id
-          student: {
-            id: student.id,
-            username: student.username,
-            first_name: student.first_name,
-            last_name: student.last_name,
-            email: student.email || ''
-          },
-          approved: student.role === 'APPROVED',
-          enrolled_at: new Date().toISOString()
-        }));
+        const enrollments = students
+          .filter(student => student.role !== 'REJECTED')  // ✅ Filtruj REJECTED
+          .map(student => ({
+            id: student.enrollment_id,
+            student: {
+              id: student.id,
+              username: student.username,
+              first_name: student.first_name,
+              last_name: student.last_name,
+              email: student.email || ''
+            },
+            approved: student.role === 'APPROVED',
+            role: student.role,  // ✅ PRIDANÉ - ulož role
+            enrolled_at: new Date().toISOString()
+          }));
         
         setCourseEnrollments(enrollments);
       } catch (err) {
@@ -182,7 +184,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       setLoading(false);
     }
   };
-
+  
   const handleTermFormChange = (e) => {
     const { name, value, type, checked } = e.target;
     setTermFormData(prev => ({
@@ -290,8 +292,10 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   const isAdmin = currentUser?.role === 'ADMIN';
   const canManageCourse = isGuarantor || isAdmin;
   
-  const pendingEnrollments = courseEnrollments.filter(e => !e.approved);
-  const approvedEnrollments = courseEnrollments.filter(e => e.approved);
+  // const pendingEnrollments = courseEnrollments.filter(e => !e.approved && e.role !== 'REJECTED');
+  // const approvedEnrollments = courseEnrollments.filter(e => e.approved);
+  const pendingEnrollments = courseEnrollments.filter(e => e.role === 'PENDING');  // ✅ ZMENENÉ
+const approvedEnrollments = courseEnrollments.filter(e => e.role === 'APPROVED');  // ✅ ZMENENÉ
 
   if (loading && !currentUser) {
     return (
@@ -489,7 +493,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                       </td>
                       <td>{getRoomName(term.room)}</td>
                       <td>{term.capacity}</td>
-                      <td>{term.registered_count || 0}</td>
+                      <td>{term.registrations_count || 0}</td>
                       {canManageCourse && (
                         <td>
                           <button 
