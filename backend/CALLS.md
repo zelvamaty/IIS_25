@@ -200,6 +200,22 @@ Vrátí seznam studentů v kurzu (vidí Garant, Admin a Lektoři).
 ]
 ```
 
+### \- method: "GET" - [http://127.0.0.1:8000/api/courses/](http://127.0.0.1:8000/api/courses/)\<id\>/my\_courses/
+
+Vrátí seznam zapsaných kurzů.
+
+```json
+[
+    {
+        "id": 2,
+        "code": "test",
+        "title": "vetsitest",
+        "guarantee": "testuserrr",
+        "role": "APPROVED"
+    }
+]
+```
+
 -----
 
 ## 4\. Rooms (Místnosti)
