@@ -56,9 +56,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.is_authenticated:
-            if user.role == 'ADMIN':
-                return User.objects.all()
-            return User.objects.exclude(role='ADMIN')
+            return User.objects.all()
         return User.objects.none()
 
     @action (detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
