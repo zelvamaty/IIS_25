@@ -4,7 +4,7 @@ __pycache__/
 *$py.class
 
 # environment-specific stuff
-backend/backend_iis/settings.py
+backend/backend_iis/backend_iis/settings.py
 
 # C extensions
 *.so
