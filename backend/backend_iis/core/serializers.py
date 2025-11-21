@@ -37,8 +37,10 @@ class UserSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         user_data = super().to_representation(instance)
+        user = self.context['request'].user
 
-        if self.context['request'].user.role != 'ADMIN':
+
+        if user.role != 'ADMIN' or not user.is_authenticated:
             user_data.pop('role', None)
 
         return user_data
