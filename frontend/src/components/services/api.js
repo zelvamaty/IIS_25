@@ -253,7 +253,7 @@ export const coursesAPI = {
     return handleResponse(response);
   },
   getEnrollments: async (courseId) => {
-    const response = await fetch(`${API_BASE_URL}/courses/${courseId}/enrollments/`, {
+    const response = await fetch(`${API_BASE_URL}/courses/${courseId}/list_students/`, {
       method: 'GET',
       headers: getAuthHeaders()
     });
@@ -261,39 +261,22 @@ export const coursesAPI = {
   },
   
   approveEnrollment: async (courseId, enrollmentId) => {
-    const response = await fetch(`${API_BASE_URL}/courses/${courseId}/enrollments/${enrollmentId}/approve/`, {
+    const response = await fetch(`${API_BASE_URL}/courses/${courseId}/approve_enrollment/`, {
       method: 'POST',
-      headers: getAuthHeaders()
-    });
-    return response;
-  },
-  
-  rejectEnrollment: async (courseId, enrollmentId) => {
-    const response = await fetch(`${API_BASE_URL}/courses/${courseId}/enrollments/${enrollmentId}/reject/`, {
-      method: 'POST',
-      headers: getAuthHeaders()
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ enrollment_id: enrollmentId })
     });
     return handleResponse(response);
   },
-  // // Approve enrollment (guarantor)
-  // approveEnrollment: async (courseId, enrollmentId) => {
-  //   const response = await fetch(`${API_BASE_URL}/courses/${courseId}/approve_enrollment/`, {
-  //     method: 'POST',
-  //     headers: getAuthHeaders(),
-  //     body: JSON.stringify({ enrollment_id: enrollmentId })
-  //   });
-  //   return handleResponse(response);
-  // },
-
-  // // Reject enrollment (guarantor)
-  // rejectEnrollment: async (courseId, enrollmentId) => {
-  //   const response = await fetch(`${API_BASE_URL}/courses/${courseId}/reject_enrollment/`, {
-  //     method: 'POST',
-  //     headers: getAuthHeaders(),
-  //     body: JSON.stringify({ enrollment_id: enrollmentId })
-  //   });
-  //   return handleResponse(response);
-  // },
+  
+  rejectEnrollment: async (courseId, enrollmentId) => {
+    const response = await fetch(`${API_BASE_URL}/courses/${courseId}/reject_enrollment/`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ enrollment_id: enrollmentId })
+    });
+    return handleResponse(response);
+  },
 
   // List students in course
   listStudents: async (courseId) => {

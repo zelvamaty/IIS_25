@@ -143,21 +143,35 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       setLoading(true);
       setError(null);
       
-      // Load course details
       const course = await coursesAPI.getCourseDetail(courseId);
       setSelectedCourse(course);
       
-      // Load terms for this course
       const allTerms = await termsAPI.getTerms();
       const courseTerms = allTerms.filter(t => t.course?.id === courseId);
       setCourseTerms(courseTerms);
       
-      // Load enrollments for this course
+      // Load enrollments
       try {
-        const enrollments = await coursesAPI.getEnrollments(courseId);
-        setCourseEnrollments(enrollments || []);
+        const students = await coursesAPI.getEnrollments(courseId);
+        
+        // Backend vracia študentov s "role": "PENDING" alebo "APPROVED"
+        // Transformujeme to na formát čo frontend očakáva
+        const enrollments = students.map(student => ({
+          id: student.id, // student ID použijeme ako enrollment ID
+          student: {
+            id: student.id,
+            username: student.username,
+            first_name: student.first_name,
+            last_name: student.last_name,
+            email: student.email
+          },
+          approved: student.role === 'APPROVED',
+          enrolled_at: new Date().toISOString() // Backend to nevracia
+        }));
+        
+        setCourseEnrollments(enrollments);
       } catch (err) {
-        console.log('No enrollments endpoint or no enrollments:', err);
+        console.log('Error loading students:', err);
         setCourseEnrollments([]);
       }
       
