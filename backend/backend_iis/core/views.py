@@ -207,6 +207,7 @@ class CourseViewSet(viewsets.ModelViewSet):
                 enrollment = course.course_enrollments.get(user=user)
                 enrollment.role = 'APPROVED'
                 enrollment.save()
+                self._register_to_auto_terms(course, user)
                 return Response({'detail': 'Enrolled in course successfully.'})
 
         return Response({'detail': 'Pending approval for enrollment.'})
@@ -221,6 +222,7 @@ class CourseViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Pending enrollment not found.'}, status=404)
         enrollment.role = 'APPROVED'
         enrollment.save()
+        self._register_to_auto_terms(course, enrollment.user)
         return Response({'detail': 'Enrollment approved.'})
 
     @action(detail=True, methods=['post'], permission_classes=[IsGuaranteeOrAdmin])
@@ -232,7 +234,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         except CourseEnrollment.DoesNotExist:
             return Response({'detail': 'Pending enrollment not found.'}, status=404)
         enrollment.role = 'REJECTED'
-        enrollment.save()
+        enrollment.delete()
         return Response({'detail': 'Enrollment rejected.'})
 
     @action(detail=True, methods=['get'], permission_classes=[IsLecturerOrGuaranteeOrAdmin])
@@ -263,6 +265,13 @@ class CourseViewSet(viewsets.ModelViewSet):
                         'role': enrollment.role}
                        for enrollment in enrollments]
         return Response(course_data)
+
+    def _register_to_auto_terms(self, course, user):
+        auto_terms = Term.objects.filter(course=course, requires_registration=False)
+        for term in auto_terms:
+            if not Registration.objects.filter(user=user, term=term).exists():
+                registration = Registration(user=user, term=term)
+                registration.save()
 
 
 class RoomViewSet(viewsets.ModelViewSet):
@@ -303,6 +312,15 @@ class TermViewSet(viewsets.ModelViewSet):
         if user.is_authenticated:
             return Term.objects.all()
 
+    def perform_create(self, serializer):
+        term = serializer.save()
+        if not term.requires_registration:
+            self._auto_register_students(term)
+
+    def perform_update(self, serializer):
+        term = serializer.save()
+        if not term.requires_registration:
+            self._auto_register_students(term)
 
     @action(detail=True, methods=['patch'], permission_classes=[IsAdmin])
     def patch_term(self, request, pk=None):
@@ -329,6 +347,15 @@ class TermViewSet(viewsets.ModelViewSet):
                      for reg in registrations]
         return Response(term_data)
 
+    def _auto_register_students(self, term):
+        new_registrations = []
+        course = term.course
+        enrollments = course.course_enrollments.filter(role='APPROVED').select_related('user')
+        for enrollment in enrollments:
+            if not Registration.objects.filter(user=enrollment.user, term=term).exists():
+                registration = Registration(user=enrollment.user, term=term)
+                registration.save()
+                new_registrations.append(registration)
 
 class RegistrationViewSet(viewsets.ModelViewSet):
     queryset = Registration.objects.all()
