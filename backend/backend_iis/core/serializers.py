@@ -62,7 +62,7 @@ class UserSerializer(serializers.ModelSerializer):
 class CourseSerializer(serializers.ModelSerializer):
     guarantee = UserSerializer(read_only=True)
     lecturers = UserSerializer(many=True, read_only=True)
-    enrolled_count = serializers.SerializerMethodField()
+    enrolled_count = serializers.IntegerField( read_only=True)
 
     show_type = serializers.CharField(source='get_type_display', read_only=True)
 
