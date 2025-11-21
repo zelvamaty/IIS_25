@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './InstructorCourse.css';
-import { coursesAPI, termsAPI, usersAPI, roomsAPI } from '../services/api';
+import { coursesAPI, termsAPI, usersAPI, roomsAPI, gradesAPI } from '../services/api';
 
 const InstructorCourse = ({ userRole = 'Student' }) => {
   const navigate = useNavigate();
@@ -19,6 +19,12 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   const [showAddLecturerForm, setShowAddLecturerForm] = useState(false);
   const [selectedLecturerId, setSelectedLecturerId] = useState('');
   const [lecturerError, setLecturerError] = useState('');
+  const [selectedTerm, setSelectedTerm] = useState(null);
+  const [termStudents, setTermStudents] = useState([]);
+  const [showGradeForm, setShowGradeForm] = useState(false);
+  const [selectedRegistrationId, setSelectedRegistrationId] = useState('');
+  const [gradeValue, setGradeValue] = useState('');
+  const [gradeError, setGradeError] = useState('');
   
   // Term form state
   const [termFormData, setTermFormData] = useState({
@@ -39,7 +45,6 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   }, []);
 
   useEffect(() => {
-    // Ak prišiel courseId z AdminCourses, otvor ho automaticky
     if (location.state?.selectedCourseId && currentUser) {
       loadCourseDetails(location.state.selectedCourseId);
     }
@@ -68,37 +73,95 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       setLoading(true);
       setError(null);
       
-      // Get current user first
       const user = await usersAPI.getCurrentUser();
       setCurrentUser(user);
-      console.log('Current user:', user);
       
-      // Then get courses
       const allCourses = await coursesAPI.getCourses();
-      console.log('All courses:', allCourses);
       
-      // Filter courses where I'm a guarantee or lecturer
       const instructorCourses = allCourses.filter(course => {
         const isGuarantee = course.guarantee?.id === user.id;
         const isLecturer = course.lecturers?.some(l => l.id === user.id);
-        
-        console.log(`Course ${course.title}:`, {
-          guaranteeId: course.guarantee?.id,
-          myId: user.id,
-          isGuarantee,
-          isLecturer
-        });
-        
         return isGuarantee || isLecturer;
       });
 
-      console.log('Instructor courses:', instructorCourses);
       setMyCourses(instructorCourses);
     } catch (err) {
       setError('Nepodařilo se načíst kurzy');
       console.error('Error loading courses:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadTermStudents = async (termId) => {
+    try {
+      const students = await termsAPI.getTermStudents(termId);
+      console.log('RAW Term students from API:', JSON.stringify(students, null, 2)); // ✅ Ukáž celý objekt
+      setTermStudents(students);
+    } catch (err) {
+      console.error('Error loading term students:', err);
+      setTermStudents([]);
+    }
+  };
+  
+  const handleViewTermDetail = async (term) => {
+    setSelectedTerm(term);
+    await loadTermStudents(term.id);
+    setActiveTab('term-detail');
+  };
+  
+  const handleBackToTerms = () => {
+    setSelectedTerm(null);
+    setTermStudents([]);
+    setShowGradeForm(false);
+    setActiveTab('terms');
+  };
+  
+  const handleAddGrade = async (e) => {
+    e.preventDefault();
+    setGradeError('');
+  
+    console.log('Selected Registration ID:', selectedRegistrationId); // DEBUG
+    console.log('Grade Value:', gradeValue); // DEBUG
+  
+    if (!selectedRegistrationId || !gradeValue) {
+      setGradeError('Vyplňte všechna pole');
+      return;
+    }
+  
+    try {
+      const gradeData = {
+        registration: parseInt(selectedRegistrationId),
+        value: parseFloat(gradeValue)
+      };
+      
+      console.log('Sending grade data:', gradeData); // DEBUG
+      
+      await gradesAPI.createGrade(gradeData);
+      
+      alert('Hodnocení bylo úspěšně přidáno!');
+      setShowGradeForm(false);
+      setSelectedRegistrationId('');
+      setGradeValue('');
+      await loadTermStudents(selectedTerm.id);
+    } catch (err) {
+      setGradeError(err.message || 'Přidání hodnocení se nezdařilo');
+      console.error('Error adding grade:', err);
+    }
+  };
+  
+  const handleUpdateGrade = async (gradeId, newValue) => {
+    if (!window.confirm('Opravdu chcete změnit hodnocení?')) {
+      return;
+    }
+  
+    try {
+      await gradesAPI.updateGrade(gradeId, { value: parseFloat(newValue) });
+      alert('Hodnocení bylo změněno');
+      await loadTermStudents(selectedTerm.id);
+    } catch (err) {
+      alert(err.message || 'Změna hodnocení se nezdařila');
+      console.error('Error updating grade:', err);
     }
   };
 
@@ -150,12 +213,11 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       const courseTerms = allTerms.filter(t => t.course?.id === courseId);
       setCourseTerms(courseTerms);
       
-      // Load enrollments
       try {
         const students = await coursesAPI.getEnrollments(courseId);
         
         const enrollments = students
-          .filter(student => student.role !== 'REJECTED')  // ✅ Filtruj REJECTED
+          .filter(student => student.role !== 'REJECTED')
           .map(student => ({
             id: student.enrollment_id,
             student: {
@@ -166,7 +228,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
               email: student.email || ''
             },
             approved: student.role === 'APPROVED',
-            role: student.role,  // ✅ PRIDANÉ - ulož role
+            role: student.role,
             enrolled_at: new Date().toISOString()
           }));
         
@@ -292,10 +354,8 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   const isAdmin = currentUser?.role === 'ADMIN';
   const canManageCourse = isGuarantor || isAdmin;
   
-  // const pendingEnrollments = courseEnrollments.filter(e => !e.approved && e.role !== 'REJECTED');
-  // const approvedEnrollments = courseEnrollments.filter(e => e.approved);
-  const pendingEnrollments = courseEnrollments.filter(e => e.role === 'PENDING');  // ✅ ZMENENÉ
-const approvedEnrollments = courseEnrollments.filter(e => e.role === 'APPROVED');  // ✅ ZMENENÉ
+  const pendingEnrollments = courseEnrollments.filter(e => e.role === 'PENDING');
+  const approvedEnrollments = courseEnrollments.filter(e => e.role === 'APPROVED');
 
   if (loading && !currentUser) {
     return (
@@ -320,7 +380,6 @@ const approvedEnrollments = courseEnrollments.filter(e => e.role === 'APPROVED')
     );
   }
 
-  // Course list view
   if (!selectedCourse) {
     return (
       <div className="instructor-course">
@@ -387,7 +446,6 @@ const approvedEnrollments = courseEnrollments.filter(e => e.role === 'APPROVED')
     );
   }
 
-  // Course detail view
   return (
     <div className="instructor-course">
       <div className="course-info-header">
@@ -421,7 +479,7 @@ const approvedEnrollments = courseEnrollments.filter(e => e.role === 'APPROVED')
         >
           Zápisy ({approvedEnrollments.length})
         </button>
-        {canManageCourse && pendingEnrollments.length > 0 && (
+        {canManageCourse && (
           <button 
             className={`tab ${activeTab === 'pending' ? 'active' : ''}`}
             onClick={() => setActiveTab('pending')}
@@ -496,14 +554,189 @@ const approvedEnrollments = courseEnrollments.filter(e => e.role === 'APPROVED')
                       <td>{term.registrations_count || 0}</td>
                       {canManageCourse && (
                         <td>
-                          <button 
-                            className="button button-danger button-small"
-                            onClick={() => handleDeleteTerm(term.id)}
-                          >
-                            Smazat
-                          </button>
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button 
+                              className="button button-small"
+                              onClick={() => handleViewTermDetail(term)}
+                            >
+                              Detail
+                            </button>
+                            <button 
+                              className="button button-danger button-small"
+                              onClick={() => handleDeleteTerm(term.id)}
+                            >
+                              Smazat
+                            </button>
+                          </div>
                         </td>
                       )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'term-detail' && selectedTerm && canManageCourse && (
+        <div className="tab-content">
+          <div className="section-header">
+            <h2 className="section-title">
+              Detail termínu - {getTermTypeName(selectedTerm.type)}
+            </h2>
+            <button 
+              className="button button-secondary"
+              onClick={handleBackToTerms}
+            >
+              ← Zpět na termíny
+            </button>
+          </div>
+
+          <div className="term-info-box">
+            <p><strong>Datum:</strong> {new Date(selectedTerm.start_time).toLocaleString('cs-CZ')}</p>
+            <p><strong>Místnost:</strong> {getRoomName(selectedTerm.room)}</p>
+            <p><strong>Kapacita:</strong> {selectedTerm.registrations_count || 0}/{selectedTerm.capacity}</p>
+          </div>
+
+          <div className="section-header">
+            <h3>Registrovaní studenti ({termStudents.length})</h3>
+            {!showGradeForm && (
+              <button 
+                className="button button-success"
+                onClick={() => setShowGradeForm(true)}
+              >
+                + Přidat hodnocení
+              </button>
+            )}
+          </div>
+
+          {showGradeForm && (
+            <div className="grade-form-container">
+              <h4>Přidat hodnocení studentovi</h4>
+              
+              {gradeError && (
+                <div className="error-message">{gradeError}</div>
+              )}
+
+              <form onSubmit={handleAddGrade} className="grade-form">
+                <div className="form-group">
+                  <label className="form-label">Student *</label>
+                  <select
+  className="input-field"
+  value={selectedRegistrationId}
+  onChange={(e) => {
+    console.log('Selected value:', e.target.value); // DEBUG
+    setSelectedRegistrationId(e.target.value);
+  }}
+  required
+>
+  <option value="">-- Vyberte studenta --</option>
+  {termStudents
+    .filter(s => !s.grade)
+    .map(student => (
+      <option 
+        key={student.registration_id} 
+        value={student.registration_id}  // ✅ TOTO MUSÍ BYŤ registration_id
+      >
+        {student.first_name} {student.last_name} ({student.username})
+      </option>
+    ))
+  }
+</select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Hodnocení (0-100) *</label>
+                  <input
+                    type="number"
+                    className="input-field"
+                    min="0"
+                    max="100"
+                    step="0.5"
+                    value={gradeValue}
+                    onChange={(e) => setGradeValue(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="form-actions">
+                  <button type="submit" className="button button-success">
+                    ✓ Přidat hodnocení
+                  </button>
+                  <button 
+                    type="button" 
+                    className="button button-secondary"
+                    onClick={() => {
+                      setShowGradeForm(false);
+                      setSelectedRegistrationId('');
+                      setGradeValue('');
+                      setGradeError('');
+                    }}
+                  >
+                    Zrušit
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {termStudents.length === 0 ? (
+            <div className="empty-state">
+              <p>Na tento termín není zatím nikdo zaregistrován</p>
+            </div>
+          ) : (
+            <div className="table-container">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Registrace</th>
+                    <th>Hodnocení</th>
+                    <th>Akce</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {termStudents.map(student => (
+                    <tr key={student.registration_id}>
+                      <td>
+                        {student.first_name} {student.last_name}
+                        <br />
+                        <small style={{ color: '#64748b' }}>({student.username})</small>
+                      </td>
+                      <td>
+                        {new Date(student.registered_at).toLocaleDateString('cs-CZ')}
+                      </td>
+                      <td>
+                        {student.grade ? (
+                          <div>
+                            <strong style={{ color: '#3b82f6', fontSize: '18px' }}>
+                              {student.grade.value}
+                            </strong>
+                            <br />
+                            <small style={{ color: '#64748b' }}>
+                              {new Date(student.grade.graded_at).toLocaleDateString('cs-CZ')}
+                            </small>
+                          </div>
+                        ) : (
+                          <span style={{ color: '#94a3b8' }}>Nehodnoceno</span>
+                        )}
+                      </td>
+                      <td>
+                        {student.grade && (
+                          <button 
+                            className="button button-small"
+                            onClick={() => {
+                              const newValue = prompt('Nové hodnocení (0-100):', student.grade.value);
+                              if (newValue) {
+                                handleUpdateGrade(student.grade.id, newValue);
+                              }
+                            }}
+                          >
+                            Upravit
+                          </button>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

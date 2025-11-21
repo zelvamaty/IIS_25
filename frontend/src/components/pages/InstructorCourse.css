@@ -362,3 +362,28 @@
   margin: 0;
   font-size: 15px;
 }
+.term-info-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.term-info-box p {
+  margin: 8px 0;
+}
+
+.grade-form-container {
+  background: #f8fafc;
+  border: 2px solid #3b82f6;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.grade-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}

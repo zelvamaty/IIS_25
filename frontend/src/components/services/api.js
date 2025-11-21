@@ -350,7 +350,13 @@ export const termsAPI = {
     });
     return handleResponse(response);
   },
-
+  getTermStudents: async (termId) => {
+    const response = await fetch(`${API_BASE_URL}/terms/${termId}/list_registered_students/`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+    return handleResponse(response);
+  },
   // Create term
   createTerm: async (termData) => {
     const response = await fetch(`${API_BASE_URL}/terms/`, {
@@ -434,7 +440,7 @@ export const registrationsAPI = {
 // 7. GRADES API
 // ============================================
 export const gradesAPI = {
-  // Get grades
+  // Get grades (student sees own, lecturer sees their courses)
   getGrades: async () => {
     const response = await fetch(`${API_BASE_URL}/grades/`, {
       method: 'GET',
@@ -443,7 +449,7 @@ export const gradesAPI = {
     return handleResponse(response);
   },
 
-  // Create grade (lecturer/guarantor)
+  // Create grade
   createGrade: async (gradeData) => {
     const response = await fetch(`${API_BASE_URL}/grades/`, {
       method: 'POST',
@@ -453,9 +459,9 @@ export const gradesAPI = {
     return handleResponse(response);
   },
 
-  // Update grade (lecturer/guarantor)
-  updateGrade: async (id, gradeData) => {
-    const response = await fetch(`${API_BASE_URL}/grades/${id}/patch_grade/`, {
+  // Update grade
+  updateGrade: async (gradeId, gradeData) => {
+    const response = await fetch(`${API_BASE_URL}/grades/${gradeId}/patch_grade/`, {
       method: 'PATCH',
       headers: getAuthHeaders(),
       body: JSON.stringify(gradeData)
@@ -463,7 +469,6 @@ export const gradesAPI = {
     return handleResponse(response);
   }
 };
-
 // Export all APIs
 export default {
   auth: authAPI,
