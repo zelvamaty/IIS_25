@@ -98,7 +98,7 @@ class Term(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='terms')
-    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='terms')
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='terms', null=True, blank=True)
     requires_registration = models.BooleanField(default=True)
     capacity = models.PositiveIntegerField(default=30)
     type = models.CharField(

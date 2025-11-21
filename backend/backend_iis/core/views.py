@@ -58,8 +58,7 @@ class UserViewSet(viewsets.ModelViewSet):
         if user.is_authenticated:
             if user.role == 'ADMIN':
                 return User.objects.all()
-            else:
-                return User.objects.filter(id=user.id)
+            return User.objects.exclude(role='ADMIN')
         return User.objects.none()
 
     @action (detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
