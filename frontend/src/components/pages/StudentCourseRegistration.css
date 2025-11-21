@@ -239,3 +239,29 @@
     padding: 25px;
   }
 }
+.course-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.course-actions {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 2px solid #e0e7ff;
+}
+
+.info-badge {
+  display: inline-block;
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.full-width {
+  width: 100%;
+}

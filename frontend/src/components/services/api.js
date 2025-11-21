@@ -380,7 +380,15 @@ export const termsAPI = {
       headers: getAuthHeaders()
     });
     return handleResponse(response);
-  }
+  },
+  
+registerTerm: async (termId) => {
+  const response = await fetch(`${API_BASE_URL}/terms/${termId}/register/`, {
+    method: 'POST',
+    headers: getAuthHeaders()
+  });
+  return handleResponse(response);
+}
 };
 
 // ============================================
