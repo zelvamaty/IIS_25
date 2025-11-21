@@ -1,126 +1,201 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './PublicCourses.css';
+import { coursesAPI } from '../services/api';
 
-const PublicCourses = () => {
+const PublicCourses = ({ user, onShowLogin }) => {  // Pridané onShowLogin prop
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('');
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [enrollingCourseId, setEnrollingCourseId] = useState(null);
 
-  // Mock data
-  const courses = [
-    {
-      id: 1,
-      title: 'Webové technologie',
-      type: 'Přednáška',
-      description: 'Kurz zaměřený na moderní webové technologie včetně HTML5, CSS3, JavaScript a React frameworku.',
-      instructor: 'Dr. Jan Novák',
-      terms: 15,
-      price: 500
-    },
-    {
-      id: 2,
-      title: 'Databázové systémy',
-      type: 'Cvičení',
-      description: 'Praktický kurz práce s SQL databázemi, návrh databázových schémat a optimalizace dotazů.',
-      instructor: 'Ing. Marie Svobodová',
-      terms: 12,
-      price: 450
-    },
-    {
-      id: 3,
-      title: 'Síťové technologie',
-      type: 'Přednáška',
-      description: 'Úvod do počítačových sítí, protokoly TCP/IP, routing, switching a bezpečnost sítí.',
-      instructor: 'Prof. Petr Dvořák',
-      terms: 10,
-      price: 600
-    },
-    {
-      id: 4,
-      title: 'Operační systémy',
-      type: 'Zkouška',
-      description: 'Studium principů operačních systémů, správa procesů, paměti a souborových systémů.',
-      instructor: 'Dr. Jana Procházková',
-      terms: 8,
-      price: 400
-    },
-    {
-      id: 5,
-      title: 'Programování v Pythonu',
-      type: 'Cvičení',
-      description: 'Praktický kurz programování v jazyce Python pro začátečníky i pokročilé.',
-      instructor: 'Mgr. Tomáš Černý',
-      terms: 20,
-      price: 550
-    },
-    {
-      id: 6,
-      title: 'Umělá inteligence',
-      type: 'Přednáška',
-      description: 'Základy strojového učení, neuronové sítě a moderní AI technologie.',
-      instructor: 'Dr. Lucie Veselá',
-      terms: 14,
-      price: 700
+  useEffect(() => {
+    loadCourses();
+  }, []);
+
+  const loadCourses = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await coursesAPI.getCourses();
+      const approvedCourses = data.filter(course => course.approved);
+      setCourses(approvedCourses);
+    } catch (err) {
+      setError('Nepodařilo se načíst kurzy. Zkuste to prosím později.');
+      console.error('Error loading courses:', err);
+    } finally {
+      setLoading(false);
     }
-  ];
-
-  const handleSearch = () => {
-    console.log('Searching:', searchTerm, filterType);
   };
+
+  const handleEnroll = async (courseId) => {
+    if (!user) {
+      // Guest user trying to enroll - show login
+      if (onShowLogin) {
+        onShowLogin();
+      } else {
+        alert('Pro zápis do kurzu se musíte přihlásit');
+      }
+      return;
+    }
+
+    try {
+      setEnrollingCourseId(courseId);
+      await coursesAPI.enrollInCourse(courseId);
+      alert('Úspěšně jste se zapsali do kurzu!');
+      await loadCourses();
+    } catch (err) {
+      console.error('Error enrolling in course:', err);
+      alert(err.message || 'Zápis do kurzu se nezdařil');
+    } finally {
+      setEnrollingCourseId(null);
+    }
+  };
+
+  const filteredCourses = courses.filter(course => {
+    const matchesSearch = 
+      course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.code?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesType = !filterType || course.type === filterType;
+    
+    return matchesSearch && matchesType;
+  });
+
+  if (loading) {
+    return (
+      <div className="public-courses">
+        <div className="loading-state">
+          <p>Načítání kurzů...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="public-courses">
+        <div className="error-state">
+          <p>{error}</p>
+          <button className="button" onClick={loadCourses}>
+            Zkusit znovu
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="public-courses">
-
       <div className="filter-section">
         <h3>Filtr kurzů:</h3>
         <div className="filter-inputs">
           <div className="form-group">
+            <label className="form-label">Hledat kurz</label>
             <input
               type="text"
               className="input-field"
-              placeholder="Hledat kurz..."
+              placeholder="Zadejte název nebo kód kurzu..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <div className="form-group">
+            <label className="form-label">Typ kurzu</label>
             <select
               className="input-field"
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
             >
               <option value="">Všechny typy</option>
-              <option value="prednaska">Přednáška</option>
-              <option value="cviceni">Cvičení</option>
-              <option value="zkouska">Zkouška</option>
+              <option value="lecture">Přednáška</option>
+              <option value="exercise">Cvičení</option>
+              <option value="exam">Zkouška</option>
             </select>
           </div>
-          <button className="button" onClick={handleSearch}>
-            Filtrovat
-          </button>
         </div>
       </div>
 
-      <div className="courses-grid">
-        {courses.map(course => (
-          <div key={course.id} className="course-card">
-            <div className="course-card-header">
-              <h3>{course.title}</h3>
-            </div>
-            <div className="course-card-body">
-              <p><strong>Typ:</strong> {course.type}</p>
-              <p><strong>Popis:</strong> {course.description}</p>
-              <p><strong>Lektor:</strong> {course.instructor}</p>
-              <p><strong>Počet termínů:</strong> {course.terms}</p>
-              <p><strong>Cena:</strong> {course.price} Kč</p>
-            </div>
-            <div className="course-card-footer">
-              <button className="button button-secondary">
-                Zobrazit detail
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+      {filteredCourses.length === 0 ? (
+        <div className="empty-state">
+          <p>Žádné kurzy nenalezeny</p>
+        </div>
+      ) : (
+        <div className="courses-grid">
+          {filteredCourses.map(course => {
+            const isFull = course.enrolled_count >= course.capacity;
+            const isEnrolling = enrollingCourseId === course.id;
+
+            return (
+              <div key={course.id} className="course-card">
+                <div className="course-card-header">
+                  <h3>{course.title}</h3>
+                  <span className="course-code">{course.code}</span>
+                </div>
+                <div className="course-card-body">
+                  {course.type && (
+                    <p>
+                      <strong>Typ:</strong> {course.type}
+                    </p>
+                  )}
+                  <p>
+                    <strong>Popis:</strong> {course.description || 'Bez popisu'}
+                  </p>
+                  <p>
+                    <strong>Garant:</strong>{' '}
+                    {course.guarantee 
+                      ? `${course.guarantee.first_name} ${course.guarantee.last_name}`
+                      : 'Neznámý'
+                    }
+                  </p>
+                  {course.lecturers && course.lecturers.length > 0 && (
+                    <p>
+                      <strong>Lektoři:</strong>{' '}
+                      {course.lecturers.map(l => `${l.first_name} ${l.last_name}`).join(', ')}
+                    </p>
+                  )}
+                  <p>
+                    <strong>Kapacita:</strong>{' '}
+                    <span className={isFull ? 'capacity-full' : 'capacity-available'}>
+                      {course.enrolled_count}/{course.capacity} míst
+                    </span>
+                  </p>
+                  <p>
+                    <strong>Cena:</strong> {course.price} Kč
+                  </p>
+                  {course.auto_confirm && (
+                    <p className="auto-confirm-badge">
+                      ✓ Automatické potvrzení
+                    </p>
+                  )}
+                </div>
+                <div className="course-card-footer">
+                  {user ? (
+                    <button 
+                      className={`button ${isFull ? 'button-disabled' : 'button-success'}`}
+                      onClick={() => handleEnroll(course.id)}
+                      disabled={isFull || isEnrolling}
+                    >
+                      {isEnrolling ? '⏳ Zapisuji...' : isFull ? '❌ Obsazeno' : '✓ Zapsat se do kurzu'}
+                    </button>
+                  ) : (
+                    <button 
+                      className="button button-secondary"
+                      onClick={() => handleEnroll(course.id)}
+                    >
+                      🔒 Přihlásit se pro zápis
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

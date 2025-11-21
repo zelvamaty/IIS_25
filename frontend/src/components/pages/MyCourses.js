@@ -1,70 +1,124 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './MyCourses.css';
+import { coursesAPI, registrationsAPI, gradesAPI } from '../services/api';
 
 const MyCourses = () => {
   const navigate = useNavigate();
-
-  // Mock data 
-  const [enrolledCourses] = useState([
-    {
-      id: 1,
-      name: 'Webové technologie',
-      code: 'WEB-101',
-      type: 'Přednáška',
-      instructor: 'Dr. Jan Novák',
-      status: 'Schválený',
-      progress: 75,
-      totalTerms: 12,
-      completedTerms: 9,
-      overallGrade: 85,
-      terms: [
-        { id: 1, name: 'Úvodní přednáška', date: '15.03.2025', grade: 90, status: 'Hodnoceno' },
-        { id: 2, name: 'HTML a CSS', date: '22.03.2025', grade: 85, status: 'Hodnoceno' },
-        { id: 3, name: 'JavaScript', date: '29.03.2025', grade: 80, status: 'Hodnoceno' },
-        { id: 4, name: 'React framework', date: '05.04.2025', grade: null, status: 'Čeká na hodnocení' }
-      ]
-    },
-    {
-      id: 2,
-      name: 'Databázové systémy',
-      code: 'DB-201',
-      type: 'Cvičení',
-      instructor: 'Ing. Marie Svobodová',
-      status: 'Schválený',
-      progress: 60,
-      totalTerms: 10,
-      completedTerms: 6,
-      overallGrade: 78,
-      terms: [
-        { id: 1, name: 'SQL základy', date: '16.03.2025', grade: 75, status: 'Hodnoceno' },
-        { id: 2, name: 'Normalizace', date: '23.03.2025', grade: 80, status: 'Hodnoceno' },
-        { id: 3, name: 'Indexy', date: '30.03.2025', grade: null, status: 'Registrován' }
-      ]
-    },
-    {
-      id: 3,
-      name: 'Umělá inteligence',
-      code: 'AI-301',
-      type: 'Přednáška',
-      instructor: 'Dr. Lucie Veselá',
-      status: 'Čeká na schválení',
-      progress: 0,
-      totalTerms: 14,
-      completedTerms: 0,
-      overallGrade: null,
-      terms: []
-    }
-  ]);
-
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [selectedCourseDetails, setSelectedCourseDetails] = useState(null);
 
-  const handleViewDetails = (course) => {
-    setSelectedCourse(course);
+  useEffect(() => {
+    loadMyCourses();
+  }, []);
+
+  const loadMyCourses = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Get all courses (will filter enrolled ones)
+      const allCourses = await coursesAPI.getCourses();
+      
+      // Get my registrations
+      const registrations = await registrationsAPI.getMyRegistrations();
+      
+      // Get my grades
+      const grades = await gradesAPI.getGrades();
+
+      // Filter courses where I'm enrolled
+      const myCourses = allCourses.filter(course => 
+        registrations.some(reg => reg.term && reg.term.course_id === course.id)
+      );
+
+      // Transform data
+      const transformedCourses = myCourses.map(course => {
+        // Get all registrations for this course
+        const courseRegistrations = registrations.filter(reg => 
+          reg.term && reg.term.course_id === course.id
+        );
+
+        // Calculate grades
+        const courseGrades = courseRegistrations
+          .map(reg => reg.grade?.value)
+          .filter(grade => grade !== null && grade !== undefined);
+
+        const averageGrade = courseGrades.length > 0
+          ? Math.round(courseGrades.reduce((a, b) => parseFloat(a) + parseFloat(b), 0) / courseGrades.length)
+          : null;
+
+        // Calculate progress
+        const totalTerms = courseRegistrations.length;
+        const completedTerms = courseRegistrations.filter(reg => reg.grade).length;
+        const progress = totalTerms > 0 ? Math.round((completedTerms / totalTerms) * 100) : 0;
+
+        return {
+          id: course.id,
+          name: course.title,
+          code: course.code,
+          type: getCourseType(course.type),
+          instructor: course.guarantee 
+            ? `${course.guarantee.first_name} ${course.guarantee.last_name}`
+            : 'Neznámý',
+          status: 'Schválený', // All registered courses are approved
+          progress: progress,
+          totalTerms: totalTerms,
+          completedTerms: completedTerms,
+          overallGrade: averageGrade,
+          registrations: courseRegistrations
+        };
+      });
+
+      setEnrolledCourses(transformedCourses);
+    } catch (err) {
+      setError('Nepodařilo se načíst kurzy');
+      console.error('Error loading courses:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getCourseType = (type) => {
+    const typeMap = {
+      'LECTURE': 'Přednáška',
+      'EXERCISE': 'Cvičení',
+      'EXAM': 'Zkouška'
+    };
+    return typeMap[type] || type || 'Kurz';
+  };
+
+  const handleViewDetails = async (course) => {
+    try {
+      // Load detailed term information
+      const termsWithGrades = course.registrations.map(reg => ({
+        id: reg.id,
+        name: reg.term ? getCourseType(reg.term.type) : 'Neznámý termín',
+        date: reg.term 
+          ? new Date(reg.term.start_time).toLocaleDateString('cs-CZ')
+          : 'Neznámé datum',
+        grade: reg.grade ? parseFloat(reg.grade.value) : null,
+        status: reg.grade ? 'Hodnoceno' : 'Čeká na hodnocení',
+        registeredAt: new Date(reg.registered_at).toLocaleDateString('cs-CZ'),
+        gradedBy: reg.graded_by ? reg.graded_by.join(', ') : null,
+        gradedAt: reg.grade ? new Date(reg.grade.graded_at).toLocaleDateString('cs-CZ') : null
+      }));
+
+      setSelectedCourseDetails({
+        ...course,
+        terms: termsWithGrades
+      });
+      setSelectedCourse(course);
+    } catch (err) {
+      console.error('Error loading course details:', err);
+    }
   };
 
   const handleCloseDetails = () => {
     setSelectedCourse(null);
+    setSelectedCourseDetails(null);
   };
 
   const getStatusBadgeClass = (status) => {
@@ -93,89 +147,124 @@ const MyCourses = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="my-courses">
+        <div className="loading-state">
+          <p>Načítání kurzů...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="my-courses">
+        <div className="error-state">
+          <p>{error}</p>
+          <button className="button" onClick={loadMyCourses}>
+            Zkusit znovu
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const activeCourses = enrolledCourses.filter(c => c.status === 'Schválený');
+  const totalCompletedTerms = enrolledCourses.reduce((sum, c) => sum + c.completedTerms, 0);
+  const averageGrade = enrolledCourses.filter(c => c.overallGrade).length > 0
+    ? Math.round(
+        enrolledCourses
+          .filter(c => c.overallGrade)
+          .reduce((sum, c) => sum + c.overallGrade, 0) /
+        enrolledCourses.filter(c => c.overallGrade).length
+      )
+    : 0;
+
   return (
     <div className="my-courses">
-
       {/* Summary Statistics */}
       <div className="stats-summary">
         <div className="stat-box">
-          <div className="stat-number">{enrolledCourses.filter(c => c.status === 'Schválený').length}</div>
+          <div className="stat-number">{activeCourses.length}</div>
           <div className="stat-label">Aktivní kurzy</div>
         </div>
         <div className="stat-box">
-          <div className="stat-number">{enrolledCourses.reduce((sum, c) => sum + c.completedTerms, 0)}</div>
+          <div className="stat-number">{totalCompletedTerms}</div>
           <div className="stat-label">Dokončené termíny</div>
         </div>
         <div className="stat-box">
-          <div className="stat-number">
-            {Math.round(
-              enrolledCourses
-                .filter(c => c.overallGrade)
-                .reduce((sum, c) => sum + c.overallGrade, 0) /
-              enrolledCourses.filter(c => c.overallGrade).length
-            ) || 0}
-          </div>
+          <div className="stat-number">{averageGrade}</div>
           <div className="stat-label">Průměrné hodnocení</div>
         </div>
       </div>
 
       {/* Courses List */}
-      <div className="courses-list">
-        {enrolledCourses.map(course => (
-          <div key={course.id} className="course-item">
-            <div className="course-header">
-              <div className="course-title-section">
-                <h3>{course.name}</h3>
-                <span className="course-code">{course.code}</span>
-                <span className={`badge ${getStatusBadgeClass(course.status)}`}>
-                  {course.status}
-                </span>
+      {enrolledCourses.length === 0 ? (
+        <div className="empty-state">
+          <p>Nejste zapsaní do žádných kurzů</p>
+          <button className="button" onClick={() => navigate('/courses')}>
+            Prohlédnout dostupné kurzy
+          </button>
+        </div>
+      ) : (
+        <div className="courses-list">
+          {enrolledCourses.map(course => (
+            <div key={course.id} className="course-item">
+              <div className="course-header">
+                <div className="course-title-section">
+                  <h3>{course.name}</h3>
+                  <span className="course-code">{course.code}</span>
+                  <span className={`badge ${getStatusBadgeClass(course.status)}`}>
+                    {course.status}
+                  </span>
+                </div>
+                <div className="course-grade">
+                  {course.overallGrade ? (
+                    <>
+                      <div className="grade-number">{course.overallGrade}</div>
+                      <div className="grade-label">Celkové hodnocení</div>
+                    </>
+                  ) : (
+                    <div className="grade-label">Zatím nehodnoceno</div>
+                  )}
+                </div>
               </div>
-              <div className="course-grade">
-                {course.overallGrade ? (
-                  <>
-                    <div className="grade-number">{course.overallGrade}</div>
-                    <div className="grade-label">Celkové hodnocení</div>
-                  </>
-                ) : (
-                  <div className="grade-label">Zatím nehodnoceno</div>
+
+              <div className="course-body">
+                <div className="course-info-row">
+                  <span><strong>Typ:</strong> {course.type}</span>
+                  <span><strong>Lektor:</strong> {course.instructor}</span>
+                </div>
+
+                <div className="progress-section">
+                  <div className="progress-info">
+                    <span>Pokrok: {course.completedTerms}/{course.totalTerms} termínů</span>
+                    <span>{course.progress}%</span>
+                  </div>
+                  <div className="progress-bar">
+                    <div 
+                      className="progress-fill" 
+                      style={{ width: `${course.progress}%` }}
+                    ></div>
+                  </div>
+                </div>
+
+                {course.status === 'Schválený' && course.registrations.length > 0 && (
+                  <button 
+                    className="button"
+                    onClick={() => handleViewDetails(course)}
+                  >
+                    Zobrazit hodnocení termínů
+                  </button>
                 )}
               </div>
             </div>
+          ))}
+        </div>
+      )}
 
-            <div className="course-body">
-              <div className="course-info-row">
-                <span><strong>Typ:</strong> {course.type}</span>
-                <span><strong>Lektor:</strong> {course.instructor}</span>
-              </div>
-
-              <div className="progress-section">
-                <div className="progress-info">
-                  <span>Pokrok: {course.completedTerms}/{course.totalTerms} termínů</span>
-                  <span>{course.progress}%</span>
-                </div>
-                <div className="progress-bar">
-                  <div 
-                    className="progress-fill" 
-                    style={{ width: `${course.progress}%` }}
-                  ></div>
-                </div>
-              </div>
-
-              {course.status === 'Schválený' && (
-                <button 
-                  className="button"
-                  onClick={() => handleViewDetails(course)}
-                >
-                  Zobrazit hodnocení termínů
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {selectedCourse && (
+      {selectedCourse && selectedCourseDetails && (
         <div className="modal-overlay" onClick={handleCloseDetails}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
@@ -194,17 +283,17 @@ const MyCourses = () => {
                 <thead>
                   <tr>
                     <th>Termín</th>
-                    <th>Datum</th>
+                    <th>Datum registrace</th>
                     <th>Hodnocení</th>
                     <th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {selectedCourse.terms.length > 0 ? (
-                    selectedCourse.terms.map(term => (
+                  {selectedCourseDetails.terms.length > 0 ? (
+                    selectedCourseDetails.terms.map(term => (
                       <tr key={term.id}>
                         <td>{term.name}</td>
-                        <td>{term.date}</td>
+                        <td>{term.registeredAt}</td>
                         <td>
                           {term.grade ? (
                             <span className="grade-badge">{term.grade} bodů</span>

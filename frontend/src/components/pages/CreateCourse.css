@@ -192,3 +192,35 @@
   padding: 14px 28px;
   font-size: 16px;
 }
+.page-title {
+  color: #1e40af;
+  font-size: 48px;
+  font-weight: 700;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.error-message {
+  background: #fee2e2;
+  border: 2px solid #ef4444;
+  color: #dc2626;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.info-message {
+  background: #dbeafe;
+  border: 2px solid #3b82f6;
+  color: #1e40af;
+  padding: 20px;
+  border-radius: 12px;
+  margin: 24px 0;
+}
+
+.info-message p {
+  margin: 8px 0;
+  font-size: 15px;
+}

@@ -1,57 +1,64 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './MySchedule.css';
+import { termsAPI } from '../services/api';
 
 const MySchedule = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState('week'); // 'week' or 'month'
+  const [scheduleEvents, setScheduleEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock schedule data
-  const scheduleEvents = [
-    {
-      id: 1,
-      courseName: 'Webové technologie',
-      termName: 'React framework',
-      date: '2025-03-19',
-      startTime: '10:00',
-      endTime: '12:00',
-      room: 'A112',
-      type: 'Přednáška',
-      instructor: 'Dr. Jan Novák'
-    },
-    {
-      id: 2,
-      courseName: 'Databázové systémy',
-      termName: 'SQL pokročilé',
-      date: '2025-03-19',
-      startTime: '14:00',
-      endTime: '16:00',
-      room: 'B205',
-      type: 'Cvičení',
-      instructor: 'Ing. Marie Svobodová'
-    },
-    {
-      id: 3,
-      courseName: 'Webové technologie',
-      termName: 'Deployment',
-      date: '2025-03-21',
-      startTime: '10:00',
-      endTime: '12:00',
-      room: 'A112',
-      type: 'Přednáška',
-      instructor: 'Dr. Jan Novák'
-    },
-    {
-      id: 4,
-      courseName: 'Umělá inteligence',
-      termName: 'Neural Networks',
-      date: '2025-03-22',
-      startTime: '13:00',
-      endTime: '15:00',
-      room: 'C301',
-      type: 'Přednáška',
-      instructor: 'Dr. Lucie Veselá'
+  useEffect(() => {
+    loadSchedule();
+  }, []);
+
+  const loadSchedule = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await termsAPI.getSchedule();
+      
+      // Transform API data to match component format
+      const transformedEvents = data.map(term => ({
+        id: term.id,
+        courseName: term.course?.title || 'Bez názvu',
+        termName: getTermTypeName(term.type),
+        date: term.start_time.split('T')[0], // Extract date from ISO string
+        startTime: new Date(term.start_time).toLocaleTimeString('cs-CZ', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+        endTime: new Date(term.end_time).toLocaleTimeString('cs-CZ', { 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+        room: term.room || 'Neznámá',
+        type: getTermTypeName(term.type),
+        instructor: term.course?.guarantee 
+          ? `${term.course.guarantee.first_name} ${term.course.guarantee.last_name}`
+          : 'Neznámý',
+        courseCode: term.course?.code || '',
+        capacity: term.capacity,
+        requiresRegistration: term.requires_registration
+      }));
+
+      setScheduleEvents(transformedEvents);
+    } catch (err) {
+      setError('Nepodařilo se načíst rozvrh');
+      console.error('Error loading schedule:', err);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const getTermTypeName = (type) => {
+    const typeMap = {
+      'LECTURE': 'Přednáška',
+      'EXERCISE': 'Cvičení',
+      'EXAM': 'Zkouška'
+    };
+    return typeMap[type] || type;
+  };
 
   const getWeekDays = () => {
     const start = new Date(currentDate);
@@ -69,6 +76,16 @@ const MySchedule = () => {
   const getEventsForDate = (date) => {
     const dateStr = date.toISOString().split('T')[0];
     return scheduleEvents.filter(event => event.date === dateStr);
+  };
+
+  const getUpcomingEvents = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    return scheduleEvents
+      .filter(event => new Date(event.date) >= today)
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .slice(0, 5);
   };
 
   const formatDate = (date) => {
@@ -93,13 +110,36 @@ const MySchedule = () => {
     setCurrentDate(new Date());
   };
 
+  if (loading) {
+    return (
+      <div className="my-schedule">
+        <div className="loading-state">
+          <p>Načítání rozvrhu...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="my-schedule">
+        <div className="error-state">
+          <p>{error}</p>
+          <button className="button" onClick={loadSchedule}>
+            Zkusit znovu
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const weekDays = getWeekDays();
   const { monthName, year } = formatDate(currentDate);
+  const upcomingEvents = getUpcomingEvents();
 
   return (
     <div className="my-schedule">
       <div className="schedule-header">
-        
         <div className="schedule-controls">
           <button className="button button-secondary" onClick={() => changeWeek(-1)}>
             ← Předchozí týden
@@ -145,11 +185,19 @@ const MySchedule = () => {
                           {event.startTime} - {event.endTime}
                         </div>
                         <div className="event-course">{event.courseName}</div>
+                        {event.courseCode && (
+                          <div className="event-code">{event.courseCode}</div>
+                        )}
                         <div className="event-term">{event.termName}</div>
                         <div className="event-details">
-                          <span>📍 {event.room}</span>
+                          <span>📍 Místnost {event.room}</span>
                           <span>👨‍🏫 {event.instructor}</span>
                         </div>
+                        {event.requiresRegistration && (
+                          <div className="requires-registration">
+                            ✓ Vyžaduje registraci
+                          </div>
+                        )}
                         <div className="event-type-badge">
                           {event.type}
                         </div>
@@ -168,33 +216,41 @@ const MySchedule = () => {
       </div>
 
       {/* Upcoming events list */}
-      <div className="upcoming-section">
-        <h2 className="section-title">Nadcházející termíny</h2>
-        <div className="upcoming-list">
-          {scheduleEvents.slice(0, 5).map(event => (
-            <div key={event.id} className="upcoming-item">
-              <div className="upcoming-date">
-                <div className="upcoming-day">{new Date(event.date).getDate()}</div>
-                <div className="upcoming-month">
-                  {new Date(event.date).toLocaleDateString('cs-CZ', { month: 'short' })}
+      {upcomingEvents.length > 0 && (
+        <div className="upcoming-section">
+          <h2 className="section-title">Nadcházející termíny</h2>
+          <div className="upcoming-list">
+            {upcomingEvents.map(event => (
+              <div key={event.id} className="upcoming-item">
+                <div className="upcoming-date">
+                  <div className="upcoming-day">{new Date(event.date).getDate()}</div>
+                  <div className="upcoming-month">
+                    {new Date(event.date).toLocaleDateString('cs-CZ', { month: 'short' })}
+                  </div>
+                </div>
+                <div className="upcoming-info">
+                  <h4>{event.courseName}</h4>
+                  <p>{event.termName}</p>
+                  <div className="upcoming-details">
+                    <span>🕐 {event.startTime} - {event.endTime}</span>
+                    <span>📍 Místnost {event.room}</span>
+                    <span>👨‍🏫 {event.instructor}</span>
+                  </div>
+                </div>
+                <div className="upcoming-type">
+                  <span className="badge badge-info">{event.type}</span>
                 </div>
               </div>
-              <div className="upcoming-info">
-                <h4>{event.courseName}</h4>
-                <p>{event.termName}</p>
-                <div className="upcoming-details">
-                  <span>🕐 {event.startTime} - {event.endTime}</span>
-                  <span>📍 {event.room}</span>
-                  <span>👨‍🏫 {event.instructor}</span>
-                </div>
-              </div>
-              <div className="upcoming-type">
-                <span className="badge badge-info">{event.type}</span>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+
+      {scheduleEvents.length === 0 && !loading && (
+        <div className="empty-state">
+          <p>Nemáte žádné naplánované termíny</p>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,68 +1,390 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './InstructorCourse.css';
+import { coursesAPI, termsAPI, usersAPI, roomsAPI } from '../services/api';
 
-const InstructorCourse = ({ userRole = 'Garant' }) => {
-  const [activeTab, setActiveTab] = useState('terms');
+const InstructorCourse = ({ userRole = 'Student' }) => {
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('courses');
+  const [myCourses, setMyCourses] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [courseTerms, setCourseTerms] = useState([]);
+  const [courseEnrollments, setCourseEnrollments] = useState([]);
+  const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [availableUsers, setAvailableUsers] = useState([]);
+  const [showAddLecturerForm, setShowAddLecturerForm] = useState(false);
+  const [selectedLecturerId, setSelectedLecturerId] = useState('');
+  const [lecturerError, setLecturerError] = useState('');
+  // Term form state
+  const [termFormData, setTermFormData] = useState({
+    type: '',
+    start_time: '',
+    end_time: '',
+    room: '',
+    capacity: '30',
+    requires_registration: true
+  });
+  const [termLoading, setTermLoading] = useState(false);
+  const [termError, setTermError] = useState('');
+
+  useEffect(() => {
+    loadCurrentUserAndCourses();
+    loadRooms();
+  }, []);
+
+  const loadRooms = async () => {
+    try {
+      const roomsData = await roomsAPI.getRooms();
+      setRooms(roomsData);
+    } catch (err) {
+      console.error('Error loading rooms:', err);
+    }
+  };
+
+  const loadCurrentUserAndCourses = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Get current user first
+      const user = await usersAPI.getCurrentUser();
+      setCurrentUser(user);
+      console.log('Current user:', user);
+      
+      // Then get courses
+      const allCourses = await coursesAPI.getCourses();
+      console.log('All courses:', allCourses);
+      
+      // Filter courses where I'm a guarantee or lecturer
+      const instructorCourses = allCourses.filter(course => {
+        const isGuarantee = course.guarantee?.id === user.id;
+        const isLecturer = course.lecturers?.some(l => l.id === user.id);
+        
+        console.log(`Course ${course.title}:`, {
+          guaranteeId: course.guarantee?.id,
+          myId: user.id,
+          isGuarantee,
+          isLecturer
+        });
+        
+        return isGuarantee || isLecturer;
+      });
+
+      console.log('Instructor courses:', instructorCourses);
+      setMyCourses(instructorCourses);
+    } catch (err) {
+      setError('Nepodařilo se načíst kurzy');
+      console.error('Error loading courses:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    loadCurrentUserAndCourses();
+    loadRooms();
+    loadUsers();
+  }, []);
   
-  const courseInfo = {
-    name: 'Webové technologie',
-    type: 'Přednáška',
-    capacity: 30,
-    registered: 24
+  const loadUsers = async () => {
+    try {
+      const users = await usersAPI.getUsers();
+      setAvailableUsers(users);
+    } catch (err) {
+      console.error('Error loading users:', err);
+    }
+  };
+  
+  // Funkcie na pridanie/odobratie lektora
+  const handleAddLecturer = async (e) => {
+    e.preventDefault();
+    setLecturerError('');
+  
+    if (!selectedLecturerId) {
+      setLecturerError('Vyberte lektora');
+      return;
+    }
+  
+    try {
+      await coursesAPI.addLecturer(selectedCourse.id, parseInt(selectedLecturerId));
+      alert('Lektor byl úspěšně přidán');
+      setShowAddLecturerForm(false);
+      setSelectedLecturerId('');
+      // Reload course details
+      await loadCourseDetails(selectedCourse.id);
+    } catch (err) {
+      setLecturerError(err.message || 'Přidání lektora se nezdařilo');
+      console.error('Error adding lecturer:', err);
+    }
+  };
+  
+  const handleRemoveLecturer = async (lecturerId) => {
+    if (!window.confirm('Opravdu chcete odebrat tohoto lektora?')) {
+      return;
+    }
+  
+    try {
+      await coursesAPI.removeLecturer(selectedCourse.id, lecturerId);
+      alert('Lektor byl odebrán');
+      // Reload course details
+      await loadCourseDetails(selectedCourse.id);
+    } catch (err) {
+      alert(err.message || 'Odebrání lektora se nezdařilo');
+      console.error('Error removing lecturer:', err);
+    }
+  };
+  const loadCourseDetails = async (courseId) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Load course details
+      const course = await coursesAPI.getCourseDetail(courseId);
+      setSelectedCourse(course);
+      
+      // Load terms for this course
+      const allTerms = await termsAPI.getTerms();
+      const courseTerms = allTerms.filter(t => t.course?.id === courseId);
+      setCourseTerms(courseTerms);
+      
+      // Load enrollments for this course
+      try {
+        const enrollments = await coursesAPI.getEnrollments(courseId);
+        setCourseEnrollments(enrollments || []);
+      } catch (err) {
+        console.log('No enrollments endpoint or no enrollments:', err);
+        setCourseEnrollments([]);
+      }
+      
+      setActiveTab('terms');
+    } catch (err) {
+      setError('Nepodařilo se načíst detail kurzu');
+      console.error('Error loading course details:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const terms = [
-    { id: 1, name: 'Úvodní přednáška', type: 'Přednáška', date: '15.03.2025', time: '10:00-12:00', room: 'A112', capacity: '30/30' },
-    { id: 2, name: 'HTML a CSS', type: 'Cvičení', date: '22.03.2025', time: '10:00-12:00', room: 'A112', capacity: '24/30' },
-    { id: 3, name: 'JavaScript základy', type: 'Cvičení', date: '29.03.2025', time: '10:00-12:00', room: 'A112', capacity: '28/30' },
-    { id: 4, name: 'React framework', type: 'Přednáška', date: '05.04.2025', time: '10:00-12:00', room: 'A112', capacity: '25/30' }
-  ];
-
-  const waitingStudents = [
-    { id: 1, name: 'Jan Novák', login: 'xnovak01' },
-    { id: 2, name: 'Petr Svoboda', login: 'xsvobo02' },
-    { id: 3, name: 'Marie Dvořáková', login: 'xdvora03' }
-  ];
-
-  const enrolledStudents = [
-    { id: 4, name: 'Karel Procházka', login: 'xproch04', rating: 85 },
-    { id: 5, name: 'Eva Nováková', login: 'xnovak05', rating: 92 },
-    { id: 6, name: 'Tomáš Svoboda', login: 'xsvobo06', rating: 78 },
-    { id: 7, name: 'Jana Dvořáková', login: 'xdvora07', rating: null }
-  ];
-
-  const handleNewTerm = () => {
-    console.log('Create new term');
+  const handleTermFormChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setTermFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+    setTermError('');
   };
 
-  const handleTermDetail = (id) => {
-    console.log('View term detail:', id);
+  const handleCreateTerm = async (e) => {
+    e.preventDefault();
+    setTermLoading(true);
+    setTermError('');
+
+    try {
+      const termData = {
+        course_id: selectedCourse.id,
+        type: termFormData.type,
+        start_time: new Date(termFormData.start_time).toISOString(),
+        end_time: new Date(termFormData.end_time).toISOString(),
+        capacity: parseInt(termFormData.capacity),
+        requires_registration: termFormData.requires_registration
+      };
+
+      // Pridať room len ak je vybraná
+      if (termFormData.room) {
+        termData.room = parseInt(termFormData.room);
+      }
+
+      await termsAPI.createTerm(termData);
+      alert('Termín byl úspěšně vytvořen!');
+      
+      // Reset form
+      setTermFormData({
+        type: '',
+        start_time: '',
+        end_time: '',
+        room: '',
+        capacity: '30',
+        requires_registration: true
+      });
+      
+      // Reload course details
+      await loadCourseDetails(selectedCourse.id);
+      setActiveTab('terms');
+    } catch (err) {
+      setTermError(err.message || 'Vytvoření termínu se nezdařilo');
+      console.error('Error creating term:', err);
+    } finally {
+      setTermLoading(false);
+    }
   };
 
-  const handleApprove = (studentId) => {
-    console.log('Approve student:', studentId);
+  const handleDeleteTerm = async (termId) => {
+    if (!window.confirm('Opravdu chcete smazat tento termín?')) {
+      return;
+    }
+
+    try {
+      await termsAPI.deleteTerm(termId);
+      alert('Termín byl smazán');
+      await loadCourseDetails(selectedCourse.id);
+    } catch (err) {
+      alert(err.message || 'Smazání termínu se nezdařilo');
+      console.error('Error deleting term:', err);
+    }
   };
 
-  const handleReject = (studentId) => {
-    console.log('Reject student:', studentId);
+  const handleApproveEnrollment = async (enrollmentId) => {
+    if (!selectedCourse) return;
+    
+    try {
+      await coursesAPI.approveEnrollment(selectedCourse.id, enrollmentId);
+      alert('Student byl úspěšně schválen');
+      await loadCourseDetails(selectedCourse.id);
+    } catch (err) {
+      alert(err.message || 'Schválení studenta se nezdařilo');
+      console.error('Error approving enrollment:', err);
+    }
   };
 
-  const handleRateStudent = (studentId) => {
-    console.log('Rate student:', studentId);
+  const handleRejectEnrollment = async (enrollmentId) => {
+    if (!selectedCourse) return;
+    
+    try {
+      await coursesAPI.rejectEnrollment(selectedCourse.id, enrollmentId);
+      alert('Student byl odmítnut');
+      await loadCourseDetails(selectedCourse.id);
+    } catch (err) {
+      alert(err.message || 'Odmítnutí studenta se nezdařilo');
+      console.error('Error rejecting enrollment:', err);
+    }
   };
 
-  // Určíme, či je užívateľ garant (má všetky práva)
-  const isGuarantor = userRole === 'Garant';
+  const handleBackToCourses = () => {
+    setSelectedCourse(null);
+    setCourseEnrollments([]);
+    setActiveTab('courses');
+  };
 
+  const getRoomName = (roomId) => {
+    if (!roomId) return 'Neurčeno';
+    const room = rooms.find(r => r.id === roomId);
+    return room ? (room.name || `Místnost ${room.id}`) : 'Neurčeno';
+  };
+
+  const isGuarantor = selectedCourse && currentUser && selectedCourse.guarantee?.id === currentUser.id;
+  
+  const pendingEnrollments = courseEnrollments.filter(e => !e.approved);
+  const approvedEnrollments = courseEnrollments.filter(e => e.approved);
+
+  if (loading && !currentUser) {
+    return (
+      <div className="instructor-course">
+        <div className="loading-state">
+          <p>Načítání kurzů...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && myCourses.length === 0) {
+    return (
+      <div className="instructor-course">
+        <div className="error-state">
+          <p>{error}</p>
+          <button className="button" onClick={loadCurrentUserAndCourses}>
+            Zkusit znovu
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Course list view
+  if (!selectedCourse) {
+    return (
+      <div className="instructor-course">
+        
+        {myCourses.length === 0 ? (
+          <div className="empty-state">
+            <p>Zatím nemáte žádné kurzy jako garant nebo lektor</p>
+            <button className="button" onClick={() => navigate('/create-course')}>
+              Vytvořit kurz
+            </button>
+          </div>
+        ) : (
+          <div className="courses-list">
+            {myCourses.map(course => (
+              <div key={course.id} className="course-item">
+                <div className="course-header">
+                  <div className="course-title-section">
+                    <h3>{course.title}</h3>
+                    <span className="course-code">{course.code}</span>
+                    {!course.approved ? (
+                      <span className="badge badge-warning">
+                        ⏳ Čeká na schválení administrátorem
+                      </span>
+                    ) : (
+                      <span className="badge badge-success">
+                        ✓ Schváleno
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="course-body">
+                  <div className="course-info-row">
+                    <span><strong>Garant:</strong> {course.guarantee 
+                      ? `${course.guarantee.first_name} ${course.guarantee.last_name}`
+                      : 'Neznámý'}</span>
+                    <span><strong>Kapacita:</strong> {course.enrolled_count}/{course.capacity}</span>
+                  </div>
+
+                  <div className="course-info-row">
+                    <span><strong>Cena:</strong> {course.price} Kč</span>
+                    {course.auto_confirm && (
+                      <span className="badge badge-info">✓ Automatické potvrzení</span>
+                    )}
+                  </div>
+
+                  {course.description && (
+                    <p className="course-description">{course.description}</p>
+                  )}
+
+                  <button 
+                    className="button"
+                    onClick={() => loadCourseDetails(course.id)}
+                  >
+                    Spravovat kurz
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Course detail view
   return (
     <div className="instructor-course">
       <div className="course-info-header">
+        <button className="button button-secondary" onClick={handleBackToCourses}>
+          ← Zpět na seznam kurzů
+        </button>
         <div>
-          <h1>{courseInfo.name}</h1>
+          <h1>{selectedCourse.title}</h1>
           <p className="course-meta">
-            Typ: {courseInfo.type} | Kapacita: {courseInfo.capacity} | 
-            Registrováno: {courseInfo.registered}
+            Kód: {selectedCourse.code} | Kapacita: {selectedCourse.capacity} | 
+            Registrováno: {selectedCourse.enrolled_count}
           </p>
+          {!selectedCourse.approved && (
+            <p className="warning-message">
+              ⚠️ Kurz čeká na schválení administrátorem
+            </p>
+          )}
         </div>
       </div>
 
@@ -71,179 +393,434 @@ const InstructorCourse = ({ userRole = 'Garant' }) => {
           className={`tab ${activeTab === 'terms' ? 'active' : ''}`}
           onClick={() => setActiveTab('terms')}
         >
-          Termíny
+          Termíny ({courseTerms.length})
         </button>
         <button 
-          className={`tab ${activeTab === 'students' ? 'active' : ''}`}
-          onClick={() => setActiveTab('students')}
+          className={`tab ${activeTab === 'enrollments' ? 'active' : ''}`}
+          onClick={() => setActiveTab('enrollments')}
         >
-          Studenti
+          Zápisy ({approvedEnrollments.length})
         </button>
-        {isGuarantor && (
+        {isGuarantor && pendingEnrollments.length > 0 && (
           <button 
-            className={`tab ${activeTab === 'settings' ? 'active' : ''}`}
-            onClick={() => setActiveTab('settings')}
+            className={`tab ${activeTab === 'pending' ? 'active' : ''}`}
+            onClick={() => setActiveTab('pending')}
           >
-            Nastavení
+            Čekající ({pendingEnrollments.length})
           </button>
         )}
-      </div>
+     {isGuarantor && (
+    <button 
+      className={`tab ${activeTab === 'lecturers' ? 'active' : ''}`}
+      onClick={() => setActiveTab('lecturers')}
+    >
+      Lektoři ({selectedCourse.lecturers?.length || 0})
+    </button>
+  )}
+</div>
 
       {activeTab === 'terms' && (
         <div className="tab-content">
           <div className="section-header">
-            <h2 className="section-title">Seznam termínů</h2>
+            <h2 className="section-title">Termíny kurzu</h2>
             {isGuarantor && (
-              <button className="button button-success" onClick={handleNewTerm}>
-                + Nový termín
+              <button 
+                className="button button-success"
+                onClick={() => setActiveTab('create-term')}
+              >
+                + Vytvořit termín
               </button>
             )}
           </div>
 
-          <div className="table-container">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Název</th>
-                  <th>Typ</th>
-                  <th>Datum</th>
-                  <th>Čas</th>
-                  <th>Místnost</th>
-                  <th>Kapacita</th>
-                  <th>Akce</th>
-                </tr>
-              </thead>
-              <tbody>
-                {terms.map(term => (
-                  <tr key={term.id}>
-                    <td>{term.name}</td>
-                    <td>{term.type}</td>
-                    <td>{term.date}</td>
-                    <td>{term.time}</td>
-                    <td>{term.room}</td>
-                    <td>{term.capacity}</td>
-                    <td>
-                      <button 
-                        className="button button-small"
-                        onClick={() => handleTermDetail(term.id)}
-                      >
-                        Detail
-                      </button>
-                    </td>
+          {courseTerms.length === 0 ? (
+            <div className="empty-state">
+              <p>Zatím nejsou vytvořené žádné termíny</p>
+              {isGuarantor && (
+                <button 
+                  className="button button-success"
+                  onClick={() => setActiveTab('create-term')}
+                >
+                  + Vytvořit první termín
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="table-container">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Typ</th>
+                    <th>Datum a čas</th>
+                    <th>Místnost</th>
+                    <th>Kapacita</th>
+                    <th>Registrací</th>
+                    {isGuarantor && <th>Akce</th>}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {courseTerms.map(term => (
+                    <tr key={term.id}>
+                      <td>{getTermTypeName(term.type)}</td>
+                      <td>
+                        {new Date(term.start_time).toLocaleString('cs-CZ', {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </td>
+                      <td>{getRoomName(term.room)}</td>
+                      <td>{term.capacity}</td>
+                      <td>{term.registered_count || 0}</td>
+                      {isGuarantor && (
+                        <td>
+                          <button 
+                            className="button button-danger button-small"
+                            onClick={() => handleDeleteTerm(term.id)}
+                          >
+                            Smazat
+                          </button>
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === 'create-term' && isGuarantor && (
+        <div className="tab-content">
+          <div className="section-header">
+            <h2 className="section-title">Vytvořit nový termín</h2>
+            <button 
+              className="button button-secondary"
+              onClick={() => setActiveTab('terms')}
+            >
+              ← Zpět
+            </button>
           </div>
 
-          {isGuarantor && waitingStudents.length > 0 && (
-            <div className="waiting-students">
-              <h3>Čekající studenti na schválení ({waitingStudents.length})</h3>
-              <div className="waiting-list">
-                {waitingStudents.map(student => (
-                  <div key={student.id} className="waiting-student-item">
-                    <span className="student-info">
-                      {student.name} ({student.login})
-                    </span>
-                    <div className="student-actions">
-                      <button 
-                        className="button button-success button-small"
-                        onClick={() => handleApprove(student.id)}
-                      >
-                        Schválit
-                      </button>
-                      <button 
-                        className="button button-danger button-small"
-                        onClick={() => handleReject(student.id)}
-                      >
-                        Odmítnout
-                      </button>
-                    </div>
-                  </div>
-                ))}
+          <form onSubmit={handleCreateTerm} className="term-form">
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Typ termínu *</label>
+                <select
+                  name="type"
+                  className="input-field"
+                  value={termFormData.type}
+                  onChange={handleTermFormChange}
+                  required
+                >
+                  <option value="">Vyberte typ</option>
+                  <option value="LECTURE">Přednáška</option>
+                  <option value="EXERCISE">Cvičení</option>
+                  <option value="EXAM">Zkouška</option>
+                </select>
               </div>
             </div>
-          )}
+
+            <div className="form-row two-columns">
+              <div className="form-group">
+                <label className="form-label">Datum a čas začátku *</label>
+                <input
+                  type="datetime-local"
+                  name="start_time"
+                  className="input-field"
+                  value={termFormData.start_time}
+                  onChange={handleTermFormChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Datum a čas konce *</label>
+                <input
+                  type="datetime-local"
+                  name="end_time"
+                  className="input-field"
+                  value={termFormData.end_time}
+                  onChange={handleTermFormChange}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="form-row two-columns">
+              <div className="form-group">
+                <label className="form-label">Místnost</label>
+                <select
+                  name="room"
+                  className="input-field"
+                  value={termFormData.room}
+                  onChange={handleTermFormChange}
+                >
+                  <option value="">Bez místnosti</option>
+                  {rooms.map(room => (
+                    <option key={room.id} value={room.id}>
+                      {room.name || `Místnost ${room.id}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Kapacita *</label>
+                <input
+                  type="number"
+                  name="capacity"
+                  className="input-field"
+                  min="1"
+                  value={termFormData.capacity}
+                  onChange={handleTermFormChange}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="checkbox-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    name="requires_registration"
+                    checked={termFormData.requires_registration}
+                    onChange={handleTermFormChange}
+                  />
+                  Vyžaduje registraci studentů
+                </label>
+              </div>
+            </div>
+
+            {termError && (
+              <div className="error-message">
+                {termError}
+              </div>
+            )}
+
+            <div className="form-actions">
+              <button 
+                type="submit" 
+                className="button button-success"
+                disabled={termLoading}
+              >
+                {termLoading ? '⏳ Vytvářím...' : '✓ Vytvořit termín'}
+              </button>
+              <button 
+                type="button" 
+                className="button button-secondary"
+                onClick={() => setActiveTab('terms')}
+              >
+                Zrušit
+              </button>
+            </div>
+          </form>
         </div>
       )}
 
-      {activeTab === 'students' && (
+      {activeTab === 'enrollments' && (
         <div className="tab-content">
-          <h2 className="section-title">
-            {isGuarantor ? 'Registrovaní studenti' : 'Hodnocení studentů'}
-          </h2>
+          <h2 className="section-title">Schválení studenti</h2>
           
-          <div className="table-container">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Jméno</th>
-                  <th>Login</th>
-                  <th>Hodnocení</th>
-                  <th>Akce</th>
-                </tr>
-              </thead>
-              <tbody>
-                {enrolledStudents.map(student => (
-                  <tr key={student.id}>
-                    <td>{student.name}</td>
-                    <td>{student.login}</td>
-                    <td>
-                      {student.rating ? (
-                        <span className="badge badge-success">{student.rating}/100</span>
-                      ) : (
-                        <span className="badge badge-warning">Nehodnoceno</span>
-                      )}
-                    </td>
-                    <td>
-                      <button 
-                        className="button button-small"
-                        onClick={() => handleRateStudent(student.id)}
-                      >
-                        {student.rating ? 'Upravit hodnocení' : 'Ohodnotit'}
-                      </button>
-                    </td>
+          {approvedEnrollments.length === 0 ? (
+            <div className="empty-state">
+              <p>Zatím nejsou žádní schválení studenti</p>
+            </div>
+          ) : (
+            <div className="table-container">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Email</th>
+                    <th>Datum zápisu</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {isGuarantor && (
-            <div className="info-box">
-              <p><strong>ℹ️ Info pro garanta:</strong> Můžete vidět všechny studenty a jejich hodnocení. Lektoři mohou studenty hodnotit.</p>
+                </thead>
+                <tbody>
+                  {approvedEnrollments.map(enrollment => (
+                    <tr key={enrollment.id}>
+                      <td>
+                        {enrollment.student 
+                          ? `${enrollment.student.first_name} ${enrollment.student.last_name}`
+                          : 'Neznámý'}
+                      </td>
+                      <td>{enrollment.student?.email || '-'}</td>
+                      <td>
+                        {new Date(enrollment.enrolled_at).toLocaleDateString('cs-CZ')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
       )}
+{activeTab === 'lecturers' && isGuarantor && (
+  <div className="tab-content">
+    <div className="section-header">
+      <h2 className="section-title">Lektoři kurzu</h2>
+      {!showAddLecturerForm && (
+        <button 
+          className="button button-success"
+          onClick={() => setShowAddLecturerForm(true)}
+        >
+          + Přidat lektora
+        </button>
+      )}
+    </div>
 
-      {activeTab === 'settings' && isGuarantor && (
+    {showAddLecturerForm && (
+      <div className="add-lecturer-form">
+        <h3>Přidat lektora</h3>
+        
+        {lecturerError && (
+          <div className="error-message">
+            {lecturerError}
+          </div>
+        )}
+
+        <form onSubmit={handleAddLecturer}>
+          <div className="form-group">
+            <label className="form-label">Vyberte uživatele *</label>
+            <select
+              className="input-field"
+              value={selectedLecturerId}
+              onChange={(e) => setSelectedLecturerId(e.target.value)}
+              required
+            >
+              <option value="">-- Vyberte lektora --</option>
+              {availableUsers
+  .filter(u => 
+    u.id !== selectedCourse.guarantee?.id && 
+    !selectedCourse.lecturers?.some(l => l.id === u.id) &&  
+    u.role !== 'ADMIN' 
+  )
+  .map(user => (
+    <option key={user.id} value={user.id}>
+      {user.first_name} {user.last_name} ({user.username})
+    </option>
+  ))
+}
+            </select>
+          </div>
+
+          <div className="form-actions">
+            <button type="submit" className="button button-success">
+              ✓ Přidat lektora
+            </button>
+            <button 
+              type="button" 
+              className="button button-secondary"
+              onClick={() => {
+                setShowAddLecturerForm(false);
+                setSelectedLecturerId('');
+                setLecturerError('');
+              }}
+            >
+              Zrušit
+            </button>
+          </div>
+        </form>
+      </div>
+    )}
+
+    {selectedCourse.lecturers && selectedCourse.lecturers.length > 0 ? (
+      <div className="lecturers-list">
+        <h3>Seznam lektorů</h3>
+        <div className="table-container">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Jméno</th>
+                <th>Uživatelské jméno</th>
+                <th>Email</th>
+                <th>Akce</th>
+              </tr>
+            </thead>
+            <tbody>
+              {selectedCourse.lecturers.map(lecturer => (
+                <tr key={lecturer.id}>
+                  <td>{lecturer.first_name} {lecturer.last_name}</td>
+                  <td>{lecturer.username}</td>
+                  <td>{lecturer.email || '-'}</td>
+                  <td>
+                    <button 
+                      className="button button-danger button-small"
+                      onClick={() => handleRemoveLecturer(lecturer.id)}
+                    >
+                      Odebrat
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    ) : (
+      <div className="empty-state">
+        <p>Kurz zatím nemá žádné lektory</p>
+      </div>
+    )}
+
+    <div className="info-box">
+      <p><strong>ℹ️ Info:</strong> Lektoři mohou hodnotit studenty a spravovat termíny kurzu.</p>
+    </div>
+  </div>
+)}
+      {activeTab === 'pending' && isGuarantor && (
         <div className="tab-content">
-          <h2 className="section-title">Nastavení kurzu</h2>
+          <h2 className="section-title">Čekající studenti na schválení</h2>
           
-          <div className="settings-section">
-            <h3>Správa lektorů</h3>
-            <p>Přidání a odebrání lektorů kurzu</p>
-            <button className="button">+ Přidat lektora</button>
-          </div>
-
-          <div className="settings-section">
-            <h3>Parametry kurzu</h3>
-            <p>Úprava základních informací o kurzu</p>
-            <button className="button">Upravit kurz</button>
-          </div>
-
-          <div className="settings-section">
-            <h3>Registrace studentů</h3>
-            <label className="checkbox-label">
-              <input type="checkbox" defaultChecked />
-              <span>Automatické schvalování studentů do limitu kapacity</span>
-            </label>
-          </div>
+          {pendingEnrollments.length === 0 ? (
+            <div className="empty-state">
+              <p>Žádní studenti nečekají na schválení</p>
+            </div>
+          ) : (
+            <div className="waiting-list">
+              {pendingEnrollments.map(enrollment => (
+                <div key={enrollment.id} className="waiting-student-item">
+                  <span className="student-info">
+                    {enrollment.student 
+                      ? `${enrollment.student.first_name} ${enrollment.student.last_name} (${enrollment.student.username})`
+                      : 'Neznámý'}
+                  </span>
+                  <div className="student-actions">
+                    <button 
+                      className="button button-success button-small"
+                      onClick={() => handleApproveEnrollment(enrollment.id)}
+                    >
+                      ✓ Schválit
+                    </button>
+                    <button 
+                      className="button button-danger button-small"
+                      onClick={() => handleRejectEnrollment(enrollment.id)}
+                    >
+                      ✗ Odmítnout
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
   );
+};
+
+const getTermTypeName = (type) => {
+  const typeMap = {
+    'LECTURE': 'Přednáška',
+    'EXERCISE': 'Cvičení',
+    'EXAM': 'Zkouška'
+  };
+  return typeMap[type] || type;
 };
 
 export default InstructorCourse;

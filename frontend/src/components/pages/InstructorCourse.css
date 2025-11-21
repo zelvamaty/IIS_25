@@ -201,3 +201,164 @@
   cursor: pointer;
   accent-color: #3b82f6;
 }
+.page-title {
+  color: #1e40af;
+  font-size: 48px;
+  font-weight: 700;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.courses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.course-item {
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
+}
+
+.course-description {
+  color: #64748b;
+  margin: 16px 0;
+  line-height: 1.6;
+}
+
+.warning-message {
+  color: #f59e0b;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.loading-state,
+.error-state,
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  background: white;
+  border-radius: 20px;
+  margin: 40px auto;
+  max-width: 600px;
+  box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
+}
+
+.waiting-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.waiting-student-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: white;
+  border: 2px solid #e0e7ff;
+  border-radius: 12px;
+}
+.term-form {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
+}
+
+.two-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.checkbox-group {
+  padding: 20px 0;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  color: #1e40af;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+.term-form {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
+}
+
+.two-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.checkbox-group {
+  padding: 20px 0;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  color: #1e40af;
+  cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+.add-lecturer-form {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
+  margin-bottom: 30px;
+}
+
+.add-lecturer-form h3 {
+  color: #1e40af;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.lecturers-list {
+  margin-top: 30px;
+}
+
+.lecturers-list h3 {
+  color: #1e40af;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.info-box {
+  background: #dbeafe;
+  border: 2px solid #3b82f6;
+  color: #1e40af;
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 30px;
+}
+
+.info-box p {
+  margin: 0;
+  font-size: 15px;
+}

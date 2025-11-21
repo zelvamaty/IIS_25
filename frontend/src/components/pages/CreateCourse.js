@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './CreateCourse.css';
+import { coursesAPI } from '../services/api';
 
 const CreateCourse = () => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  
   const [formData, setFormData] = useState({
-    name: '',
+    title: '',
     code: '',
-    type: '',
     description: '',
-    price: '',
-    rating: '',
-    allowNews: false
+    price: '0',
+    capacity: '30',
+    auto_confirm: false
   });
-
-  const [terms, setTerms] = useState([]);
-  const [showTermForm, setShowTermForm] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -23,21 +25,44 @@ const CreateCourse = () => {
     }));
   };
 
-  const handleAddTerm = () => {
-    setShowTermForm(true);
-  };
-
-  const handleSaveCourse = (e) => {
+  const handleSaveCourse = async (e) => {
     e.preventDefault();
-    console.log('Saving course:', formData, terms);
+    setLoading(true);
+    setError('');
+
+    try {
+      const courseData = {
+        code: formData.code,
+        title: formData.title,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        capacity: parseInt(formData.capacity),
+        auto_confirm: formData.auto_confirm
+      };
+
+      const newCourse = await coursesAPI.createCourse(courseData);
+      alert('Kurz byl úspěšně vytvořen! Nyní jste garantem tohoto kurzu.');
+      navigate('/instructor/courses'); // Presmeruj na moje kurzy
+    } catch (err) {
+      setError(err.message || 'Vytvoření kurzu se nezdařilo');
+      console.error('Error creating course:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {
-    console.log('Cancel');
+    navigate(-1); // Vrátiť sa späť
   };
 
   return (
     <div className="create-course">
+
+      {error && (
+        <div className="error-message">
+          {error}
+        </div>
+      )}
 
       <form onSubmit={handleSaveCourse} className="course-form">
         <div className="form-section">
@@ -46,9 +71,10 @@ const CreateCourse = () => {
               <label className="form-label">Název kurzu *</label>
               <input
                 type="text"
-                name="name"
+                name="title"
                 className="input-field"
-                value={formData.name}
+                placeholder="např. Webové technologie"
+                value={formData.title}
                 onChange={handleChange}
                 required
               />
@@ -57,7 +83,7 @@ const CreateCourse = () => {
 
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label">Označení kurzu *</label>
+              <label className="form-label">Kód kurzu *</label>
               <input
                 type="text"
                 name="code"
@@ -72,30 +98,12 @@ const CreateCourse = () => {
 
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label">Typ kurzu *</label>
-              <select
-                name="type"
-                className="input-field"
-                value={formData.type}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Vyberte typ</option>
-                <option value="prednaska">Přednáška</option>
-                <option value="cviceni">Cvičení</option>
-                <option value="zkouska">Zkouška</option>
-                <option value="domaci-ukol">Domácí úkol</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
               <label className="form-label">Popis kurzu</label>
               <textarea
                 name="description"
                 className="input-field textarea"
                 rows="4"
+                placeholder="Popište obsah a cíle kurzu..."
                 value={formData.description}
                 onChange={handleChange}
               />
@@ -104,89 +112,60 @@ const CreateCourse = () => {
 
           <div className="form-row two-columns">
             <div className="form-group">
-              <label className="form-label">Cena (Kč)</label>
+              <label className="form-label">Cena (Kč) *</label>
               <input
                 type="number"
                 name="price"
                 className="input-field"
+                min="0"
+                step="0.01"
                 value={formData.price}
                 onChange={handleChange}
+                required
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Celkové hodnocení (0-100)</label>
+              <label className="form-label">Kapacita *</label>
               <input
                 type="number"
-                name="rating"
+                name="capacity"
                 className="input-field"
-                min="0"
-                max="100"
-                value={formData.rating}
+                min="1"
+                value={formData.capacity}
                 onChange={handleChange}
+                required
               />
             </div>
           </div>
 
           <div className="form-row">
-            
+            <div className="checkbox-group">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  name="auto_confirm"
+                  checked={formData.auto_confirm}
+                  onChange={handleChange}
+                />
+                Automatické potvrzení studentů
+              </label>
+            </div>
           </div>
         </div>
 
-        <div className="terms-section">
-          <div className="section-header">
-            <h2 className="section-title">Termíny kurzu</h2>
-            <button 
-              type="button" 
-              className="button button-success"
-              onClick={handleAddTerm}
-            >
-              + Přidat termín
-            </button>
-          </div>
-
-          <div className="terms-list">
-            {terms.length === 0 ? (
-              <div className="empty-state">
-                <p>Zatím nebyly přidány žádné termíny</p>
-              </div>
-            ) : (
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Název</th>
-                    <th>Typ</th>
-                    <th>Datum</th>
-                    <th>Čas</th>
-                    <th>Akce</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {terms.map((term, index) => (
-                    <tr key={index}>
-                      <td>{term.name}</td>
-                      <td>{term.type}</td>
-                      <td>{term.date}</td>
-                      <td>{term.time}</td>
-                      <td>
-                        <button 
-                          type="button" 
-                          className="button button-danger button-small"
-                        >
-                          Smazat
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
+        <div className="info-message">
+          <p>ℹ️ Po vytvoření kurzu se automaticky stanete garantem tohoto kurzu.</p>
+          <p>💡 Kurz musí být schválen administrátorem, než bude viditelný pro ostatní.</p>
         </div>
 
         <div className="form-actions">
-          <button type="submit" className="button button-success">
-            Uložit kurz
+          <button 
+            type="submit" 
+            className="button button-success"
+            disabled={loading}
+          >
+            {loading ? '⏳ Vytvářím kurz...' : '✓ Vytvořit kurz'}
           </button>
           <button 
             type="button" 

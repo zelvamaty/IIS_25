@@ -1,13 +1,11 @@
 import React from 'react';
 import './Header.css';
 
-const Header = ({ user, onLogin, onLogout }) => {
+const Header = ({ user, onLogout, onLogin }) => {
   return (
     <header className="header">
       <div className="header-content">
-        <div className="header-left">
-          {/* Prázdny priestor pre balans */}
-        </div>
+        <div className="header-left"></div>
         
         <div className="logo">
           <h1 className="app-name">WIS2</h1>
@@ -19,12 +17,12 @@ const Header = ({ user, onLogin, onLogout }) => {
               <div className="user-info">
                 <span className="user-name">{user.role}: {user.name}</span>
                 <button className="button button-secondary" onClick={onLogout}>
-                  Zmeniť rolu
+                  Odhlásit se
                 </button>
               </div>
             ) : (
               <button className="button" onClick={onLogin}>
-                Prihlásiť sa
+                Přihlásit se
               </button>
             )}
           </div>
