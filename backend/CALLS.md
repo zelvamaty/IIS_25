@@ -33,7 +33,7 @@ Odhlášení (zneplatní token).
 
 ### \- method: "GET" - [http://127.0.0.1:8000/api/users/](http://127.0.0.1:8000/api/users/)
 
-Získání users. Adminovi to vrátí všechny, normálnímu userovi jen jeho samotného.
+Získání users. Adminovi to vrátí všechny, normálnímu userovi všechny až na admina.
 
 ### \- method: "GET" - [http://127.0.0.1:8000/api/users/me/](https://www.google.com/search?q=http://127.0.0.1:8000/api/users/me/)
 
