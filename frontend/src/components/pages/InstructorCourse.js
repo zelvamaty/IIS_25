@@ -154,19 +154,18 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       try {
         const students = await coursesAPI.getEnrollments(courseId);
         
-        // Backend vracia študentov s "role": "PENDING" alebo "APPROVED"
-        // Transformujeme to na formát čo frontend očakáva
+        // Backend teraz vracia enrollment_id!
         const enrollments = students.map(student => ({
-          id: student.id, // student ID použijeme ako enrollment ID
+          id: student.enrollment_id, // POUŽIJEME enrollment_id
           student: {
             id: student.id,
             username: student.username,
             first_name: student.first_name,
             last_name: student.last_name,
-            email: student.email
+            email: student.email || ''
           },
           approved: student.role === 'APPROVED',
-          enrolled_at: new Date().toISOString() // Backend to nevracia
+          enrolled_at: new Date().toISOString()
         }));
         
         setCourseEnrollments(enrollments);
