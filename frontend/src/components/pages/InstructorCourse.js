@@ -96,7 +96,13 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   const loadTermStudents = async (termId) => {
     try {
       const students = await termsAPI.getTermStudents(termId);
-      console.log('RAW Term students from API:', JSON.stringify(students, null, 2)); // ✅ Ukáž celý objekt
+      console.log('RAW Term students from API:', JSON.stringify(students, null, 2));
+      
+      // DEBUG - skontroluj či majú registration_id
+      students.forEach(s => {
+        console.log(`Student ${s.first_name}: has registration_id? ${!!s.registration_id}, value: ${s.registration_id}`);
+      });
+      
       setTermStudents(students);
     } catch (err) {
       console.error('Error loading term students:', err);
@@ -708,35 +714,33 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                         {new Date(student.registered_at).toLocaleDateString('cs-CZ')}
                       </td>
                       <td>
-                        {student.grade ? (
-                          <div>
-                            <strong style={{ color: '#3b82f6', fontSize: '18px' }}>
-                              {student.grade.value}
-                            </strong>
-                            <br />
-                            <small style={{ color: '#64748b' }}>
-                              {new Date(student.grade.graded_at).toLocaleDateString('cs-CZ')}
-                            </small>
-                          </div>
-                        ) : (
-                          <span style={{ color: '#94a3b8' }}>Nehodnoceno</span>
-                        )}
-                      </td>
+  {student.grade ? (
+    <div>
+      <strong style={{ color: '#3b82f6', fontSize: '18px' }}>
+        {student.grade}
+      </strong>
+    </div>
+  ) : (
+    <span style={{ color: '#94a3b8' }}>Nehodnoceno</span>
+  )}
+</td>
                       <td>
-                        {student.grade && (
-                          <button 
-                            className="button button-small"
-                            onClick={() => {
-                              const newValue = prompt('Nové hodnocení (0-100):', student.grade.value);
-                              if (newValue) {
-                                handleUpdateGrade(student.grade.id, newValue);
-                              }
-                            }}
-                          >
-                            Upravit
-                          </button>
-                        )}
-                      </td>
+  {student.grade && (
+    <button 
+      className="button button-small"
+      onClick={() => {
+        const newValue = prompt('Nové hodnocení (0-100):', student.grade);
+        if (newValue) {
+          // Musíme nájsť grade ID - backend to nevracia, tak použijeme registration_id
+          alert('Úprava známky zatím nefunguje - backend nevracia grade.id');
+          // TODO: Backend musí vrátiť aj grade.id na úpravu
+        }
+      }}
+    >
+      Upravit
+    </button>
+  )}
+</td>
                     </tr>
                   ))}
                 </tbody>
