@@ -38,12 +38,11 @@ class UserSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         user_data = super().to_representation(instance)
 
-        if self.context.get('request'):
-            request_user = self.context['request'].user
-            if request_user.id != instance.id and request_user.role != 'ADMIN':
-                user_data.pop('role', None)
+        if self.context['request'].user.role != 'ADMIN':
+            user_data.pop('role', None)
 
         return user_data
+
 
 class CourseSerializer(serializers.ModelSerializer):
     guarantee = UserSerializer(read_only=True)
