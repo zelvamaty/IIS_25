@@ -240,14 +240,14 @@ class CourseViewSet(viewsets.ModelViewSet):
         course = self.get_object()
         if (is_admin(request.user) or course.guarantee == request.user):
             students = course.course_enrollments.select_related('user')
-            student_data = [{'id': enrollment.user.id, 'username': enrollment.user.username,
+            student_data = [{'id': enrollment.user.id,'enrollment_id': enrollment.id , 'username': enrollment.user.username,
                              'first_name': enrollment.user.first_name, 'last_name': enrollment.user.last_name,
                              'role': enrollment.role}
                             for enrollment in students]
             return Response(student_data)
         if request.user in course.lecturers.all():
             students = course.course_enrollments.filter(role='APPROVED').select_related('user')
-            student_data = [{'id': enrollment.user.id, 'username': enrollment.user.username,
+            student_data = [{'id': enrollment.user.id,'enrollment_id': enrollment.id ,'username': enrollment.user.username,
                              'first_name': enrollment.user.first_name, 'last_name': enrollment.user.last_name}
                             for enrollment in students]
             return Response(student_data)
