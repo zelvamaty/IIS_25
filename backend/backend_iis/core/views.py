@@ -347,6 +347,16 @@ class TermViewSet(viewsets.ModelViewSet):
                      for reg in registrations]
         return Response(term_data)
 
+    @action(detail=True, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def list_registered_students(self, request, pk=None):
+        term = self.get_object()
+        registrations = term.registrations.select_related('user')
+        student_data = [{'id': reg.user.id, 'username': reg.user.username,
+                         'first_name': reg.user.first_name, 'last_name': reg.user.last_name,
+                         'registered_at': reg.registered_at}
+                        for reg in registrations]
+        return Response(student_data)
+
     def _auto_register_students(self, term):
         new_registrations = []
         course = term.course
