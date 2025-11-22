@@ -136,10 +136,10 @@ class TermSerializer(serializers.ModelSerializer):
             if new_capacity < current_registrations:
                 raise serializers.ValidationError("Term capacity cannot be less than the number of existing registrations.")
 
-        if 'requires_registration' is False:
+        if data.get('requires_registration') is False:
             course = data.get('course')
             if course and 'capacity' in data:
-                if data['capacity'] < course.capacity():
+                if data['capacity'] < course.capacity:
                     raise serializers.ValidationError("Term capacity cannot be less than the capacity of the course.")
 
         if 'room' in data:
