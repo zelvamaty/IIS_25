@@ -237,6 +237,17 @@ class CourseViewSet(viewsets.ModelViewSet):
         enrollment.delete()
         return Response({'detail': 'Enrollment rejected.'})
 
+    @action(detail=True, methods=['delete'], permission_classes=[IsGuaranteeOrAdmin])
+    def delete_student(self, request, pk=None):
+        course = self.get_object()
+        enrollment_id = request.data.get('enrollment_id')
+        try:
+            enrollment = course.course_enrollments.get(id=enrollment_id)
+        except CourseEnrollment.DoesNotExist:
+            return Response({'detail': 'Enrollment not found.'}, status=404)
+        enrollment.delete()
+        return Response({'detail': 'Student removed from course.'})
+
     @action(detail=True, methods=['get'], permission_classes=[IsLecturerOrGuaranteeOrAdmin])
     def list_students(self, request, pk=None):
         course = self.get_object()
@@ -342,7 +353,7 @@ class TermViewSet(viewsets.ModelViewSet):
         user = request.user
         registrations = Registration.objects.filter(user=user).select_related('term')
         term_data = [{'id': reg.term.id, 'course': reg.term.course.title,
-                      'room': reg.term.room.name, 'type': reg.term.type,
+                      'room': reg.term.room.name if hasattr(reg, 'room') else None, 'type': reg.term.type,
                       'start_time': reg.term.start_time, 'end_time': reg.term.end_time}
                      for reg in registrations]
         return Response(term_data)
