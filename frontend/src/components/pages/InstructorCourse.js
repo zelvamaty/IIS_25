@@ -372,7 +372,8 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   const isGuarantor = selectedCourse && currentUser && selectedCourse.guarantee?.id === currentUser.id;
   const isLecturer = selectedCourse && currentUser && selectedCourse.lecturers?.some(l => l.id === currentUser.id);
   const isAdmin = currentUser?.role === 'ADMIN';
-  const canManageCourse = isGuarantor || isAdmin || isLecturer;
+  const canManageCourse = isGuarantor || isAdmin; // Pre vytváranie/mazanie termínov, schvaľovanie študentov
+  const canGradeStudents = isGuarantor || isLecturer || isAdmin; // Pre hodnotenie študentov
   
   const pendingEnrollments = courseEnrollments.filter(e => e.role === 'PENDING');
   const approvedEnrollments = courseEnrollments.filter(e => e.role === 'APPROVED');
@@ -572,7 +573,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                       <td>{getRoomName(term.room)}</td>
                       <td>{term.capacity}</td>
                       <td>{term.registrations_count || 0}</td>
-                      {canManageCourse && (
+                      {(canManageCourse || isLecturer) && (
                         <td>
                           <div style={{ display: 'flex', gap: '8px' }}>
                             <button 
@@ -581,15 +582,17 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                             >
                               Detail
                             </button>
-                            <button 
-                              className="button button-danger button-small"
-                              onClick={() => handleDeleteTerm(term.id)}
-                            >
-                              Smazat
-                            </button>
-                          </div>
-                        </td>
-                      )}
+                            {canManageCourse && ( // Len garant/admin môže mazať
+        <button 
+          className="button button-danger button-small"
+          onClick={() => handleDeleteTerm(term.id)}
+        >
+          Smazat
+        </button>
+      )}
+    </div>
+  </td>
+)}
                     </tr>
                   ))}
                 </tbody>
@@ -599,7 +602,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
         </div>
       )}
 
-      {activeTab === 'term-detail' && selectedTerm && canManageCourse && (
+{activeTab === 'term-detail' && selectedTerm && (canManageCourse || isLecturer) && (
         <div className="tab-content">
           <div className="section-header">
             <h2 className="section-title">
@@ -621,7 +624,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
 
           <div className="section-header">
             <h3>Registrovaní studenti ({termStudents.length})</h3>
-            {!showGradeForm && (
+            {!showGradeForm && canGradeStudents && (
               <button 
                 className="button button-success"
                 onClick={() => setShowGradeForm(true)}
