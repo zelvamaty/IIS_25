@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework.decorators import action
@@ -417,9 +418,17 @@ class RegistrationViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        if user.is_authenticated:
-            return Registration.objects.filter(user=user)
-        return Registration.objects.none()
+
+        if not user.is_authenticated:
+            return Registration.objects.none()
+
+        if is_admin(user):
+            return Registration.objects.all()
+        return Registration.objects.filter(
+            Q(user=user) |
+            Q(term__course__guarantee=user)
+        ).distinct()
+
 
     def perform_create(self, serializer):
         user = self.request.user
