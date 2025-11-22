@@ -248,6 +248,19 @@ class CourseViewSet(viewsets.ModelViewSet):
         enrollment.delete()
         return Response({'detail': 'Student removed from course.'})
 
+    @action(detail=True, methods=['delete'], permission_classes=[permissions.IsAuthenticated])
+    def leave_course(self, request, pk=None):
+        course = self.get_object()
+        user = request.user
+        try:
+            enrollment = course.course_enrollments.get(user=user)
+            if enrollment.user != user:
+                return Response({'detail': 'You do not have permission to leave this course for another user.'}, status=403)
+        except CourseEnrollment.DoesNotExist:
+            return Response({'detail': 'You are not enrolled in this course.'}, status=404)
+        enrollment.delete()
+        return Response({'detail': 'You have left the course.'})
+
     @action(detail=True, methods=['get'], permission_classes=[IsLecturerOrGuaranteeOrAdmin])
     def list_students(self, request, pk=None):
         course = self.get_object()
