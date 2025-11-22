@@ -366,6 +366,14 @@ export const termsAPI = {
     });
     return handleResponse(response);
   },
+// Delete registration from term
+deleteRegistration: async (registrationId) => {
+  const response = await fetch(`${API_BASE_URL}/registrations/${registrationId}/`, {
+    method: 'DELETE',
+    headers: getAuthHeaders()
+  });
+  return handleResponse(response);
+},
   // Create term
   createTerm: async (termData) => {
     const response = await fetch(`${API_BASE_URL}/terms/`, {

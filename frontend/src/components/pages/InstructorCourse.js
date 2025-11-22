@@ -274,6 +274,22 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
     }));
     setTermError('');
   };
+  const handleDeleteRegistration = async (registrationId) => {
+    console.log('Deleting registration ID:', registrationId);
+    
+    if (!window.confirm('Opravdu chcete odebrat studenta z tohoto termínu?')) {
+      return;
+    }
+  
+    try {
+      await termsAPI.deleteRegistration(selectedTerm.id, registrationId); // ✅ Pridaný termId
+      alert('Student byl odebrán z termínu');
+      await loadTermStudents(selectedTerm.id);
+    } catch (err) {
+      alert(err.message || 'Odebrání studenta z termínu se nezdařilo');
+      console.error('Error deleting registration:', err);
+    }
+  };
   const handleRemoveStudent = async (enrollmentId) => {
     if (!selectedCourse) return;
     
@@ -757,27 +773,37 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   )}
 </td>
 <td>
-  {student.grade && student.grade_id ? (
-    <div style={{ display: 'flex', gap: '8px' }}>
-      <button 
-        className="button button-small"
-        onClick={() => {
-          const newValue = prompt('Nové hodnocení (0-100):', student.grade);
-          if (newValue && !isNaN(parseFloat(newValue))) {
-            handleUpdateGrade(student.grade_id, newValue);
-          }
-        }}
-      >
-        Upravit
-      </button>
+  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+    {student.grade && student.grade_id && (
+      <>
+        <button 
+          className="button button-small"
+          onClick={() => {
+            const newValue = prompt('Nové hodnocení (0-100):', student.grade);
+            if (newValue && !isNaN(parseFloat(newValue))) {
+              handleUpdateGrade(student.grade_id, newValue);
+            }
+          }}
+        >
+          Upravit hodnocení
+        </button>
+        <button 
+          className="button button-danger button-small"
+          onClick={() => handleDeleteGrade(student.grade_id)}
+        >
+          Smazat hodnocení
+        </button>
+      </>
+    )}
+    {canManageCourse && (
       <button 
         className="button button-danger button-small"
-        onClick={() => handleDeleteGrade(student.grade_id)}
+        onClick={() => handleDeleteRegistration(student.registration_id)}
       >
-        Smazat
+        Odebrat z termínu
       </button>
-    </div>
-  ) : null}
+    )}
+  </div>
 </td>
                     </tr>
                   ))}
