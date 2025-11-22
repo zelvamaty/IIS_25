@@ -71,6 +71,16 @@ class CourseSerializer(serializers.ModelSerializer):
         fields = ['id', 'code', 'title','type','show_type', 'description', 'capacity', 'guarantee', 'approved', 'price', 'lecturers', 'auto_confirm', 'enrolled_count']
         read_only_fields = ['guarantee', 'approved', 'enrolled_count']
 
+    def validate(self, data):
+        if 'capacity' in data and data['capacity'] <= 0:
+            raise serializers.ValidationError("Capacity must be a positive integer.")
+        if self.instance and 'capacity' in data:
+            new_capacity = data['capacity']
+            current_enrolled = self.instance.enrolled_count()
+            if new_capacity < current_enrolled:
+                raise serializers.ValidationError("Course capacity cannot be less than the number of enrolled students.")
+        return data
+
     def get_enrolled_count(self, obj):
         return obj.enrolled_count()
 
@@ -108,6 +118,18 @@ class TermSerializer(serializers.ModelSerializer):
         if 'capacity' in data and data['capacity'] <= 0:
             raise serializers.ValidationError("Capacity must be a positive integer.")
 
+        if 'room' in data and 'capacity' in data:
+            room = data['room']
+            capacity = data['capacity']
+            if capacity > room.capacity:
+                raise serializers.ValidationError("Term capacity cannot exceed room capacity.")
+
+        if self.instance and 'capacity' in data:
+            new_capacity = data['capacity']
+            current_registrations = self.instance.registrations.count()
+            if new_capacity < current_registrations:
+                raise serializers.ValidationError("Term capacity cannot be less than the number of existing registrations.")
+
         if 'room' in data:
             room = data['room']
             start_time = data['start_time']
@@ -130,6 +152,11 @@ class GradeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Grade
         fields = ['id', 'registration', 'registration_id', 'value', 'graded_at', 'graded_by']
+
+    def validate_value(self, value):
+        if value < 0 or value > 100:
+            raise serializers.ValidationError("Grade value must be between 0 and 100.")
+        return value
 
 class RegistrationSerializer(serializers.ModelSerializer):
     term_id = serializers.PrimaryKeyRelatedField(queryset=Term.objects.all(), source='term', write_only=True)

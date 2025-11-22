@@ -382,14 +382,14 @@ class RegistrationViewSet(viewsets.ModelViewSet):
         user = self.request.user
         term = serializer.validated_data['term']
         course = term.course
-        if not course.approved:
-            raise ValidationError('Cannot register for unapproved course.')
+        if not CourseEnrollment.objects.filter(user=user, course=course, role='APPROVED').exists():
+            raise ValidationError('You are not enrolled in this course.')
         if Registration.objects.filter(user=user, term=term).exists():
             raise ValidationError('Already registered for this term.')
-        if user == course.guarantee or user in course.lecturers.all():
-            raise ValidationError('Guarantee or lecturer cannot register as student.')
-        if course.enrolled_count() >= course.capacity:
-            raise ValidationError('Course is full.')
+        if not term.requires_registration:
+            raise ValidationError('This term does not require registration.')
+        if term.registrations.count() >= term.capacity:
+            raise ValidationError('Term is full.')
 
         serializer.save(user=user)
 
