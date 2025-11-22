@@ -18,7 +18,23 @@ const StudentCourseRegistration = () => {
   useEffect(() => {
     loadCourseDetails();
   }, [id]);
-
+  const handleUnregisterFromTerm = async (registrationId) => {
+    if (!window.confirm('Opravdu se chcete odregistrovat z tohoto termínu?')) {
+      return;
+    }
+  
+    try {
+      setRegistering(true);
+      await registrationsAPI.unregisterFromTerm(registrationId);
+      alert('Úspěšně jste se odregistrovali z termínu');
+      await loadCourseDetails();
+    } catch (err) {
+      alert(err.message || 'Odregistrace z termínu se nezdařila');
+      console.error('Error unregistering from term:', err);
+    } finally {
+      setRegistering(false);
+    }
+  };
   const loadCourseDetails = async () => {
     try {
       setLoading(true);
@@ -203,6 +219,7 @@ try {
   }
 
   return (
+    
     <div className="student-course-registration">
       <button className="button button-secondary" onClick={() => navigate('/courses')}>
         ← Zpět na seznam kurzů
@@ -267,50 +284,62 @@ try {
             const isRegistered = !!myRegistration;
             
             return (
+              
               <div key={term.id} className={`term-card ${isRegistered ? 'registered' : ''}`}>
-                <div className="term-card-header">
-                  <h3>{getTermTypeName(term.type)}</h3>
-                  {isFull && <span className="badge badge-warning">Plno</span>}
-                  {isRegistered && <span className="badge badge-success">✓ Registrován</span>}
+              <div className="term-card-header">
+                <h3>{getTermTypeName(term.type)}</h3>
+                {isFull && <span className="badge badge-warning">Plno</span>}
+                {isRegistered && <span className="badge badge-success">✓ Registrován</span>}
+              </div>
+              
+              <div className="term-card-body">
+                <div className="term-info-item">
+                  <span className="term-icon">📅</span>
+                  <span>Datum: {date}</span>
                 </div>
-                
-                <div className="term-card-body">
-                  <div className="term-info-item">
-                    <span className="term-icon">📅</span>
-                    <span>Datum: {date}</span>
-                  </div>
-                  <div className="term-info-item">
-                    <span className="term-icon">🕐</span>
-                    <span>Čas: {time}</span>
-                  </div>
-                  <div className="term-info-item">
-                    <span className="term-icon">📍</span>
-                    <span>Místnost: {term.room || 'Neurčeno'}</span>
-                  </div>
-                  <div className="term-info-item">
-                    <span className="term-icon">👥</span>
-                    <span>Obsazeno: {term.registrations_count || 0}/{term.capacity}</span>
-                  </div>
+                <div className="term-info-item">
+                  <span className="term-icon">🕐</span>
+                  <span>Čas: {time}</span>
+                </div>
+                <div className="term-info-item">
+                  <span className="term-icon">📍</span>
+                  <span>Místnost: {term.room || 'Neurčeno'}</span>
+                </div>
+                <div className="term-info-item">
+                  <span className="term-icon">👥</span>
+                  <span>Obsazeno: {term.registrations_count || 0}/{term.capacity}</span>
+                </div>
 
                   {/* Zobraz hodnotenie ak existuje */}
                   {isRegistered && myRegistration.grade && (
-                    <div className="term-grade">
-                      {getGradeDisplay(myRegistration.grade)}
-                    </div>
-                  )}
-                </div>
+      <div className="term-grade">
+        {getGradeDisplay(myRegistration.grade)}
+      </div>
+    )}
+  </div>
                 
-                {term.requires_registration && !isRegistered && (
                   <div className="term-card-footer">
-                    <button 
-                      className={`button full-width ${isFull ? '' : 'button-success'}`}
-                      onClick={() => handleRegisterTerm(term.id)}
-                      disabled={registering}
-                    >
-                      {isFull ? '📋 Čekací listina' : '✓ Registrovat'}
-                    </button>
-                  </div>
-                )}
+    {isRegistered ? (
+      <button 
+        className="button button-danger full-width"
+        onClick={() => handleUnregisterFromTerm(myRegistration.id)}
+        disabled={registering}
+      >
+        {registering ? '⏳ Odregistrovávám...' : '✗ Odregistrovat se'}
+      </button>
+    ) : (
+      term.requires_registration && (
+        <button 
+          className={`button full-width ${isFull ? '' : 'button-success'}`}
+          onClick={() => handleRegisterTerm(term.id)}
+          disabled={registering || isFull}
+        >
+          {isFull ? '📋 Plno' : '✓ Registrovat'}
+        </button>
+      )
+    )}
+  </div>
+
               </div>
             );
           })}
