@@ -902,44 +902,55 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
         </div>
       )}
 
-      {activeTab === 'enrollments' && (
-        <div className="tab-content">
-          <h2 className="section-title">Schválení studenti</h2>
-          
-          {approvedEnrollments.length === 0 ? (
-            <div className="empty-state">
-              <p>Zatím nejsou žádní schválení studenti</p>
-            </div>
-          ) : (
-            <div className="table-container">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>Student</th>
-                    <th>Email</th>
-                    <th>Datum zápisu</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {approvedEnrollments.map(enrollment => (
-                    <tr key={enrollment.id}>
-                      <td>
-                        {enrollment.student 
-                          ? `${enrollment.student.first_name} ${enrollment.student.last_name}`
-                          : 'Neznámý'}
-                      </td>
-                      <td>{enrollment.student?.email || '-'}</td>
-                      <td>
-                        {new Date(enrollment.enrolled_at).toLocaleDateString('cs-CZ')}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
+{activeTab === 'enrollments' && (
+  <div className="tab-content">
+    <h2 className="section-title">Schválení studenti</h2>
+    
+    {approvedEnrollments.length === 0 ? (
+      <div className="empty-state">
+        <p>Zatím nejsou žádní schválení studenti</p>
+      </div>
+    ) : (
+      <div className="table-container">
+        <table className="table">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Email</th>
+              <th>Datum zápisu</th>
+              {canManageCourse && <th>Akce</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {approvedEnrollments.map(enrollment => (
+              <tr key={enrollment.id}>
+                <td>
+                  {enrollment.student 
+                    ? `${enrollment.student.first_name} ${enrollment.student.last_name}`
+                    : 'Neznámý'}
+                </td>
+                <td>{enrollment.student?.email || '-'}</td>
+                <td>
+                  {new Date(enrollment.enrolled_at).toLocaleDateString('cs-CZ')}
+                </td>
+                {canManageCourse && (
+                  <td>
+                    <button 
+                      className="button button-danger button-small"
+                      onClick={() => handleRejectEnrollment(enrollment.id)}
+                    >
+                      Odebrat z kurzu
+                    </button>
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </div>
+)}
 
       {activeTab === 'lecturers' && canManageCourse && (
         <div className="tab-content">
