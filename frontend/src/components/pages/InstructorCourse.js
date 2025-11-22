@@ -370,8 +370,9 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   };
 
   const isGuarantor = selectedCourse && currentUser && selectedCourse.guarantee?.id === currentUser.id;
+  const isLecturer = selectedCourse && currentUser && selectedCourse.lecturers?.some(l => l.id === currentUser.id);
   const isAdmin = currentUser?.role === 'ADMIN';
-  const canManageCourse = isGuarantor || isAdmin;
+  const canManageCourse = isGuarantor || isAdmin || isLecturer;
   
   const pendingEnrollments = courseEnrollments.filter(e => e.role === 'PENDING');
   const approvedEnrollments = courseEnrollments.filter(e => e.role === 'APPROVED');
