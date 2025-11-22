@@ -167,6 +167,15 @@ export const coursesAPI = {
     });
     return handleResponse(response);
   },
+  // Remove student from course completely
+removeStudent: async (courseId, enrollmentId) => {
+  const response = await fetch(`${API_BASE_URL}/courses/${courseId}/delete_student/`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ enrollment_id: enrollmentId })
+  });
+  return handleResponse(response);
+},
 
   // Get course detail
   getCourseDetail: async (id) => {

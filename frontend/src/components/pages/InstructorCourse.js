@@ -274,7 +274,22 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
     }));
     setTermError('');
   };
-
+  const handleRemoveStudent = async (enrollmentId) => {
+    if (!selectedCourse) return;
+    
+    if (!window.confirm('Opravdu chcete odebrat studenta z kurzu? Tato akce je nevratná.')) {
+      return;
+    }
+    
+    try {
+      await coursesAPI.removeStudent(selectedCourse.id, enrollmentId);
+      alert('Student byl odebrán z kurzu');
+      await loadCourseDetails(selectedCourse.id);
+    } catch (err) {
+      alert(err.message || 'Odebrání studenta se nezdařilo');
+      console.error('Error removing student:', err);
+    }
+  };
   const handleCreateTerm = async (e) => {
     e.preventDefault();
     setTermLoading(true);
@@ -937,8 +952,8 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                   <td>
                     <button 
                       className="button button-danger button-small"
-                      onClick={() => handleRejectEnrollment(enrollment.id)}
-                    >
+                      onClick={() => handleRemoveStudent(enrollment.id)}
+                      >
                       Odebrat z kurzu
                     </button>
                   </td>
