@@ -155,7 +155,20 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       console.error('Error adding grade:', err);
     }
   };
+  const handleDeleteGrade = async (gradeId) => {
+    if (!window.confirm('Opravdu chcete smazat hodnocení?')) {
+      return;
+    }
   
+    try {
+      await gradesAPI.deleteGrade(gradeId);
+      alert('Hodnocení bylo smazáno');
+      await loadTermStudents(selectedTerm.id);
+    } catch (err) {
+      alert(err.message || 'Smazání hodnocení se nezdařilo');
+      console.error('Error deleting grade:', err);
+    }
+  };
   const handleUpdateGrade = async (gradeId, newValue) => {
     if (!window.confirm('Opravdu chcete změnit hodnocení?')) {
       return;
@@ -724,22 +737,28 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
     <span style={{ color: '#94a3b8' }}>Nehodnoceno</span>
   )}
 </td>
-                      <td>
-  {student.grade && (
-    <button 
-      className="button button-small"
-      onClick={() => {
-        const newValue = prompt('Nové hodnocení (0-100):', student.grade);
-        if (newValue) {
-          // Musíme nájsť grade ID - backend to nevracia, tak použijeme registration_id
-          alert('Úprava známky zatím nefunguje - backend nevracia grade.id');
-          // TODO: Backend musí vrátiť aj grade.id na úpravu
-        }
-      }}
-    >
-      Upravit
-    </button>
-  )}
+<td>
+  {student.grade && student.grade_id ? (
+    <div style={{ display: 'flex', gap: '8px' }}>
+      <button 
+        className="button button-small"
+        onClick={() => {
+          const newValue = prompt('Nové hodnocení (0-100):', student.grade);
+          if (newValue && !isNaN(parseFloat(newValue))) {
+            handleUpdateGrade(student.grade_id, newValue);
+          }
+        }}
+      >
+        Upravit
+      </button>
+      <button 
+        className="button button-danger button-small"
+        onClick={() => handleDeleteGrade(student.grade_id)}
+      >
+        Smazat
+      </button>
+    </div>
+  ) : null}
 </td>
                     </tr>
                   ))}
