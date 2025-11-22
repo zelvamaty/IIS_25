@@ -77,7 +77,7 @@ class UserViewSet(viewsets.ModelViewSet):
         data['courses_enrolled'] = CourseEnrollment.objects.filter(user=user, role='APPROVED').count()
         return Response(data)
 
-    @action(detail=True, methods=['patch'], permission_classes=[IsAdmin])
+    @action(detail=True, methods=['patch'], permission_classes=[permissions.IsAuthenticated])
     def patch_user(self, request, pk=None):
         user_to_change = self.get_object()
         current_user = request.user
