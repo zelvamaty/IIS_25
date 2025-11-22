@@ -163,6 +163,11 @@ Smazání studenta z kurzu (Garant nebo Admin).
 }
 ```
 
+### \- method: "DELETE" - [http://127.0.0.1:8000/api/courses/](http://127.0.0.1:8000/api/courses/)\<id\>/leave\_course/
+
+Smazání studenta (sebe) z kurzu.
+
+
 ### \- method: "POST" - [http://127.0.0.1:8000/api/courses/](http://127.0.0.1:8000/api/courses/)\<id\>/enroll/
 
 Přihlášení studenta na kurz. Pokud je `auto_confirm` true, rovnou schváleno, jinak PENDING.
