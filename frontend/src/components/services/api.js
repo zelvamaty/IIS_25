@@ -448,7 +448,13 @@ export const gradesAPI = {
     });
     return handleResponse(response);
   },
-
+  deleteGrade: async (gradeId) => {
+    const response = await fetch(`${API_BASE_URL}/grades/${gradeId}/`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+    return handleResponse(response);
+  },
   // Create grade
   createGrade: async (gradeData) => {
     const response = await fetch(`${API_BASE_URL}/grades/`, {
