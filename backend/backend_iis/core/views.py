@@ -10,20 +10,15 @@ from .serializers import CourseSerializer, UserSerializer, RoomSerializer, TermS
     GradeSerializer, RegisterSerializer, RegistrationSerializer
 from .models import Course, User, Room, Term, Registration, CourseEnrollment, Grade
 
-
 def is_admin(user):
     return user and user.is_authenticated and user.role == 'ADMIN'
-
-
 class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         return is_admin(request.user)
 
-
 class IsGuaranteeOrAdmin(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         return is_admin(request.user) or obj.guarantee == request.user
-
 
 class IsLecturerOrGuaranteeOrAdmin(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -41,14 +36,11 @@ class IsLecturerOrGuaranteeOrAdmin(permissions.BasePermission):
                 request.user in course.lecturers.all()
             )
         return False
-
-
 class IsAdminOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
         return is_admin(request.user)
-
 
 class IsGuaranteeOrAdminOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -56,11 +48,11 @@ class IsGuaranteeOrAdminOrReadOnly(permissions.BasePermission):
             return True
         return is_admin(request.user) or obj.guarantee == request.user
 
-
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAdminOrReadOnly]
+
 
     def get_queryset(self):
         user = self.request.user
@@ -68,7 +60,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return User.objects.all()
         return User.objects.none()
 
-    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    @action (detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def me(self, request, pk=None):
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
@@ -80,18 +72,23 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'You do not have permission to view this dashboard.'}, status=403)
         serializer = self.get_serializer(user)
         data = serializer.data
-        data['courses_guaranteed'] = Course.objects.filter(
-            guarantee=user).count()
-        data['courses_lectured'] = Course.objects.filter(
-            lecturers=user).count()
-        data['courses_enrolled'] = CourseEnrollment.objects.filter(
-            user=user, role='APPROVED').count()
+        data['courses_guaranteed'] = Course.objects.filter(guarantee=user).count()
+        data['courses_lectured'] = Course.objects.filter(lecturers=user).count()
+        data['courses_enrolled'] = CourseEnrollment.objects.filter(user=user, role='APPROVED').count()
         return Response(data)
 
     @action(detail=True, methods=['patch'], permission_classes=[IsAdmin])
     def patch_user(self, request, pk=None):
-        user = self.get_object()
-        serializer = self.get_serializer(user, data=request.data, partial=True)
+        user_to_change = self.get_object()
+        current_user = request.user
+
+        if current_user.role != 'ADMIN' and current_user != user_to_change:
+            return Response({'detail': 'You do not have permission to update this user.'}, status=403)
+
+        if current_user.role != 'ADMIN' and 'role' in request.data:
+            return Response({'detail': 'You do not have permission to change the role.'}, status=403)
+
+        serializer = self.get_serializer(user_to_change, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -100,7 +97,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['delete'], permission_classes=[permissions.IsAuthenticated])
     def delete_user(self, request, pk=None):
         user = self.get_object()
-        if request.user.role != 'ADMIN' and request.user != user:  # only admin or self can delete
+        if request.user.role != 'ADMIN' and request.user != user: # only admin or self can delete
             return Response({'detail': 'You do not have permission to delete this user.'}, status=403)
         user.delete()
         return Response({'detail': 'User deleted.'})
@@ -108,8 +105,7 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def change_password(self, request):
         user = request.user
-        serializer = MyPasswordChangeSerializer(
-            data=request.data, context={'request': request})
+        serializer = MyPasswordChangeSerializer(data=request.data, context={'request': request})
 
         if serializer.is_valid():
             new_password = serializer.validated_data['new_password1']
@@ -161,14 +157,13 @@ class CourseViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['patch'], permission_classes=[IsGuaranteeOrAdmin])
     def patch_course(self, request, pk=None):
         course = self.get_object()
-        serializer = self.get_serializer(
-            course, data=request.data, partial=True)
+        serializer = self.get_serializer(course, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=400)
 
-    # delete course
+    #delete course
     @action(detail=True, methods=['delete'], permission_classes=[IsGuaranteeOrAdmin])
     def delete_course(self, request, pk=None):
         course = self.get_object()
@@ -231,8 +226,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         course = self.get_object()
         enrollment_id = request.data.get('enrollment_id')
         try:
-            enrollment = course.course_enrollments.get(
-                id=enrollment_id, role='PENDING')
+            enrollment = course.course_enrollments.get(id=enrollment_id, role='PENDING')
         except CourseEnrollment.DoesNotExist:
             return Response({'detail': 'Pending enrollment not found.'}, status=404)
         enrollment.role = 'APPROVED'
@@ -245,8 +239,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         course = self.get_object()
         enrollment_id = request.data.get('enrollment_id')
         try:
-            enrollment = course.course_enrollments.get(
-                id=enrollment_id, role='PENDING')
+            enrollment = course.course_enrollments.get(id=enrollment_id, role='PENDING')
         except CourseEnrollment.DoesNotExist:
             return Response({'detail': 'Pending enrollment not found.'}, status=404)
         enrollment.role = 'REJECTED'
@@ -282,15 +275,14 @@ class CourseViewSet(viewsets.ModelViewSet):
         course = self.get_object()
         if (is_admin(request.user) or course.guarantee == request.user):
             students = course.course_enrollments.select_related('user')
-            student_data = [{'id': enrollment.user.id, 'enrollment_id': enrollment.id, 'username': enrollment.user.username,
+            student_data = [{'id': enrollment.user.id,'enrollment_id': enrollment.id , 'username': enrollment.user.username,
                              'first_name': enrollment.user.first_name, 'last_name': enrollment.user.last_name,
                              'role': enrollment.role}
                             for enrollment in students]
             return Response(student_data)
         if request.user in course.lecturers.all():
-            students = course.course_enrollments.filter(
-                role='APPROVED').select_related('user')
-            student_data = [{'id': enrollment.user.id, 'enrollment_id': enrollment.id, 'username': enrollment.user.username,
+            students = course.course_enrollments.filter(role='APPROVED').select_related('user')
+            student_data = [{'id': enrollment.user.id,'enrollment_id': enrollment.id ,'username': enrollment.user.username,
                              'first_name': enrollment.user.first_name, 'last_name': enrollment.user.last_name}
                             for enrollment in students]
             return Response(student_data)
@@ -300,8 +292,7 @@ class CourseViewSet(viewsets.ModelViewSet):
     # method to show courses im enrolled in
     def my_courses(self, request, pk=None):
         user = request.user
-        enrollments = CourseEnrollment.objects.filter(
-            user=user).select_related('course')
+        enrollments = CourseEnrollment.objects.filter(user=user).select_related('course')
         course_data = [{'id': enrollment.course.id, 'code': enrollment.course.code,
                         'title': enrollment.course.title, 'guarantee': enrollment.course.guarantee.username,
                         'role': enrollment.role}
@@ -309,8 +300,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         return Response(course_data)
 
     def _register_to_auto_terms(self, course, user):
-        auto_terms = Term.objects.filter(
-            course=course, requires_registration=False)
+        auto_terms = Term.objects.filter(course=course, requires_registration=False)
         for term in auto_terms:
             if not Registration.objects.filter(user=user, term=term).exists():
                 registration = Registration(user=user, term=term)
@@ -341,6 +331,8 @@ class RoomViewSet(viewsets.ModelViewSet):
         room = self.get_object()
         room.delete()
         return Response({'detail': 'Room deleted.'})
+
+
 
 
 class TermViewSet(viewsets.ModelViewSet):
@@ -381,8 +373,7 @@ class TermViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def schedule(self, request, pk=None):
         user = request.user
-        registrations = Registration.objects.filter(
-            user=user).select_related('term')
+        registrations = Registration.objects.filter(user=user).select_related('term')
         term_data = [{'id': reg.term.id, 'course': reg.term.course.title,
                       'room': reg.term.room.name if hasattr(reg, 'room') else None, 'type': reg.term.type,
                       'start_time': reg.term.start_time, 'end_time': reg.term.end_time}
@@ -393,7 +384,7 @@ class TermViewSet(viewsets.ModelViewSet):
     def list_registered_students(self, request, pk=None):
         term = self.get_object()
         registrations = term.registrations.select_related('user')
-        student_data = [{'id': reg.user.id, 'registration_id': reg.id, 'grade_id': reg.grade.id if hasattr(reg, 'grade') else None, 'grade': reg.grade.value if hasattr(reg, 'grade') else None, 'username': reg.user.username,
+        student_data = [{'id': reg.user.id,'registration_id': reg.id ,'grade_id': reg.grade.id if hasattr(reg, 'grade') else None,'grade': reg.grade.value if hasattr(reg, 'grade') else None , 'username': reg.user.username,
                          'first_name': reg.user.first_name, 'last_name': reg.user.last_name,
                          'registered_at': reg.registered_at}
                         for reg in registrations]
@@ -402,14 +393,12 @@ class TermViewSet(viewsets.ModelViewSet):
     def _auto_register_students(self, term):
         new_registrations = []
         course = term.course
-        enrollments = course.course_enrollments.filter(
-            role='APPROVED').select_related('user')
+        enrollments = course.course_enrollments.filter(role='APPROVED').select_related('user')
         for enrollment in enrollments:
             if not Registration.objects.filter(user=enrollment.user, term=term).exists():
                 registration = Registration(user=enrollment.user, term=term)
                 registration.save()
                 new_registrations.append(registration)
-
 
 class RegistrationViewSet(viewsets.ModelViewSet):
     queryset = Registration.objects.all()
@@ -455,7 +444,6 @@ class RegistrationViewSet(viewsets.ModelViewSet):
         registration.delete()
         return Response({'detail': 'Registration deleted.'})
 
-
 class GradeViewSet(viewsets.ModelViewSet):
     queryset = Grade.objects.all()
     serializer_class = GradeSerializer
@@ -480,16 +468,28 @@ class GradeViewSet(viewsets.ModelViewSet):
         registration = serializer.validated_data['registration']
         course = registration.term.course
         if not (is_admin(user) or course.guarantee == user or user in course.lecturers.all()):
-            raise ValidationError(
-                'You do not have permission to grade for this course.')
+            raise ValidationError('You do not have permission to grade for this course.')
         serializer.save(graded_by=user)
 
     @action(detail=True, methods=['patch'], permission_classes=[IsLecturerOrGuaranteeOrAdmin])
     def patch_grade(self, request, pk=None):
         grade = self.get_object()
-        serializer = self.get_serializer(
-            grade, data=request.data, partial=True)
+        serializer = self.get_serializer(grade, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save(graded_by=request.user)
             return Response(serializer.data)
         return Response(serializer.errors, status=400)
+
+
+
+
+
+
+
+
+
+
+
+
+
+

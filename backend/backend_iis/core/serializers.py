@@ -8,6 +8,13 @@ class BetterRegisterSerializer(RegisterSerializer):
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
 
+    def validate(self, data):
+        if len(data.get('password1', '')) < 8:
+            raise serializers.ValidationError("Password must contain at least 8 characters.")
+        if data.get('password1') != data.get('password2'):
+            raise serializers.ValidationError("Passwords don't match each other.")
+        return super().validate(data)
+
     def get_cleaned_data(self):
         data = super().get_cleaned_data()
         data['first_name'] = self.validated_data.get('first_name', '')
