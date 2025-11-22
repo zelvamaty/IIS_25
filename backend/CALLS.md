@@ -157,6 +157,12 @@ Odebere lektora z kurzu.
 
 Smazání studenta z kurzu (Garant nebo Admin).
 
+```json
+{
+    "enrollment_id": 12
+}
+```
+
 ### \- method: "POST" - [http://127.0.0.1:8000/api/courses/](http://127.0.0.1:8000/api/courses/)\<id\>/enroll/
 
 Přihlášení studenta na kurz. Pokud je `auto_confirm` true, rovnou schváleno, jinak PENDING.
