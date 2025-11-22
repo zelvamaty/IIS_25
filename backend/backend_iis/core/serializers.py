@@ -74,6 +74,10 @@ class CourseSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if 'capacity' in data and data['capacity'] <= 0:
             raise serializers.ValidationError("Capacity must be a positive integer.")
+
+        if 'price' in data and data['price'] < 0:
+            raise serializers.ValidationError("Price cannot be negative.")
+
         if self.instance and 'capacity' in data:
             new_capacity = data['capacity']
             current_enrolled = self.instance.enrolled_count()

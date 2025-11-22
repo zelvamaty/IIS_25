@@ -1,3 +1,4 @@
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
@@ -72,7 +73,7 @@ class Course(models.Model):
         blank=False,
         null=False
     )
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, validators=[MinValueValidator(0)])
     capacity = models.PositiveIntegerField(default=30)
     guarantee = models.ForeignKey(User, on_delete=models.CASCADE, related_name='guaranteed_courses')
     lecturers = models.ManyToManyField(User, related_name='lectured_courses', blank=True)
@@ -125,7 +126,7 @@ class Registration(models.Model):
 
 class Grade(models.Model):
     registration = models.OneToOneField(Registration, on_delete=models.CASCADE, related_name='grade')
-    value = models.DecimalField(max_digits=5, decimal_places=2)
+    value = models.DecimalField(max_digits=5, decimal_places=2, validators=[MinValueValidator(0), MaxValueValidator(100)])
 
     graded_at = models.DateTimeField(auto_now_add=True)
     graded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='graded')
