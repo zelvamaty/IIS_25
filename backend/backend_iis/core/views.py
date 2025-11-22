@@ -351,7 +351,7 @@ class TermViewSet(viewsets.ModelViewSet):
     def list_registered_students(self, request, pk=None):
         term = self.get_object()
         registrations = term.registrations.select_related('user')
-        student_data = [{'id': reg.user.id,'registration_id': reg.id ,'grade': reg.grade.value if hasattr(reg, 'grade') else None , 'username': reg.user.username,
+        student_data = [{'id': reg.user.id,'registration_id': reg.id ,'grade_id': reg.grade.id ,'grade': reg.grade.value if hasattr(reg, 'grade') else None , 'username': reg.user.username,
                          'first_name': reg.user.first_name, 'last_name': reg.user.last_name,
                          'registered_at': reg.registered_at}
                         for reg in registrations]
