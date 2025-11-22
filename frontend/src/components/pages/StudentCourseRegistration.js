@@ -13,7 +13,8 @@ const StudentCourseRegistration = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [registering, setRegistering] = useState(false);
-
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const [myEnrollment, setMyEnrollment] = useState(null);
   useEffect(() => {
     loadCourseDetails();
   }, [id]);
@@ -22,27 +23,73 @@ const StudentCourseRegistration = () => {
     try {
       setLoading(true);
       setError(null);
-
+  
       const courseData = await coursesAPI.getCourseDetail(id);
       setCourse(courseData);
-
+      console.log('Course data:', courseData); // DEBUG
+  
       const allTerms = await termsAPI.getTerms();
       const courseTerms = allTerms.filter(t => t.course?.id === parseInt(id));
       setTerms(courseTerms);
-
-      // Načítaj moje registrácie (vrátane známok)
+  
+      // Načítaj moje registrácie
       try {
         const registrations = await registrationsAPI.getMyRegistrations();
         setMyRegistrations(registrations);
       } catch (err) {
         console.error('Error loading registrations:', err);
       }
-
+  
+      // Zisti či som zapísaný v kurze
+    // Zisti či som zapísaný v kurze
+try {
+  const enrollments = await coursesAPI.getMyCourses(); // ✅ Použite getMyCourses namiesto getMyEnrollments
+  console.log('My enrollments:', enrollments); // DEBUG
+  console.log('Looking for course ID:', parseInt(id)); // DEBUG
+  
+  const courseEnrollment = enrollments.find(e => {
+    console.log('Checking enrollment:', e, 'course ID:', e.id); // ✅ OPRAVENÉ - použite e.id nie e.course?.id
+    return e.id === parseInt(id);
+  });
+  
+  console.log('Found enrollment:', courseEnrollment); // DEBUG
+  
+  if (courseEnrollment) {
+    setIsEnrolled(true);
+    setMyEnrollment(courseEnrollment);
+  } else {
+    setIsEnrolled(false);
+    setMyEnrollment(null);
+  }
+} catch (err) {
+  console.error('Error checking enrollment:', err);
+  setIsEnrolled(false);
+  setMyEnrollment(null);
+}
+  
     } catch (err) {
       setError('Nepodařilo se načíst detail kurzu');
       console.error('Error loading course:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLeaveCourse = async () => {
+    if (!window.confirm(`Opravdu chcete ukončit kurz "${course.title}"? Tato akce je nevratná.`)) {
+      return;
+    }
+  
+    try {
+      setRegistering(true);
+      await coursesAPI.leaveCourse(id);
+      alert('Úspěšně jste ukončili kurz');
+      navigate('/student/my-courses');
+    } catch (err) {
+      alert(err.message || 'Ukončení kurzu se nezdařilo');
+      console.error('Error leaving course:', err);
+    } finally {
+      setRegistering(false);
     }
   };
 
@@ -161,7 +208,6 @@ const StudentCourseRegistration = () => {
         ← Zpět na seznam kurzů
       </button>
 
-      <h1 className="page-title">Detail kurzu</h1>
 
       <div className="course-detail-card">
         <div className="course-header">
@@ -185,16 +231,25 @@ const StudentCourseRegistration = () => {
             <p className="info-badge">✓ Automatické schválení po zápisu</p>
           )}
         </div>
-
         <div className="course-actions">
-          <button 
-            className="button button-success"
-            onClick={handleEnrollCourse}
-            disabled={registering || course.enrolled_count >= course.capacity}
-          >
-            {registering ? '⏳ Zapisuji...' : '📝 Zapsat se do kurzu'}
-          </button>
-        </div>
+  {isEnrolled ? (
+    <button 
+      className="button button-danger"
+      onClick={handleLeaveCourse}
+      disabled={registering}
+    >
+      {registering ? '⏳ Ukončuji...' : '🚪 Ukončit kurz'}
+    </button>
+  ) : (
+    <button 
+      className="button button-success"
+      onClick={handleEnrollCourse}
+      disabled={registering || course.enrolled_count >= course.capacity}
+    >
+      {registering ? '⏳ Zapisuji...' : '📝 Zapsat se do k]urzu'}
+    </button>
+  )}
+</div>
       </div>
 
       <h2 className="section-title">Dostupné termíny ({terms.length})</h2>

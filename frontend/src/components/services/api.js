@@ -176,6 +176,14 @@ removeStudent: async (courseId, enrollmentId) => {
   });
   return handleResponse(response);
 },
+// Leave course (student unsubscribe)
+leaveCourse: async (courseId) => {
+  const response = await fetch(`${API_BASE_URL}/courses/${courseId}/leave_course/`, {
+    method: 'DELETE',
+    headers: getAuthHeaders()
+  });
+  return handleResponse(response);
+},
 
   // Get course detail
   getCourseDetail: async (id) => {
@@ -215,6 +223,13 @@ removeStudent: async (courseId, enrollmentId) => {
     return handleResponse(response);
   },
   getMyCourses: async () => {
+    const response = await fetch(`${API_BASE_URL}/courses/my_courses/`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+    return handleResponse(response);
+  },
+  getMyEnrollments: async () => {
     const response = await fetch(`${API_BASE_URL}/courses/my_courses/`, {
       method: 'GET',
       headers: getAuthHeaders()
