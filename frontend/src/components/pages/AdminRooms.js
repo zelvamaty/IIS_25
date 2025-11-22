@@ -17,7 +17,6 @@ const AdminRooms = () => {
     building: '',
     floor: '',
     equipment: [],
-    status: 'available'
   });
 
   useEffect(() => {
@@ -46,7 +45,6 @@ const AdminRooms = () => {
       building: room.building || '',
       floor: room.floor || '',
       equipment: room.equipment || [],
-      status: room.status || 'available'
     });
     setShowModal(true);
   };
@@ -59,7 +57,6 @@ const AdminRooms = () => {
       building: '',
       floor: '',
       equipment: [],
-      status: 'available'
     });
     setShowModal(true);
   };
@@ -96,7 +93,6 @@ const AdminRooms = () => {
         building: formData.building,
         floor: formData.floor ? parseInt(formData.floor) : null,
         equipment: formData.equipment,
-        status: formData.status
       };
 
       if (editingRoom) {
@@ -130,23 +126,7 @@ const AdminRooms = () => {
     }
   };
 
-  const getStatusColor = (status) => {
-    switch(status) {
-      case 'available': return '#10b981';
-      case 'occupied': return '#ef4444';
-      case 'maintenance': return '#f59e0b';
-      default: return '#64748b';
-    }
-  };
 
-  const getStatusName = (status) => {
-    switch(status) {
-      case 'available': return 'Dostupná';
-      case 'occupied': return 'Obsazená';
-      case 'maintenance': return 'Údržba';
-      default: return status;
-    }
-  };
 
   const filteredRooms = rooms.filter(room => {
     const matchesSearch = room.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -230,9 +210,7 @@ const AdminRooms = () => {
             <div key={room.id} className="room-card">
               <div className="room-header">
                 <div className="room-name">{room.name}</div>
-                <div className="room-status" style={{ background: getStatusColor(room.status) }}>
-                  {getStatusName(room.status)}
-                </div>
+                
               </div>
               
               <div className="room-body">
@@ -341,21 +319,7 @@ const AdminRooms = () => {
                   required
                 />
               </div>
-              
-              <div className="form-row">
-                <label className="form-label">Status</label>
-                <select 
-                  name="status"
-                  className="input-field" 
-                  value={formData.status}
-                  onChange={handleFormChange}
-                >
-                  <option value="available">Dostupná</option>
-                  <option value="occupied">Obsazená</option>
-                  <option value="maintenance">Údržba</option>
-                </select>
-              </div>
-              
+            
             
             </div>
             <div className="modal-footer">
