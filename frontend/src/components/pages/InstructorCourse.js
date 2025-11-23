@@ -26,7 +26,6 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   const [gradeValue, setGradeValue] = useState('');
   const [gradeError, setGradeError] = useState('');
   
-  // Term form state
   const [termFormData, setTermFormData] = useState({
     type: '',
     start_time: '',
@@ -38,7 +37,6 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   const [termLoading, setTermLoading] = useState(false);
   const [termError, setTermError] = useState('');
   
-  // Edit course state
   const [editCourseData, setEditCourseData] = useState({
     title: '',
     code: '',
@@ -99,7 +97,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
 
       setMyCourses(instructorCourses);
     } catch (err) {
-      setError('Nepodařilo se načíst kurzy');
+      setError('Failed to load courses');
       console.error('Error loading courses:', err);
     } finally {
       setLoading(false);
@@ -134,7 +132,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
     setGradeError('');
   
     if (!selectedRegistrationId || !gradeValue) {
-      setGradeError('Vyplňte všechna pole');
+      setGradeError('Fill in all fields');
       return;
     }
   
@@ -146,43 +144,43 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       
       await gradesAPI.createGrade(gradeData);
       
-      alert('Hodnocení bylo úspěšně přidáno!');
+      alert('Grade has been successfully added!');
       setShowGradeForm(false);
       setSelectedRegistrationId('');
       setGradeValue('');
       await loadTermStudents(selectedTerm.id);
     } catch (err) {
-      setGradeError(err.message || 'Přidání hodnocení se nezdařilo');
+      setGradeError(err.message || 'Adding grade failed');
       console.error('Error adding grade:', err);
     }
   };
   
   const handleDeleteGrade = async (gradeId) => {
-    if (!window.confirm('Opravdu chcete smazat hodnocení?')) {
+    if (!window.confirm('Do you really want to delete this grade?')) {
       return;
     }
   
     try {
       await gradesAPI.deleteGrade(gradeId);
-      alert('Hodnocení bylo smazáno');
+      alert('Grade has been deleted');
       await loadTermStudents(selectedTerm.id);
     } catch (err) {
-      alert(err.message || 'Smazání hodnocení se nezdařilo');
+      alert(err.message || 'Deleting grade failed');
       console.error('Error deleting grade:', err);
     }
   };
   
   const handleUpdateGrade = async (gradeId, newValue) => {
-    if (!window.confirm('Opravdu chcete změnit hodnocení?')) {
+    if (!window.confirm('Do you really want to change this grade?')) {
       return;
     }
   
     try {
       await gradesAPI.updateGrade(gradeId, { value: parseFloat(newValue) });
-      alert('Hodnocení bylo změněno');
+      alert('Grade has been changed');
       await loadTermStudents(selectedTerm.id);
     } catch (err) {
-      alert(err.message || 'Změna hodnocení se nezdařila');
+      alert(err.message || 'Changing grade failed');
       console.error('Error updating grade:', err);
     }
   };
@@ -192,33 +190,33 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
     setLecturerError('');
   
     if (!selectedLecturerId) {
-      setLecturerError('Vyberte lektora');
+      setLecturerError('Select a lecturer');
       return;
     }
   
     try {
       await coursesAPI.addLecturer(selectedCourse.id, parseInt(selectedLecturerId));
-      alert('Lektor byl úspěšně přidán');
+      alert('Lecturer has been successfully added');
       setShowAddLecturerForm(false);
       setSelectedLecturerId('');
       await loadCourseDetails(selectedCourse.id);
     } catch (err) {
-      setLecturerError(err.message || 'Přidání lektora se nezdařilo');
+      setLecturerError(err.message || 'Adding lecturer failed');
       console.error('Error adding lecturer:', err);
     }
   };
   
   const handleRemoveLecturer = async (lecturerId) => {
-    if (!window.confirm('Opravdu chcete odebrat tohoto lektora?')) {
+    if (!window.confirm('Do you really want to remove this lecturer?')) {
       return;
     }
   
     try {
       await coursesAPI.removeLecturer(selectedCourse.id, lecturerId);
-      alert('Lektor byl odebrán');
+      alert('Lecturer has been removed');
       await loadCourseDetails(selectedCourse.id);
     } catch (err) {
-      alert(err.message || 'Odebrání lektora se nezdařilo');
+      alert(err.message || 'Removing lecturer failed');
       console.error('Error removing lecturer:', err);
     }
   };
@@ -262,7 +260,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       
       setActiveTab('terms');
     } catch (err) {
-      setError('Nepodařilo se načíst detail kurzu');
+      setError('Failed to load course details');
       console.error('Error loading course details:', err);
     } finally {
       setLoading(false);
@@ -279,16 +277,16 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   };
   
   const handleDeleteRegistration = async (registrationId) => {
-    if (!window.confirm('Opravdu chcete odebrat studenta z tohoto termínu?')) {
+    if (!window.confirm('Do you really want to remove the student from this term?')) {
       return;
     }
   
     try {
       await termsAPI.deleteRegistration(registrationId);
-      alert('Student byl odebrán z termínu');
+      alert('Student has been removed from the term');
       await loadTermStudents(selectedTerm.id);
     } catch (err) {
-      alert(err.message || 'Odebrání studenta z termínu se nezdařilo');
+      alert(err.message || 'Removing student from term failed');
       console.error('Error deleting registration:', err);
     }
   };
@@ -296,16 +294,16 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   const handleRemoveStudent = async (enrollmentId) => {
     if (!selectedCourse) return;
     
-    if (!window.confirm('Opravdu chcete odebrat studenta z kurzu? Tato akce je nevratná.')) {
+    if (!window.confirm('Do you really want to remove the student from the course? This action is irreversible.')) {
       return;
     }
     
     try {
       await coursesAPI.removeStudent(selectedCourse.id, enrollmentId);
-      alert('Student byl odebrán z kurzu');
+      alert('Student has been removed from the course');
       await loadCourseDetails(selectedCourse.id);
     } catch (err) {
-      alert(err.message || 'Odebrání studenta se nezdařilo');
+      alert(err.message || 'Removing student failed');
       console.error('Error removing student:', err);
     }
   };
@@ -330,7 +328,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       }
 
       await termsAPI.createTerm(termData);
-      alert('Termín byl úspěšně vytvořen!');
+      alert('Term has been successfully created!');
       
       setTermFormData({
         type: '',
@@ -344,7 +342,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       await loadCourseDetails(selectedCourse.id);
       setActiveTab('terms');
     } catch (err) {
-      setTermError(err.message || 'Vytvoření termínu se nezdařilo');
+      setTermError(err.message || 'Creating term failed');
       console.error('Error creating term:', err);
     } finally {
       setTermLoading(false);
@@ -352,16 +350,16 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   };
 
   const handleDeleteTerm = async (termId) => {
-    if (!window.confirm('Opravdu chcete smazat tento termín?')) {
+    if (!window.confirm('Do you really want to delete this term?')) {
       return;
     }
 
     try {
       await termsAPI.deleteTerm(termId);
-      alert('Termín byl smazán');
+      alert('Term has been deleted');
       await loadCourseDetails(selectedCourse.id);
     } catch (err) {
-      alert(err.message || 'Smazání termínu se nezdařilo');
+      alert(err.message || 'Deleting term failed');
       console.error('Error deleting term:', err);
     }
   };
@@ -371,10 +369,10 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
     
     try {
       await coursesAPI.approveEnrollment(selectedCourse.id, enrollmentId);
-      alert('Student byl úspěšně schválen');
+      alert('Student has been successfully approved');
       await loadCourseDetails(selectedCourse.id);
     } catch (err) {
-      alert(err.message || 'Schválení studenta se nezdařilo');
+      alert(err.message || 'Approving student failed');
       console.error('Error approving enrollment:', err);
     }
   };
@@ -384,10 +382,10 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
     
     try {
       await coursesAPI.rejectEnrollment(selectedCourse.id, enrollmentId);
-      alert('Student byl odmítnut');
+      alert('Student has been rejected');
       await loadCourseDetails(selectedCourse.id);
     } catch (err) {
-      alert(err.message || 'Odmítnutí studenta se nezdařilo');
+      alert(err.message || 'Rejecting student failed');
       console.error('Error rejecting enrollment:', err);
     }
   };
@@ -399,9 +397,9 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   };
 
   const getRoomName = (roomId) => {
-    if (!roomId) return 'Neurčeno';
+    if (!roomId) return 'Not specified';
     const room = rooms.find(r => r.id === roomId);
-    return room ? (room.name || `Místnost ${room.id}`) : 'Neurčeno';
+    return room ? (room.name || `Room ${room.id}`) : 'Not specified';
   };
 
   const isGuarantor = selectedCourse && currentUser && selectedCourse.guarantee?.id === currentUser.id;
@@ -417,7 +415,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
     return (
       <div className="instructor-course">
         <div className="loading-state">
-          <p>Načítání kurzů...</p>
+          <p>Loading courses...</p>
         </div>
       </div>
     );
@@ -429,7 +427,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
         <div className="error-state">
           <p>{error}</p>
           <button className="button" onClick={loadCurrentUserAndCourses}>
-            Zkusit znovu
+            Try again
           </button>
         </div>
       </div>
@@ -439,13 +437,12 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   if (!selectedCourse) {
     return (
       <div className="instructor-course">
-        <h1 className="page-title">Moje výukové kurzy</h1>
         
         {myCourses.length === 0 ? (
           <div className="empty-state">
-            <p>Zatím nemáte žádné kurzy jako garant nebo lektor</p>
+            <p>You don't have any courses as guarantor or lecturer yet</p>
             <button className="button" onClick={() => navigate('/create-course')}>
-              Vytvořit kurz
+              Create Course
             </button>
           </div>
         ) : (
@@ -458,11 +455,11 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                     <span className="course-code">{course.code}</span>
                     {!course.approved ? (
                       <span className="badge badge-warning">
-                        ⏳ Čeká na schválení administrátorem
+                        ⏳ Waiting for administrator approval
                       </span>
                     ) : (
                       <span className="badge badge-success">
-                        ✓ Schváleno
+                        ✓ Approved
                       </span>
                     )}
                   </div>
@@ -470,16 +467,16 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
 
                 <div className="course-body">
                   <div className="course-info-row">
-                    <span><strong>Garant:</strong> {course.guarantee 
+                    <span><strong>Guarantor:</strong> {course.guarantee 
                       ? `${course.guarantee.first_name} ${course.guarantee.last_name}`
-                      : 'Neznámý'}</span>
-                    <span><strong>Kapacita:</strong> {course.enrolled_count}/{course.capacity}</span>
+                      : 'Unknown'}</span>
+                    <span><strong>Capacity:</strong> {course.enrolled_count}/{course.capacity}</span>
                   </div>
 
                   <div className="course-info-row">
-                    <span><strong>Cena:</strong> {course.price} Kč</span>
+                    <span><strong>Price:</strong> {course.price} CZK</span>
                     {course.auto_confirm && (
-                      <span className="badge badge-info">✓ Automatické potvrzení</span>
+                      <span className="badge badge-info">✓ Automatic confirmation</span>
                     )}
                   </div>
 
@@ -491,7 +488,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                     className="button"
                     onClick={() => loadCourseDetails(course.id)}
                   >
-                    Spravovat kurz
+                    Manage Course
                   </button>
                 </div>
               </div>
@@ -506,17 +503,17 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
     <div className="instructor-course">
       <div className="course-info-header">
         <button className="button button-secondary" onClick={handleBackToCourses}>
-          ← Zpět na seznam kurzů
+          ← Back to course list
         </button>
         <div>
           <h1>{selectedCourse.title}</h1>
           <p className="course-meta">
-            Kód: {selectedCourse.code} | Kapacita: {selectedCourse.capacity} | 
-            Registrováno: {selectedCourse.enrolled_count}
+            Code: {selectedCourse.code} | Capacity: {selectedCourse.capacity} | 
+            Registered: {selectedCourse.enrolled_count}
           </p>
           {!selectedCourse.approved && (
             <p className="warning-message">
-              ⚠️ Kurz čeká na schválení administrátorem
+              ⚠️ Course is waiting for administrator approval
             </p>
           )}
         </div>
@@ -527,20 +524,20 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
           className={`tab ${activeTab === 'terms' ? 'active' : ''}`}
           onClick={() => setActiveTab('terms')}
         >
-          Termíny ({courseTerms.length})
+          Terms ({courseTerms.length})
         </button>
         <button 
           className={`tab ${activeTab === 'enrollments' ? 'active' : ''}`}
           onClick={() => setActiveTab('enrollments')}
         >
-          Zápisy ({approvedEnrollments.length})
+          Enrollments ({approvedEnrollments.length})
         </button>
         {canManageCourse && (
           <button 
             className={`tab ${activeTab === 'pending' ? 'active' : ''}`}
             onClick={() => setActiveTab('pending')}
           >
-            Čekající ({pendingEnrollments.length})
+            Pending ({pendingEnrollments.length})
           </button>
         )}
         {canManageCourse && (
@@ -548,7 +545,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
             className={`tab ${activeTab === 'lecturers' ? 'active' : ''}`}
             onClick={() => setActiveTab('lecturers')}
           >
-            Lektoři ({selectedCourse.lecturers?.length || 0})
+            Lecturers ({selectedCourse.lecturers?.length || 0})
           </button>
         )}
         {canManageCourse && (
@@ -567,7 +564,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
               setActiveTab('edit-course');
             }}
           >
-            ✏️ Upravit kurz
+            Edit Course
           </button>
         )}
       </div>
@@ -575,26 +572,26 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       {activeTab === 'terms' && (
         <div className="tab-content">
           <div className="section-header">
-            <h2 className="section-title">Termíny kurzu</h2>
+            <h2 className="section-title">Course Terms</h2>
             {canManageCourse && (
               <button 
                 className="button button-success"
                 onClick={() => setActiveTab('create-term')}
               >
-                + Vytvořit termín
+                + Create Term
               </button>
             )}
           </div>
 
           {courseTerms.length === 0 ? (
             <div className="empty-state">
-              <p>Zatím nejsou vytvořené žádné termíny</p>
+              <p>No terms have been created yet</p>
               {canManageCourse && (
                 <button 
                   className="button button-success"
                   onClick={() => setActiveTab('create-term')}
                 >
-                  + Vytvořit první termín
+                  + Create First Term
                 </button>
               )}
             </div>
@@ -603,12 +600,12 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
               <table className="table">
                 <thead>
                   <tr>
-                    <th>Typ</th>
-                    <th>Datum a čas</th>
-                    <th>Místnost</th>
-                    <th>Kapacita</th>
-                    <th>Registrací</th>
-                    {(canManageCourse || isLecturer) && <th>Akce</th>}
+                    <th>Type</th>
+                    <th>Date and Time</th>
+                    <th>Room</th>
+                    <th>Capacity</th>
+                    <th>Registrations</th>
+                    {(canManageCourse || isLecturer) && <th>Actions</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -616,7 +613,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                     <tr key={term.id}>
                       <td>{getTermTypeName(term.type)}</td>
                       <td>
-                        {new Date(term.start_time).toLocaleString('cs-CZ', {
+                        {new Date(term.start_time).toLocaleString('en-US', {
                           day: '2-digit',
                           month: '2-digit',
                           year: 'numeric',
@@ -641,7 +638,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                                 className="button button-danger button-small"
                                 onClick={() => handleDeleteTerm(term.id)}
                               >
-                                Smazat
+                                Delete
                               </button>
                             )}
                           </div>
@@ -660,37 +657,37 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
         <div className="tab-content">
           <div className="section-header">
             <h2 className="section-title">
-              Detail termínu - {getTermTypeName(selectedTerm.type)}
+              Term Detail - {getTermTypeName(selectedTerm.type)}
             </h2>
             <button 
               className="button button-secondary"
               onClick={handleBackToTerms}
             >
-              ← Zpět na termíny
+              ← Back to terms
             </button>
           </div>
 
           <div className="term-info-box">
-            <p><strong>Datum:</strong> {new Date(selectedTerm.start_time).toLocaleString('cs-CZ')}</p>
-            <p><strong>Místnost:</strong> {getRoomName(selectedTerm.room)}</p>
-            <p><strong>Kapacita:</strong> {selectedTerm.registrations_count || 0}/{selectedTerm.capacity}</p>
+            <p><strong>Date:</strong> {new Date(selectedTerm.start_time).toLocaleString('en-US')}</p>
+            <p><strong>Room:</strong> {getRoomName(selectedTerm.room)}</p>
+            <p><strong>Capacity:</strong> {selectedTerm.registrations_count || 0}/{selectedTerm.capacity}</p>
           </div>
 
           <div className="section-header">
-            <h3>Registrovaní studenti ({termStudents.length})</h3>
+            <h3>Registered Students ({termStudents.length})</h3>
             {!showGradeForm && canGradeStudents && (
               <button 
                 className="button button-success"
                 onClick={() => setShowGradeForm(true)}
               >
-                + Přidat hodnocení
+                + Add Grade
               </button>
             )}
           </div>
 
           {showGradeForm && (
             <div className="grade-form-container">
-              <h4>Přidat hodnocení studentovi</h4>
+              <h4>Add Grade to Student</h4>
               
               {gradeError && (
                 <div className="error-message">{gradeError}</div>
@@ -705,7 +702,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                     onChange={(e) => setSelectedRegistrationId(e.target.value)}
                     required
                   >
-                    <option value="">-- Vyberte studenta --</option>
+                    <option value="">-- Select student --</option>
                     {termStudents
                       .filter(s => !s.grade)
                       .map(student => (
@@ -721,7 +718,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Hodnocení (0-100) *</label>
+                  <label className="form-label">Grade (0-100) *</label>
                   <input
                     type="number"
                     className="input-field"
@@ -736,7 +733,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
 
                 <div className="form-actions">
                   <button type="submit" className="button button-success">
-                    ✓ Přidat hodnocení
+                    ✓ Add Grade
                   </button>
                   <button 
                     type="button" 
@@ -748,7 +745,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                       setGradeError('');
                     }}
                   >
-                    Zrušit
+                    Cancel
                   </button>
                 </div>
               </form>
@@ -757,7 +754,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
 
           {termStudents.length === 0 ? (
             <div className="empty-state">
-              <p>Na tento termín není zatím nikdo zaregistrován</p>
+              <p>No one is registered for this term yet</p>
             </div>
           ) : (
             <div className="table-container">
@@ -765,9 +762,9 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                 <thead>
                   <tr>
                     <th>Student</th>
-                    <th>Registrace</th>
-                    <th>Hodnocení</th>
-                    <th>Akce</th>
+                    <th>Registration</th>
+                    <th>Grade</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -779,7 +776,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                         <small style={{ color: '#64748b' }}>({student.username})</small>
                       </td>
                       <td>
-                        {new Date(student.registered_at).toLocaleDateString('cs-CZ')}
+                        {new Date(student.registered_at).toLocaleDateString('en-US')}
                       </td>
                       <td>
                         {student.grade ? (
@@ -789,7 +786,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                             </strong>
                           </div>
                         ) : (
-                          <span style={{ color: '#94a3b8' }}>Nehodnoceno</span>
+                          <span style={{ color: '#94a3b8' }}>Not graded</span>
                         )}
                       </td>
                       <td>
@@ -799,19 +796,19 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                               <button 
                                 className="button button-small"
                                 onClick={() => {
-                                  const newValue = prompt('Nové hodnocení (0-100):', student.grade);
+                                  const newValue = prompt('New grade (0-100):', student.grade);
                                   if (newValue && !isNaN(parseFloat(newValue))) {
                                     handleUpdateGrade(student.grade_id, newValue);
                                   }
                                 }}
                               >
-                                Upravit hodnocení
+                                Edit Grade
                               </button>
                               <button 
                                 className="button button-danger button-small"
                                 onClick={() => handleDeleteGrade(student.grade_id)}
                               >
-                                Smazat hodnocení
+                                Delete Grade
                               </button>
                             </>
                           )}
@@ -820,7 +817,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                               className="button button-danger button-small"
                               onClick={() => handleDeleteRegistration(student.registration_id)}
                             >
-                              Odebrat z termínu
+                              Remove from Term
                             </button>
                           )}
                         </div>
@@ -837,19 +834,19 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       {activeTab === 'create-term' && canManageCourse && (
         <div className="tab-content">
           <div className="section-header">
-            <h2 className="section-title">Vytvořit nový termín</h2>
+            <h2 className="section-title">Create New Term</h2>
             <button 
               className="button button-secondary"
               onClick={() => setActiveTab('terms')}
             >
-              ← Zpět
+              ← Back
             </button>
           </div>
 
           <form onSubmit={handleCreateTerm} className="term-form">
             <div className="form-row">
               <div className="form-group">
-                <label className="form-label">Typ termínu *</label>
+                <label className="form-label">Term Type *</label>
                 <select
                   name="type"
                   className="input-field"
@@ -857,17 +854,17 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                   onChange={handleTermFormChange}
                   required
                 >
-                  <option value="">Vyberte typ</option>
-                  <option value="LECTURE">Přednáška</option>
-                  <option value="EXERCISE">Cvičení</option>
-                  <option value="EXAM">Zkouška</option>
+                  <option value="">Select type</option>
+                  <option value="LECTURE">Lecture</option>
+                  <option value="EXERCISE">Exercise</option>
+                  <option value="EXAM">Exam</option>
                 </select>
               </div>
             </div>
 
             <div className="form-row two-columns">
               <div className="form-group">
-                <label className="form-label">Datum a čas začátku *</label>
+                <label className="form-label">Start Date and Time *</label>
                 <input
                   type="datetime-local"
                   name="start_time"
@@ -879,7 +876,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Datum a čas konce *</label>
+                <label className="form-label">End Date and Time *</label>
                 <input
                   type="datetime-local"
                   name="end_time"
@@ -893,24 +890,24 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
 
             <div className="form-row two-columns">
               <div className="form-group">
-                <label className="form-label">Místnost</label>
+                <label className="form-label">Room</label>
                 <select
                   name="room"
                   className="input-field"
                   value={termFormData.room}
                   onChange={handleTermFormChange}
                 >
-                  <option value="">Bez místnosti</option>
+                  <option value="">No room</option>
                   {rooms.map(room => (
                     <option key={room.id} value={room.id}>
-                      {room.name || `Místnost ${room.id}`}
+                      {room.name || `Room ${room.id}`}
                     </option>
                   ))}
                 </select>
               </div>
 
               <div className="form-group">
-                <label className="form-label">Kapacita *</label>
+                <label className="form-label">Capacity *</label>
                 <input
                   type="number"
                   name="capacity"
@@ -932,7 +929,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                     checked={termFormData.requires_registration}
                     onChange={handleTermFormChange}
                   />
-                  Vyžaduje registraci studentů
+                  Requires student registration
                 </label>
               </div>
             </div>
@@ -949,14 +946,14 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                 className="button button-success"
                 disabled={termLoading}
               >
-                {termLoading ? '⏳ Vytvářím...' : '✓ Vytvořit termín'}
+                {termLoading ? '⏳ Creating...' : '✓ Create Term'}
               </button>
               <button 
                 type="button" 
                 className="button button-secondary"
                 onClick={() => setActiveTab('terms')}
               >
-                Zrušit
+                Cancel
               </button>
             </div>
           </form>
@@ -965,11 +962,11 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
 
       {activeTab === 'enrollments' && (
         <div className="tab-content">
-          <h2 className="section-title">Schválení studenti</h2>
+          <h2 className="section-title">Approved Students</h2>
           
           {approvedEnrollments.length === 0 ? (
             <div className="empty-state">
-              <p>Zatím nejsou žádní schválení studenti</p>
+              <p>No approved students yet</p>
             </div>
           ) : (
             <div className="table-container">
@@ -977,9 +974,8 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                 <thead>
                   <tr>
                     <th>Student</th>
-                    <th>Email</th>
-                    <th>Datum zápisu</th>
-                    {canManageCourse && <th>Akce</th>}
+                    <th>Enrollment Date</th>
+                    {canManageCourse && <th>Actions</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -988,11 +984,10 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                       <td>
                         {enrollment.student 
                           ? `${enrollment.student.first_name} ${enrollment.student.last_name}`
-                          : 'Neznámý'}
+                          : 'Unknown'}
                       </td>
-                      <td>{enrollment.student?.email || '-'}</td>
                       <td>
-                        {new Date(enrollment.enrolled_at).toLocaleDateString('cs-CZ')}
+                        {new Date(enrollment.enrolled_at).toLocaleDateString('en-US')}
                       </td>
                       {canManageCourse && (
                         <td>
@@ -1000,7 +995,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                             className="button button-danger button-small"
                             onClick={() => handleRemoveStudent(enrollment.id)}
                           >
-                            Odebrat z kurzu
+                            Remove from Course
                           </button>
                         </td>
                       )}
@@ -1016,20 +1011,20 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       {activeTab === 'lecturers' && canManageCourse && (
         <div className="tab-content">
           <div className="section-header">
-            <h2 className="section-title">Lektoři kurzu</h2>
+            <h2 className="section-title">Course Lecturers</h2>
             {!showAddLecturerForm && (
               <button 
                 className="button button-success"
                 onClick={() => setShowAddLecturerForm(true)}
               >
-                + Přidat lektora
+                + Add Lecturer
               </button>
             )}
           </div>
 
           {showAddLecturerForm && (
             <div className="add-lecturer-form">
-              <h3>Přidat lektora</h3>
+              <h3>Add Lecturer</h3>
               
               {lecturerError && (
                 <div className="error-message">
@@ -1039,14 +1034,14 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
 
               <form onSubmit={handleAddLecturer}>
                 <div className="form-group">
-                  <label className="form-label">Vyberte uživatele *</label>
+                  <label className="form-label">Select User *</label>
                   <select
                     className="input-field"
                     value={selectedLecturerId}
                     onChange={(e) => setSelectedLecturerId(e.target.value)}
                     required
                   >
-                    <option value="">-- Vyberte lektora --</option>
+                    <option value="">-- Select lecturer --</option>
                     {availableUsers
                       .filter(u => 
                         u.id !== selectedCourse.guarantee?.id && 
@@ -1064,7 +1059,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
 
                 <div className="form-actions">
                   <button type="submit" className="button button-success">
-                    ✓ Přidat lektora
+                    ✓ Add Lecturer
                   </button>
                   <button 
                     type="button" 
@@ -1075,7 +1070,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                       setLecturerError('');
                     }}
                   >
-                    Zrušit
+                    Cancel
                   </button>
                 </div>
               </form>
@@ -1084,15 +1079,15 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
 
           {selectedCourse.lecturers && selectedCourse.lecturers.length > 0 ? (
             <div className="lecturers-list">
-              <h3>Seznam lektorů</h3>
+              <h3>Lecturers List</h3>
               <div className="table-container">
                 <table className="table">
                   <thead>
                     <tr>
-                      <th>Jméno</th>
-                      <th>Uživatelské jméno</th>
+                      <th>Name</th>
+                      <th>Username</th>
                       <th>Email</th>
-                      <th>Akce</th>
+                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1106,7 +1101,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                             className="button button-danger button-small"
                             onClick={() => handleRemoveLecturer(lecturer.id)}
                           >
-                            Odebrat
+                            Remove
                           </button>
                         </td>
                       </tr>
@@ -1117,23 +1112,21 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
             </div>
           ) : (
             <div className="empty-state">
-              <p>Kurz zatím nemá žádné lektory</p>
+              <p>The course doesn't have any lecturers yet</p>
             </div>
           )}
 
-          <div className="info-box">
-            <p><strong>ℹ️ Info:</strong> Lektoři mohou hodnotit studenty a spravovat termíny kurzu.</p>
-          </div>
+          
         </div>
       )}
 
       {activeTab === 'pending' && canManageCourse && (
         <div className="tab-content">
-          <h2 className="section-title">Čekající studenti na schválení</h2>
+          <h2 className="section-title">Students Waiting for Approval</h2>
           
           {pendingEnrollments.length === 0 ? (
             <div className="empty-state">
-              <p>Žádní studenti nečekají na schválení</p>
+              <p>No students are waiting for approval</p>
             </div>
           ) : (
             <div className="waiting-list">
@@ -1142,20 +1135,20 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                   <span className="student-info">
                     {enrollment.student 
                       ? `${enrollment.student.first_name} ${enrollment.student.last_name} (${enrollment.student.username})`
-                      : 'Neznámý'}
+                      : 'Unknown'}
                   </span>
                   <div className="student-actions">
                     <button 
                       className="button button-success button-small"
                       onClick={() => handleApproveEnrollment(enrollment.id)}
                     >
-                      ✓ Schválit
+                      ✓ Approve
                     </button>
                     <button 
                       className="button button-danger button-small"
                       onClick={() => handleRejectEnrollment(enrollment.id)}
                     >
-                      ✗ Odmítnout
+                      ✗ Reject
                     </button>
                   </div>
                 </div>
@@ -1167,16 +1160,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
 
       {activeTab === 'edit-course' && canManageCourse && (
         <div className="tab-content">
-          <div className="section-header">
-            <h2 className="section-title">Upravit kurz</h2>
-            <button 
-              className="button button-secondary"
-              onClick={() => setActiveTab('terms')}
-            >
-              ← Zpět
-            </button>
-          </div>
-
+       
           {editError && (
             <div className="error-message">
               {editError}
@@ -1200,11 +1184,11 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
               };
 
               await coursesAPI.updateCourse(selectedCourse.id, courseData);
-              alert('Kurz byl úspěšně upraven!');
+              alert('Course has been successfully updated!');
               await loadCourseDetails(selectedCourse.id);
               setActiveTab('terms');
             } catch (err) {
-              setEditError(err.message || 'Úprava kurzu se nezdařila');
+              setEditError(err.message || 'Updating course failed');
               console.error('Error updating course:', err);
             } finally {
               setEditLoading(false);
@@ -1213,7 +1197,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
             <div className="form-section">
               <div className="form-row">
                 <div className="form-group">
-                  <label className="form-label">Název kurzu *</label>
+                  <label className="form-label">Course Title *</label>
                   <input
                     type="text"
                     name="title"
@@ -1227,7 +1211,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label className="form-label">Kód kurzu *</label>
+                  <label className="form-label">Course Code *</label>
                   <input
                     type="text"
                     name="code"
@@ -1241,7 +1225,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label className="form-label">Typ kurzu *</label>
+                  <label className="form-label">Course Type *</label>
                   <select
                     name="type"
                     className="input-field"
@@ -1249,7 +1233,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                     onChange={(e) => setEditCourseData(prev => ({...prev, type: e.target.value}))}
                     required
                   >
-                    <option value="">-- Vyberte typ --</option>
+                    <option value="">-- Select type --</option>
                     <option value="HARDWARE">Hardware</option>
                     <option value="OS">Operating Systems</option>
                     <option value="AI">Artificial Intelligence</option>
@@ -1263,7 +1247,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label className="form-label">Popis kurzu</label>
+                  <label className="form-label">Course Description</label>
                   <textarea
                     name="description"
                     className="input-field textarea"
@@ -1276,7 +1260,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
 
               <div className="form-row two-columns">
                 <div className="form-group">
-                  <label className="form-label">Cena (Kč) *</label>
+                  <label className="form-label">Price (CZK) *</label>
                   <input
                     type="number"
                     name="price"
@@ -1290,7 +1274,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Kapacita *</label>
+                  <label className="form-label">Capacity *</label>
                   <input
                     type="number"
                     name="capacity"
@@ -1312,7 +1296,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                       checked={editCourseData.auto_confirm}
                       onChange={(e) => setEditCourseData(prev => ({...prev, auto_confirm: e.target.checked}))}
                     />
-                    Automatické potvrzení studentů
+                    Automatic student confirmation
                   </label>
                 </div>
               </div>
@@ -1324,14 +1308,14 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                 className="button button-success"
                 disabled={editLoading}
               >
-                {editLoading ? '⏳ Ukládám změny...' : '✓ Uložit změny'}
+                {editLoading ? '⏳ Saving changes...' : '✓ Save Changes'}
               </button>
               <button 
                 type="button" 
                 className="button button-secondary"
                 onClick={() => setActiveTab('terms')}
               >
-                Zrušit
+                Cancel
               </button>
             </div>
           </form>
@@ -1343,9 +1327,9 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
 
 const getTermTypeName = (type) => {
   const typeMap = {
-    'LECTURE': 'Přednáška',
-    'EXERCISE': 'Cvičení',
-    'EXAM': 'Zkouška'
+    'LECTURE': 'Lecture',
+    'EXERCISE': 'Exercise',
+    'EXAM': 'Exam'
   };
   return typeMap[type] || type;
 };

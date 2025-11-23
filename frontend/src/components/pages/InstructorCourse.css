@@ -84,6 +84,7 @@
   color: #1e40af;
   font-size: 28px;
   font-weight: 700;
+  margin: 0;
 }
 
 .table-container {
@@ -106,20 +107,19 @@
 }
 
 .waiting-list {
-  background: #fef3c7;
-  border: 2px solid #fbbf24;
-  border-radius: 16px;
-  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .waiting-student-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px;
+  padding: 20px;
   background: white;
+  border: 2px solid #e0e7ff;
   border-radius: 12px;
-  margin-bottom: 12px;
   transition: all 0.3s ease;
 }
 
@@ -128,7 +128,7 @@
 }
 
 .waiting-student-item:hover {
-  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.2);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
   transform: translateX(4px);
 }
 
@@ -144,17 +144,17 @@
 }
 
 .info-box {
-  margin-top: 35px;
-  padding: 24px;
   background: #dbeafe;
   border: 2px solid #3b82f6;
-  border-radius: 16px;
+  color: #1e40af;
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 30px;
 }
 
 .info-box p {
   margin: 0;
-  color: #1e40af;
-  font-weight: 500;
+  font-size: 15px;
 }
 
 .settings-section {
@@ -201,6 +201,7 @@
   cursor: pointer;
   accent-color: #3b82f6;
 }
+
 .page-title {
   color: #1e40af;
   font-size: 48px;
@@ -218,14 +219,66 @@
 .course-item {
   background: white;
   border-radius: 20px;
-  padding: 30px;
+  padding: 0;
   box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
+  overflow: hidden;
+}
+
+.course-header {
+  padding: 24px 30px;
+  background: #f8fafc;
+  border-bottom: 2px solid #e0e7ff;
+}
+
+.course-title-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.course-title-section h3 {
+  margin: 0;
+  color: #1e40af;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.course-code {
+  background: #3b82f6;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.course-body {
+  padding: 24px 30px;
+}
+
+.course-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 20px;
+}
+
+.course-info-row span {
+  font-size: 15px;
+  color: #475569;
 }
 
 .course-description {
   color: #64748b;
-  margin: 16px 0;
+  margin: 20px 0;
   line-height: 1.6;
+  font-size: 15px;
+}
+
+.course-body .button {
+  margin-top: 16px;
 }
 
 .warning-message {
@@ -238,30 +291,34 @@
 .error-state,
 .empty-state {
   text-align: center;
-  padding: 80px 20px;
-  background: white;
-  border-radius: 20px;
-  margin: 40px auto;
-  max-width: 600px;
-  box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
+  padding: 60px 40px;
+  background: #f8fafc;
+  border: 2px dashed #cbd5e1;
+  border-radius: 16px;
+  margin: 40px 0;
 }
 
-.waiting-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+.empty-state p {
+  color: #64748b;
+  font-size: 16px;
+  margin: 0 0 20px 0;
+  font-weight: 500;
 }
 
-.waiting-student-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  background: white;
-  border: 2px solid #e0e7ff;
-  border-radius: 12px;
+.empty-state .button {
+  margin: 0 auto;
 }
-.term-form {
+
+.loading-state p,
+.error-state p {
+  color: #64748b;
+  font-size: 16px;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.term-form,
+.course-form {
   background: white;
   padding: 30px;
   border-radius: 16px;
@@ -278,51 +335,6 @@
   padding: 20px 0;
 }
 
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 15px;
-  color: #1e40af;
-  cursor: pointer;
-}
-
-.checkbox-label input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-}
-.term-form {
-  background: white;
-  padding: 30px;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
-}
-
-.two-columns {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-.checkbox-group {
-  padding: 20px 0;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 15px;
-  color: #1e40af;
-  cursor: pointer;
-}
-
-.checkbox-label input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-}
 .add-lecturer-form {
   background: white;
   padding: 30px;
@@ -349,19 +361,6 @@
   margin-bottom: 20px;
 }
 
-.info-box {
-  background: #dbeafe;
-  border: 2px solid #3b82f6;
-  color: #1e40af;
-  padding: 20px;
-  border-radius: 12px;
-  margin-top: 30px;
-}
-
-.info-box p {
-  margin: 0;
-  font-size: 15px;
-}
 .term-info-box {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
