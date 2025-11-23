@@ -274,21 +274,23 @@ const AdminUsers = () => {
                       </div>
                     </td>
                     <td>
-                      <div className="action-buttons">
-                        <button 
-                          className="button button-warning button-small"
-                          onClick={() => handleEditUser(user)}
-                        >
-                          Edit
-                        </button>
-                        <button 
-                          className="button button-danger button-small"
-                          onClick={() => handleDeleteUser(user.id, user.username)}
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
+  <div className="action-buttons">
+    <button 
+      className="button button-warning button-small"
+      onClick={() => handleEditUser(user)}
+    >
+      Edit
+    </button>
+    {user.role !== 'ADMIN' && (
+      <button 
+        className="button button-danger button-small"
+        onClick={() => handleDeleteUser(user.id, user.username)}
+      >
+        Delete
+      </button>
+    )}
+  </div>
+</td>
                   </tr>
                 );
               })}
