@@ -159,12 +159,6 @@ const AdminRooms = () => {
 
   return (
     <div className="admin-rooms">
-      <div className="page-header">
-        <button className="button button-success" onClick={handleAddNew}>
-          ➕ Add Room
-        </button>
-      </div>
-
       <div className="filter-section">
         <div className="filter-inputs">
           <div className="form-group">
@@ -177,9 +171,13 @@ const AdminRooms = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
         </div>
       </div>
+      <div className="action-bar">
+      <button className="button button-success button-small" onClick={handleAddNew}>
+        Add Room
+      </button>
+    </div>
 
       {filteredRooms.length === 0 ? (
         <div className="empty-state">
@@ -304,7 +302,7 @@ const AdminRooms = () => {
                 Cancel
               </button>
               <button className="button button-success" onClick={handleSave}>
-                 Save
+                Save
               </button>
             </div>
           </div>

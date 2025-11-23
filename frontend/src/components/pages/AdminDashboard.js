@@ -26,7 +26,6 @@ const AdminDashboard = () => {
       setLoading(true);
       setError(null);
 
-      // Load all data in parallel
       const [courses, users, rooms, terms] = await Promise.all([
         coursesAPI.getCourses(),
         usersAPI.getUsers(),
@@ -34,7 +33,6 @@ const AdminDashboard = () => {
         termsAPI.getTerms()
       ]);
 
-      // Calculate statistics
       const totalCourses = courses.length;
       const approvedCourses = courses.filter(c => c.approved).length;
       const pendingCourses = courses.filter(c => !c.approved).length;
@@ -51,7 +49,6 @@ const AdminDashboard = () => {
         totalRooms
       });
 
-      // Get upcoming terms (next 7 days)
       const today = new Date();
       const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
       
@@ -66,20 +63,19 @@ const AdminDashboard = () => {
       setUpcomingTerms(upcoming);
 
     } catch (err) {
-      setError('Nepodařilo se načíst data');
+      setError('Failed to load data');
       console.error('Error loading dashboard:', err);
     } finally {
       setLoading(false);
     }
   };
-
   const statsCards = [
-    { label: 'Celkem kurzů', value: stats.totalCourses, icon: '📚', color: '#3b82f6' },
-    { label: 'Schválené kurzy', value: stats.approvedCourses, icon: '✅', color: '#10b981' },
-    { label: 'Registrovaní studenti', value: stats.totalStudents, icon: '👨‍🎓', color: '#8b5cf6' },
-    { label: 'Čeká na schválení', value: stats.pendingCourses, icon: '⏳', color: '#f59e0b' },
-    { label: 'Vyučující', value: stats.totalLecturers, icon: '👨‍🏫', color: '#06b6d4' },
-    { label: 'Místnosti', value: stats.totalRooms, icon: '🏫', color: '#ec4899' }
+    { label: 'Total Courses', value: stats.totalCourses, color: '#3b82f6' },
+    { label: 'Approved Courses', value: stats.approvedCourses, color: '#10b981' },
+    { label: 'Registered Students', value: stats.totalStudents, color: '#8b5cf6' },
+    { label: 'Pending Approval', value: stats.pendingCourses, color: '#f59e0b' },
+    { label: 'Instructors', value: stats.totalLecturers, color: '#06b6d4' },
+    { label: 'Rooms', value: stats.totalRooms, color: '#ec4899' }
   ];
 
   const formatDate = (dateString) => {
@@ -88,15 +84,15 @@ const AdminDashboard = () => {
       day: date.getDate(),
       month: date.getMonth() + 1,
       year: date.getFullYear(),
-      time: date.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })
+      time: date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
     };
   };
 
   const getTermTypeName = (type) => {
     const typeMap = {
-      'LECTURE': 'Přednáška',
-      'EXERCISE': 'Cvičení',
-      'EXAM': 'Zkouška'
+      'LECTURE': 'Lecture',
+      'EXERCISE': 'Exercise',
+      'EXAM': 'Exam'
     };
     return typeMap[type] || type;
   };
@@ -105,7 +101,7 @@ const AdminDashboard = () => {
     return (
       <div className="admin-dashboard">
         <div className="loading-state">
-          <p>Načítání dashboardu...</p>
+          <p>Loading dashboard...</p>
         </div>
       </div>
     );
@@ -117,7 +113,7 @@ const AdminDashboard = () => {
         <div className="error-state">
           <p>{error}</p>
           <button className="button" onClick={loadDashboardData}>
-            Zkusit znovu
+            Try Again
           </button>
         </div>
       </div>
@@ -126,31 +122,23 @@ const AdminDashboard = () => {
 
   return (
     <div className="admin-dashboard">
-      <h1 className="page-title">Dashboard</h1>
-
-      {/* Stats Grid */}
-      <div className="stats-grid">
-        {statsCards.map((stat, index) => (
-          <div key={index} className="stat-card" style={{ borderTopColor: stat.color }}>
-            <div className="stat-icon" style={{ color: stat.color }}>
-              {stat.icon}
-            </div>
-            <div className="stat-value" style={{ color: stat.color }}>
-              {stat.value}
-            </div>
-            <div className="stat-label">{stat.label}</div>
-          </div>
-        ))}
+<div className="stats-grid">
+  {statsCards.map((stat, index) => (
+    <div key={index} className="stat-card" style={{ borderTopColor: stat.color }}>
+      <div className="stat-value" style={{ color: stat.color }}>
+        {stat.value}
       </div>
+      <div className="stat-label">{stat.label}</div>
+    </div>
+  ))}
+</div>
 
-      {/* Dashboard Content */}
       <div className="dashboard-content">
-        {/* Upcoming Terms */}
         <div className="dashboard-section">
-          <h2>Nadcházející termíny (příštích 7 dní)</h2>
+          <h2>Upcoming Terms (Next 7 Days)</h2>
           {upcomingTerms.length === 0 ? (
             <div className="empty-message">
-              <p>Žádné nadcházející termíny v příštích 7 dnech</p>
+              <p>No upcoming terms in the next 7 days</p>
             </div>
           ) : (
             <div className="upcoming-list">
@@ -164,15 +152,15 @@ const AdminDashboard = () => {
                     </div>
                     <div className="upcoming-info">
                       <div className="upcoming-name">
-                        {term.course?.title || 'Bez názvu'} - {getTermTypeName(term.type)}
+                        {term.course?.title || 'Untitled'} - {getTermTypeName(term.type)}
                       </div>
                       <div className="upcoming-instructor">
                         {term.course?.guarantee 
                           ? `${term.course.guarantee.first_name} ${term.course.guarantee.last_name}`
-                          : 'Neznámý'}
+                          : 'Unknown'}
                       </div>
                       <div className="upcoming-time">
-                        📅 {date.time} | 📍 {term.room || 'Bez místnosti'}
+                        {date.time} | {term.room || 'No room'}
                       </div>
                     </div>
                     <div className="upcoming-capacity">
@@ -185,59 +173,21 @@ const AdminDashboard = () => {
           )}
         </div>
 
-        {/* Quick Stats */}
-        <div className="dashboard-section">
-          <h2>Rychlý přehled</h2>
-          <div className="quick-stats">
-            <div className="quick-stat-item">
-              <div className="quick-stat-label">Naplněnost kurzů</div>
-              <div className="quick-stat-value">
-                {stats.totalCourses > 0 
-                  ? Math.round((stats.totalStudents / (stats.totalCourses * 30)) * 100) 
-                  : 0}%
-              </div>
-            </div>
-            <div className="quick-stat-item">
-              <div className="quick-stat-label">Průměr studentů/kurz</div>
-              <div className="quick-stat-value">
-                {stats.totalCourses > 0 
-                  ? Math.round(stats.totalStudents / stats.totalCourses) 
-                  : 0}
-              </div>
-            </div>
-            <div className="quick-stat-item">
-              <div className="quick-stat-label">Místností k dispozici</div>
-              <div className="quick-stat-value">{stats.totalRooms}</div>
-            </div>
-            <div className="quick-stat-item">
-              <div className="quick-stat-label">Čeká na schválení</div>
-              <div className="quick-stat-value" style={{ color: '#f59e0b' }}>
-                {stats.pendingCourses}
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
-      {/* Quick Actions */}
       <div className="quick-actions">
-        <h2>Rychlé akce</h2>
         <div className="actions-grid">
           <button className="action-card" onClick={() => navigate('/admin/courses')}>
-            <span className="action-icon">📚</span>
-            <span>Spravovat kurzy</span>
+            <span>Manage Courses</span>
           </button>
           <button className="action-card" onClick={() => navigate('/admin/users')}>
-            <span className="action-icon">👤</span>
-            <span>Spravovat uživatele</span>
+            <span>Manage Users</span>
           </button>
           <button className="action-card" onClick={() => navigate('/admin/rooms')}>
-            <span className="action-icon">🏫</span>
-            <span>Spravovat místnosti</span>
+            <span>Manage Rooms</span>
           </button>
           <button className="action-card" onClick={() => navigate('/create-course')}>
-            <span className="action-icon">➕</span>
-            <span>Vytvořit kurz</span>
+            <span>Create Course</span>
           </button>
         </div>
       </div>

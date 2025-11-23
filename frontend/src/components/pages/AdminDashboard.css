@@ -14,50 +14,44 @@
     text-align: center;
   }
   
-  /* Stats Grid */
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
     margin-bottom: 50px;
   }
   
   .stat-card {
     background: white;
-    border-radius: 20px;
-    padding: 32px;
+    border-radius: 16px;
+    padding: 20px 16px;
     text-align: center;
-    box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
+    box-shadow: 0 2px 12px rgba(30, 64, 175, 0.08);
     transition: all 0.3s ease;
-    border-top: 4px solid;
+    border-top: 3px solid;
     position: relative;
   }
   
   .stat-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 8px 28px rgba(30, 64, 175, 0.15);
-  }
-  
-  .stat-icon {
-    font-size: 48px;
-    margin-bottom: 16px;
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px rgba(30, 64, 175, 0.15);
   }
   
   .stat-value {
-    font-size: 48px;
+    font-size: 32px;
     font-weight: bold;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
   
   .stat-label {
-    font-size: 14px;
+    font-size: 11px;
     color: #64748b;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    line-height: 1.3;
   }
   
-  /* Dashboard Content - Two Columns */
   .dashboard-content {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
@@ -79,7 +73,6 @@
     margin-bottom: 24px;
   }
   
-  /* Activity List */
   .activity-list {
     display: flex;
     flex-direction: column;
@@ -137,7 +130,6 @@
     flex-shrink: 0;
   }
   
-  /* Upcoming List */
   .upcoming-list {
     display: flex;
     flex-direction: column;
@@ -206,7 +198,6 @@
     flex-shrink: 0;
   }
   
-  /* Quick Actions */
   .quick-actions {
     background: white;
     border-radius: 20px;
@@ -255,7 +246,6 @@
     font-size: 36px;
   }
   
-  /* Responsive */
   @media (max-width: 768px) {
     .admin-dashboard {
       padding: 20px 15px;
@@ -270,18 +260,12 @@
     }
   
     .stats-grid {
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     }
   
     .actions-grid {
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     }
-  }
-  .page-title {
-    color: #1e40af;
-    font-size: 48px;
-    font-weight: 700;
-    margin-bottom: 40px;
   }
   
   .loading-state,

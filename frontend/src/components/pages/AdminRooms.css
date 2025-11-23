@@ -19,18 +19,23 @@
     font-weight: 700;
     margin: 0;
   }
+  .action-bar {
+    justify-content: flex-start;
+    margin-bottom: 30px;
+  }
   
   .filter-section {
     background: white;
     border-radius: 20px;
     padding: 30px;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
   }
   
+  
   .filter-inputs {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 24px;
   }
   

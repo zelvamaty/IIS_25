@@ -152,13 +152,6 @@ const AdminCourses = () => {
 
   return (
     <div className="admin-courses">
-      <div className="page-header">
-        <h1 className="page-title">Course Management</h1>
-        <button className="button button-success" onClick={handleNewCourse}>
-          New Course
-        </button>
-      </div>
-
       <div className="filter-section">
         <div className="filter-inputs">
           <div className="form-group">
@@ -186,6 +179,12 @@ const AdminCourses = () => {
         </div>
       </div>
 
+      <div className="action-bar">
+        <button className="button button-success button-small" onClick={handleNewCourse}>
+          New Course
+        </button>
+      </div>
+
       {filteredCourses.length === 0 ? (
         <div className="empty-state">
           <p>No courses found</p>
@@ -201,6 +200,7 @@ const AdminCourses = () => {
                 <th>Capacity</th>
                 <th>Price</th>
                 <th>Status</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -268,38 +268,38 @@ const AdminCourses = () => {
                       )}
                     </td>
                     <td>
-  <div className="action-buttons">
-    <button 
-      className="button button-small" 
-      onClick={() => handleManageCourse(course.id)}
-    >
-      Manage
-    </button>
-    {!course.approved ? (
-      <>
-        <button 
-          className="button button-success button-small" 
-          onClick={() => handleApproveCourse(course.id, course.title)}
-        >
-          Approve
-        </button>
-        <button 
-          className="button button-warning button-small" 
-          onClick={() => handleRejectCourse(course.id, course.title)}
-        >
-          Reject
-        </button>
-      </>
-    ) : (
-      <button 
-        className="button button-danger button-small" 
-        onClick={() => handleDelete(course.id, course.title)}
-      >
-        Delete
-      </button>
-    )}
-  </div>
-</td>
+                      <div className="action-buttons">
+                        <button 
+                          className="button button-small" 
+                          onClick={() => handleManageCourse(course.id)}
+                        >
+                          Manage
+                        </button>
+                        {!course.approved ? (
+                          <>
+                            <button 
+                              className="button button-success button-small" 
+                              onClick={() => handleApproveCourse(course.id, course.title)}
+                            >
+                              Approve
+                            </button>
+                            <button 
+                              className="button button-warning button-small" 
+                              onClick={() => handleRejectCourse(course.id, course.title)}
+                            >
+                              Reject
+                            </button>
+                          </>
+                        ) : (
+                          <button 
+                            className="button button-danger button-small" 
+                            onClick={() => handleDelete(course.id, course.title)}
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 );
               })}
