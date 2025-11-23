@@ -286,7 +286,7 @@ class CourseViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'], permission_classes=[IsLecturerOrGuaranteeOrAdmin])
     def list_students(self, request, pk=None):
         course = self.get_object()
-        if (is_admin(request.user) or course.guarantee == request.user or course.lecturers == request.user):
+        if (is_admin(request.user) or course.guarantee == request.user):
             students = course.course_enrollments.select_related('user')
             student_data = [{'id': enrollment.user.id,'enrollment_id': enrollment.id , 'username': enrollment.user.username,
                              'first_name': enrollment.user.first_name, 'last_name': enrollment.user.last_name,
