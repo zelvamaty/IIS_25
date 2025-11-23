@@ -244,58 +244,59 @@ const AdminRooms = () => {
               <button className="close-button" onClick={() => setShowModal(false)}>×</button>
             </div>
             <div className="modal-body">
-              <div className="form-row">
-                <label className="form-label">Room Name *</label>
-                <input 
-                  type="text" 
-                  name="name"
-                  className="input-field" 
-                  placeholder="e.g. A112" 
-                  value={formData.name}
-                  onChange={handleFormChange}
-                  required
-                />
-              </div>
+  <div className="form-row">
+    <label className="form-label">Room Name *</label>
+    <input 
+      type="text" 
+      name="name"
+      className="input-field" 
+      placeholder="e.g. A112" 
+      value={formData.name}
+      onChange={handleFormChange}
+      required
+    />
+  </div>
+  
+  <div className="form-row">
+    <label className="form-label">Building *</label>
+    <input 
+      type="text" 
+      name="building"
+      className="input-field" 
+      placeholder="e.g. Building A"
+      value={formData.building}
+      onChange={handleFormChange}
+      required
+    />
+  </div>
+
+  <div className="form-row">
+    <label className="form-label">Floor *</label>
+    <input 
+      type="number" 
+      name="floor"
+      className="input-field" 
+      placeholder="1" 
+      value={formData.floor}
+      onChange={handleFormChange}
+      required
+    />
+  </div>
+  
+  <div className="form-row">
+    <label className="form-label">Capacity *</label>
+    <input 
+      type="number" 
+      name="capacity"
+      className="input-field" 
+      placeholder="30" 
+      value={formData.capacity}
+      onChange={handleFormChange}
+      required
+    />
+  </div>
               
-              <div className="form-row two-columns">
-                <div>
-                  <label className="form-label">Building *</label>
-                  <input 
-                    type="text" 
-                    name="building"
-                    className="input-field" 
-                    placeholder="e.g. Building A"
-                    value={formData.building}
-                    onChange={handleFormChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="form-label">Floor *</label>
-                  <input 
-                    type="number" 
-                    name="floor"
-                    className="input-field" 
-                    placeholder="1" 
-                    value={formData.floor}
-                    onChange={handleFormChange}
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="form-row">
-                <label className="form-label">Capacity *</label>
-                <input 
-                  type="number" 
-                  name="capacity"
-                  className="input-field" 
-                  placeholder="30" 
-                  value={formData.capacity}
-                  onChange={handleFormChange}
-                  required
-                />
-              </div>
+            
             </div>
             <div className="modal-footer">
               <button className="button button-secondary" onClick={() => setShowModal(false)}>
