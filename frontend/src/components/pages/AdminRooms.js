@@ -30,7 +30,7 @@ const AdminRooms = () => {
       const data = await roomsAPI.getRooms();
       setRooms(data);
     } catch (err) {
-      setError('Nepodařilo se načíst místnosti');
+      setError('Failed to load rooms');
       console.error('Error loading rooms:', err);
     } finally {
       setLoading(false);
@@ -81,9 +81,8 @@ const AdminRooms = () => {
 
   const handleSave = async () => {
     try {
-      // Automaticky vytvor location z building a floor
       const location = formData.building && formData.floor 
-        ? `${formData.building}, ${formData.floor}. patro`
+        ? `${formData.building}, ${formData.floor}. floor`
         : (formData.building || '');
 
       const roomData = {
@@ -97,36 +96,34 @@ const AdminRooms = () => {
 
       if (editingRoom) {
         await roomsAPI.updateRoom(editingRoom.id, roomData);
-        alert('Místnost byla úspěšně upravena');
+        alert('Room has been successfully updated');
       } else {
         await roomsAPI.createRoom(roomData);
-        alert('Místnost byla úspěšně vytvořena');
+        alert('Room has been successfully created');
       }
 
       setShowModal(false);
       await loadRooms();
     } catch (err) {
-      alert(err.message || 'Operace se nezdařila');
+      alert(err.message || 'Operation failed');
       console.error('Error saving room:', err);
     }
   };
 
   const handleDelete = async (id, name) => {
-    if (!window.confirm(`Opravdu chcete smazat místnost ${name}?`)) {
+    if (!window.confirm(`Do you really want to delete room ${name}?`)) {
       return;
     }
 
     try {
       await roomsAPI.deleteRoom(id);
-      alert('Místnost byla smazána');
+      alert('Room has been deleted');
       await loadRooms();
     } catch (err) {
-      alert(err.message || 'Smazání místnosti se nezdařilo');
+      alert(err.message || 'Deleting room failed');
       console.error('Error deleting room:', err);
     }
   };
-
-
 
   const filteredRooms = rooms.filter(room => {
     const matchesSearch = room.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -141,7 +138,7 @@ const AdminRooms = () => {
     return (
       <div className="admin-rooms">
         <div className="loading-state">
-          <p>Načítání místností...</p>
+          <p>Loading rooms...</p>
         </div>
       </div>
     );
@@ -153,7 +150,7 @@ const AdminRooms = () => {
         <div className="error-state">
           <p>{error}</p>
           <button className="button" onClick={loadRooms}>
-            Zkusit znovu
+            Try Again
           </button>
         </div>
       </div>
@@ -164,45 +161,29 @@ const AdminRooms = () => {
     <div className="admin-rooms">
       <div className="page-header">
         <button className="button button-success" onClick={handleAddNew}>
-          ➕ Přidat místnost
+          ➕ Add Room
         </button>
       </div>
 
-      {/* Filters */}
       <div className="filter-section">
         <div className="filter-inputs">
           <div className="form-group">
-            <label className="form-label">Hledat místnost</label>
+            <label className="form-label">Search Room</label>
             <input
               type="text"
               className="input-field"
-              placeholder="Název nebo budova..."
+              placeholder="Name or building..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className="form-group">
-            <label className="form-label">Budova</label>
-            <select
-              className="input-field"
-              value={filterBuilding}
-              onChange={(e) => setFilterBuilding(e.target.value)}
-            >
-              <option value="">Všechny budovy</option>
-              {uniqueBuildings.map(building => (
-                <option key={building} value={building}>{building}</option>
-              ))}
-            </select>
-          </div>
+          
         </div>
       </div>
 
-
-
-      {/* Rooms Grid */}
       {filteredRooms.length === 0 ? (
         <div className="empty-state">
-          <p>Žádné místnosti nenalezeny</p>
+          <p>No rooms found</p>
         </div>
       ) : (
         <div className="rooms-grid">
@@ -210,7 +191,6 @@ const AdminRooms = () => {
             <div key={room.id} className="room-card">
               <div className="room-header">
                 <div className="room-name">{room.name}</div>
-                
               </div>
               
               <div className="room-body">
@@ -224,18 +204,18 @@ const AdminRooms = () => {
                 {room.building && (
                   <div className="room-info-item">
                     <span className="info-icon">🏢</span>
-                    <span>{room.building} - {room.floor}. patro</span>
+                    <span>{room.building} - {room.floor}. floor</span>
                   </div>
                 )}
                 
                 <div className="room-info-item">
                   <span className="info-icon">👥</span>
-                  <span>Kapacita: {room.capacity} míst</span>
+                  <span>Capacity: {room.capacity}</span>
                 </div>
                 
                 {room.equipment && room.equipment.length > 0 && (
                   <div className="room-equipment">
-                    <div className="equipment-label">Vybavení:</div>
+                    <div className="equipment-label">Equipment:</div>
                     <div className="equipment-tags">
                       {room.equipment.map((item, index) => (
                         <span key={index} className="equipment-tag">{item}</span>
@@ -247,10 +227,10 @@ const AdminRooms = () => {
               
               <div className="room-footer">
                 <button className="button button-small" onClick={() => handleEdit(room)}>
-                  ✏️ Upravit
+                  Edit
                 </button>
                 <button className="button button-small button-danger" onClick={() => handleDelete(room.id, room.name)}>
-                  🗑️ Smazat
+                  Delete
                 </button>
               </div>
             </div>
@@ -258,22 +238,21 @@ const AdminRooms = () => {
         </div>
       )}
 
-      {/* Modal */}
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>{editingRoom ? 'Upravit místnost' : 'Přidat místnost'}</h2>
+              <h2>{editingRoom ? 'Edit Room' : 'Add Room'}</h2>
               <button className="close-button" onClick={() => setShowModal(false)}>×</button>
             </div>
             <div className="modal-body">
               <div className="form-row">
-                <label className="form-label">Název místnosti *</label>
+                <label className="form-label">Room Name *</label>
                 <input 
                   type="text" 
                   name="name"
                   className="input-field" 
-                  placeholder="např. A112" 
+                  placeholder="e.g. A112" 
                   value={formData.name}
                   onChange={handleFormChange}
                   required
@@ -282,19 +261,19 @@ const AdminRooms = () => {
               
               <div className="form-row two-columns">
                 <div>
-                  <label className="form-label">Budova *</label>
+                  <label className="form-label">Building *</label>
                   <input 
                     type="text" 
                     name="building"
                     className="input-field" 
-                    placeholder="např. Budova A"
+                    placeholder="e.g. Building A"
                     value={formData.building}
                     onChange={handleFormChange}
                     required
                   />
                 </div>
                 <div>
-                  <label className="form-label">Patro *</label>
+                  <label className="form-label">Floor *</label>
                   <input 
                     type="number" 
                     name="floor"
@@ -308,7 +287,7 @@ const AdminRooms = () => {
               </div>
               
               <div className="form-row">
-                <label className="form-label">Kapacita *</label>
+                <label className="form-label">Capacity *</label>
                 <input 
                   type="number" 
                   name="capacity"
@@ -319,15 +298,13 @@ const AdminRooms = () => {
                   required
                 />
               </div>
-            
-            
             </div>
             <div className="modal-footer">
               <button className="button button-secondary" onClick={() => setShowModal(false)}>
-                Zrušit
+                Cancel
               </button>
               <button className="button button-success" onClick={handleSave}>
-                💾 Uložit
+                 Save
               </button>
             </div>
           </div>

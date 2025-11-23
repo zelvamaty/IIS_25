@@ -21,11 +21,11 @@ const StudentCourseRegistration = () => {
   }, [id]);
   const handleUnregisterFromTerm = async (registrationId) => {
     
-    const confirmed = window.confirm('Do you really want to unregister from this term?');
+    // const confirmed = window.confirm('Do you really want to unregister from this term?');
     
-    if (!confirmed) {
-      return;
-    }
+    // if (!confirmed) {
+    //   return;
+    // }
   
     try {
       setRegistering(true);
@@ -89,9 +89,9 @@ const StudentCourseRegistration = () => {
   };
 
   const handleLeaveCourse = async () => {
-    if (!window.confirm(`Do you really want to leave the course "${course.title}"? This action is irreversible.`)) {
-      return;
-    }
+    // if (!window.confirm(`Do you really want to leave the course "${course.title}"? This action is irreversible.`)) {
+    //   return;
+    // }
   
     try {
       setRegistering(true);
@@ -107,9 +107,9 @@ const StudentCourseRegistration = () => {
   };
 
   const handleRegisterTerm = async (termId) => {
-    if (!window.confirm('Do you really want to register for this term?')) {
-      return;
-    }
+    // if (!window.confirm('Do you really want to register for this term?')) {
+    //   return;
+    // }
 
     try {
       setRegistering(true);
@@ -129,9 +129,9 @@ const StudentCourseRegistration = () => {
   };
 
   const handleEnrollCourse = async () => {
-    if (!window.confirm(`Do you really want to enroll in the course "${course.title}"?`)) {
-      return;
-    }
+    // if (!window.confirm(`Do you really want to enroll in the course "${course.title}"?`)) {
+    //   return;
+    // }
 
     try {
       setRegistering(true);

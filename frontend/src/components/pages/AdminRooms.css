@@ -10,7 +10,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
   }
   
   .page-title {
@@ -20,7 +20,6 @@
     margin: 0;
   }
   
-  /* Filters */
   .filter-section {
     background: white;
     border-radius: 20px;
@@ -32,13 +31,11 @@
   .filter-inputs {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 42px;
-
+    gap: 24px;
   }
   
   .form-group {
     margin-bottom: 0;
-    gap: 42px;
   }
   
   .form-label {
@@ -60,6 +57,7 @@
     transition: all 0.3s ease;
     background: white;
     color: #1e293b;
+    box-sizing: border-box;
   }
   
   .input-field:focus {
@@ -68,7 +66,6 @@
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
   
-  /* Stats */
   .rooms-stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -84,6 +81,7 @@
     text-align: center;
     box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
     transition: all 0.3s ease;
+    position: relative;
   }
   
   .stat-card::before {
@@ -116,7 +114,6 @@
     letter-spacing: 0.5px;
   }
   
-  /* Rooms Grid */
   .rooms-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -152,15 +149,7 @@
     font-size: 24px;
     font-weight: 700;
   }
-  
-  .room-status {
-    padding: 6px 14px;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 600;
-    color: white;
-  }
-  
+
   .room-body {
     padding: 24px;
   }
@@ -174,10 +163,15 @@
     font-size: 15px;
   }
   
+  .room-info-item:last-child {
+    margin-bottom: 0;
+  }
+  
   .info-icon {
     font-size: 20px;
     width: 32px;
     text-align: center;
+    flex-shrink: 0;
   }
   
   .room-equipment {
@@ -258,11 +252,19 @@
     transform: translateY(-2px);
   }
   
+  .button-secondary {
+    background: #60a5fa;
+    color: white;
+  }
+  
+  .button-secondary:hover {
+    background: #3b82f6;
+  }
+  
   .button:hover {
     box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
   }
   
-  /* Empty State */
   .empty-state {
     text-align: center;
     padding: 80px 20px;
@@ -271,7 +273,6 @@
     font-weight: 500;
   }
   
-  /* Modal */
   .modal-overlay {
     position: fixed;
     top: 0;
@@ -290,8 +291,8 @@
     background: white;
     border-radius: 20px;
     width: 90%;
-    max-width: 600px;
-    max-height: 80vh;
+    max-width: 550px;
+    max-height: 85vh;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -309,6 +310,7 @@
   
   .modal-header h2 {
     margin: 0;
+    color: white;
     font-size: 24px;
     font-weight: 700;
   }
@@ -326,6 +328,7 @@
     justify-content: center;
     border-radius: 10px;
     transition: all 0.2s;
+    flex-shrink: 0;
   }
   
   .close-button:hover {
@@ -336,22 +339,37 @@
     padding: 32px;
     overflow-y: auto;
     flex: 1;
+    box-sizing: border-box;
+  }
+
+  .modal-body * {
+    box-sizing: border-box;
   }
   
   .form-row {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
   }
   
-  .form-row.two-columns {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+  .form-row:last-child {
+    margin-bottom: 0;
+  }
+  
+  
+  .modal-body .form-row.two-columns {
+    display: flex;
+    flex-direction: column;
     gap: 20px;
+  }
+  
+  .modal-body .form-row.two-columns > div {
+    display: flex;
+    flex-direction: column;
   }
   
   .checkbox-group {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
     margin-top: 12px;
   }
   
@@ -388,16 +406,17 @@
     gap: 12px;
   }
   
-  .button-secondary {
-    background: #60a5fa;
-    color: white;
+  .loading-state,
+  .error-state {
+    text-align: center;
+    padding: 80px 20px;
+    background: white;
+    border-radius: 20px;
+    margin: 40px auto;
+    max-width: 600px;
+    box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
   }
   
-  .button-secondary:hover {
-    background: #3b82f6;
-  }
-  
-  /* Responsive */
   @media (max-width: 768px) {
     .admin-rooms {
       padding: 20px 15px;
@@ -424,53 +443,4 @@
     .rooms-stats {
       grid-template-columns: repeat(2, 1fr);
     }
-  }
-  .page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-  }
-  
-  .page-title {
-    color: #1e40af;
-    font-size: 48px;
-    font-weight: 700;
-    margin: 0;
-  }
-  
-  .loading-state,
-  .error-state {
-    text-align: center;
-    padding: 80px 20px;
-    background: white;
-    border-radius: 20px;
-    margin: 40px auto;
-    max-width: 600px;
-    box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
-  }
-  
-  .checkbox-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .checkbox-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-  }
-  
-  .checkbox-label input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-  }
-  
-  .two-columns {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
   }
