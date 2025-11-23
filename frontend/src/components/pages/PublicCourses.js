@@ -196,7 +196,7 @@ const PublicCourses = ({ user, onShowLogin }) => {
                   <p>
                     <strong>Capacity:</strong>{' '}
                     <span className={isFull ? 'capacity-full' : 'capacity-available'}>
-                      {course.enrolled_count}/{course.capacity} seats
+                      {course.enrolled_count}/{course.capacity} 
                     </span>
                   </p>
                   <p>
