@@ -117,6 +117,17 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.errors, status=400)
 
+    @action(detail=True, methods=['patch'], permission_classes=[IsAdmin])
+    def change_users_password(self, request, pk=None):
+        user = self.get_object()
+        new_password = request.data.get('new_password')
+
+        if not new_password:
+            return Response({'detail': 'New password is required.'}, status=400)
+
+        user.set_password(new_password)
+        user.save()
+        return Response({'detail': 'User password changed successfully.'})
 
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
