@@ -2,6 +2,11 @@ import React from 'react';
 import './Header.css';
 
 const Header = ({ user, onLogout, onLogin }) => {
+  const truncateText = (text, maxLength) => {
+    if (!text || text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  };
+
   return (
     <header className="header">
       <div className="header-content">
@@ -15,7 +20,7 @@ const Header = ({ user, onLogout, onLogin }) => {
           <div className="user-section">
             {user ? (
               <div className="user-info">
-                <span className="user-name">{user.name}</span>
+                <span className="user-name">{truncateText(user.name, 30)}</span>
                 <button className="button button-secondary" onClick={onLogout}>
                   Logout
                 </button>
@@ -29,6 +34,7 @@ const Header = ({ user, onLogout, onLogin }) => {
         </div>
       </div>
     </header>
+    
   );
 };
 

@@ -23,7 +23,14 @@ function AppContent() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [guestMode, setGuestMode] = useState(false);
-
+  const loadUser = async () => {
+    try {
+      const userInfo = await authAPI.getCurrentUser();
+      setUser(userInfo);
+    } catch (err) {
+      console.error('Error loading user:', err);
+    }
+  };
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem('token');
@@ -174,7 +181,7 @@ function AppContent() {
         <Route path="/student/schedule" element={mappedUser?.role === 'Student' ? <MySchedule /> : <Navigate to="/courses" />} />
         <Route path="/course/:id" element={mappedUser?.role === 'Student' ? <StudentCourseRegistration /> : <Navigate to="/courses" />} />
         
-        <Route path="/profile" element={mappedUser ? <UserProfile user={mappedUser} /> : <Navigate to="/courses" />} />
+        <Route path="/profile" element={mappedUser ? <UserProfile user={mappedUser} onProfileUpdate={loadUser} /> : <Navigate to="/courses" />} />
       </Routes>
     </div>
   );

@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import './UserProfile.css';
 import { usersAPI } from '../services/api';
 
-const UserProfile = ({ user }) => {
+const UserProfile = ({ user,onProfileUpdate }) => {
   const [userDetails, setUserDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
+  const [expandedFields, setExpandedFields] = useState({});
   
   const [profileData, setProfileData] = useState({
     first_name: '',
@@ -47,6 +48,22 @@ const UserProfile = ({ user }) => {
     }
   };
 
+  const toggleFieldExpansion = (field) => {
+    setExpandedFields(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }));
+  };
+
+  const truncateText = (text, maxLength) => {
+    if (!text || text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  };
+
+  const isFieldExpanded = (field) => {
+    return expandedFields[field];
+  };
+
   const handleProfileChange = (e) => {
     setProfileData({
       ...profileData,
@@ -54,7 +71,6 @@ const UserProfile = ({ user }) => {
     });
     setProfileError('');
   };
-
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     setProfileError('');
@@ -64,6 +80,11 @@ const UserProfile = ({ user }) => {
       await usersAPI.updateUser(userDetails.id, profileData);
       setProfileSuccess('Profile has been successfully updated');
       await loadUserDetails();
+      
+      // Call the parent callback to refresh user data
+      if (onProfileUpdate) {
+        await onProfileUpdate();
+      }
       
       setTimeout(() => {
         setIsEditingProfile(false);
@@ -116,8 +137,6 @@ const UserProfile = ({ user }) => {
     }
   };
 
-
-
   if (loading) {
     return (
       <div className="user-profile">
@@ -141,14 +160,25 @@ const UserProfile = ({ user }) => {
     );
   }
 
+  const username = userDetails?.username || '';
+  const email = userDetails?.email || 'Not set';
+  const firstName = userDetails?.first_name || 'Not set';
+  const lastName = userDetails?.last_name || 'Not set';
+
+  const isUsernameLong = username.length > 20;
+  const isEmailLong = email.length > 30;
+  const isFirstNameLong = firstName.length > 25;
+  const isLastNameLong = lastName.length > 25;
+
+  const fullHeaderName = `${userDetails?.first_name || ''} ${userDetails?.last_name || ''}`.trim();
+  const displayHeaderName = truncateText(fullHeaderName, 40);
+
   return (
     <div className="user-profile">
       <div className="profile-container">
         <div className="profile-header">
-          
           <div className="profile-header-info">
-            <h1>{userDetails?.first_name} {userDetails?.last_name}</h1>
-            
+            <h1>{displayHeaderName}</h1>
           </div>
         </div>
 
@@ -246,32 +276,86 @@ const UserProfile = ({ user }) => {
               <div className="detail-item">
                 <div className="detail-content">
                   <label>Username</label>
-                  <p>{userDetails?.username}</p>
+                  <div className="expandable-cell">
+                    <p>
+                      {isFieldExpanded('username') || !isUsernameLong
+                        ? username
+                        : truncateText(username, 20)}
+                    </p>
+                    {isUsernameLong && (
+                      <button 
+                        className="expand-button"
+                        onClick={() => toggleFieldExpansion('username')}
+                      >
+                        {isFieldExpanded('username') ? 'Show less' : 'Show more'}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
 
               <div className="detail-item">
                 <div className="detail-content">
                   <label>Email</label>
-                  <p>{userDetails?.email || 'Not set'}</p>
+                  <div className="expandable-cell">
+                    <p>
+                      {isFieldExpanded('email') || !isEmailLong
+                        ? email
+                        : truncateText(email, 30)}
+                    </p>
+                    {isEmailLong && email !== 'Not set' && (
+                      <button 
+                        className="expand-button"
+                        onClick={() => toggleFieldExpansion('email')}
+                      >
+                        {isFieldExpanded('email') ? 'Show less' : 'Show more'}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
 
               <div className="detail-item">
                 <div className="detail-content">
                   <label>First Name</label>
-                  <p>{userDetails?.first_name || 'Not set'}</p>
+                  <div className="expandable-cell">
+                    <p>
+                      {isFieldExpanded('firstName') || !isFirstNameLong
+                        ? firstName
+                        : truncateText(firstName, 25)}
+                    </p>
+                    {isFirstNameLong && firstName !== 'Not set' && (
+                      <button 
+                        className="expand-button"
+                        onClick={() => toggleFieldExpansion('firstName')}
+                      >
+                        {isFieldExpanded('firstName') ? 'Show less' : 'Show more'}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
 
               <div className="detail-item">
                 <div className="detail-content">
                   <label>Last Name</label>
-                  <p>{userDetails?.last_name || 'Not set'}</p>
+                  <div className="expandable-cell">
+                    <p>
+                      {isFieldExpanded('lastName') || !isLastNameLong
+                        ? lastName
+                        : truncateText(lastName, 25)}
+                    </p>
+                    {isLastNameLong && lastName !== 'Not set' && (
+                      <button 
+                        className="expand-button"
+                        onClick={() => toggleFieldExpansion('lastName')}
+                      >
+                        {isFieldExpanded('lastName') ? 'Show less' : 'Show more'}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
-
-            
 
               <div className="detail-item">
                 <div className="detail-content">
