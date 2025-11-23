@@ -22,7 +22,7 @@ const MyCourses = () => {
       setMyCourses(courses);
 
     } catch (err) {
-      setError('Nepodařilo se načíst kurzy');
+      setError('Failed to load courses');
       console.error('Error loading my courses:', err);
     } finally {
       setLoading(false);
@@ -33,7 +33,7 @@ const MyCourses = () => {
     return (
       <div className="my-courses">
         <div className="loading-state">
-          <p>Načítání kurzů...</p>
+          <p>Loading courses...</p>
         </div>
       </div>
     );
@@ -45,7 +45,7 @@ const MyCourses = () => {
         <div className="error-state">
           <p>{error}</p>
           <button className="button" onClick={loadMyCourses}>
-            Zkusit znovu
+            Try again
           </button>
         </div>
       </div>
@@ -57,45 +57,28 @@ const MyCourses = () => {
 
   return (
     <div className="my-courses">
-      <h1 className="page-title">Zapsané kurzy</h1>
-
-      {/* Statistics */}
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-value">{approvedCourses.length}</div>
-          <div className="stat-label">AKTIVNÍ KURZY</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-value">{pendingCourses.length}</div>
-          <div className="stat-label">ČEKAJÍCÍ NA SCHVÁLENÍ</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-value">{myCourses.length}</div>
-          <div className="stat-label">CELKEM KURZŮ</div>
-        </div>
-      </div>
-
-      {/* Pending Courses */}
       {pendingCourses.length > 0 && (
         <div className="courses-section">
-          <h2 className="section-title">⏳ Čekající na schválení</h2>
+          <h2 className="section-title"> Pending Approval</h2>
           <div className="courses-list">
             {pendingCourses.map(course => (
               <div key={course.id} className="course-card pending">
-                <div className="course-header">
+                <div className="course-card-header">
                   <h3>{course.title}</h3>
                   <span className="course-code">{course.code}</span>
-                  <span className="badge badge-warning">Čeká na schválení</span>
                 </div>
-                <div className="course-body">
-                  <p><strong>Garant:</strong> {course.guarantee}</p>
+                <div className="course-status">
+                  <span className="badge badge-warning">Waiting for approval</span>
                 </div>
-                <div className="course-footer">
+                <div className="course-card-body">
+                  <p><strong>Guarantor:</strong> {course.guarantee}</p>
+                </div>
+                <div className="course-card-footer">
                   <button 
                     className="button"
                     onClick={() => navigate(`/course/${course.id}`)}
                   >
-                    Detail kurzu
+                    Course details
                   </button>
                 </div>
               </div>
@@ -104,35 +87,36 @@ const MyCourses = () => {
         </div>
       )}
 
-      {/* Approved Courses */}
       <div className="courses-section">
-        <h2 className="section-title">✅ Schválené kurzy</h2>
+        <h2 className="section-title"> Approved Courses</h2>
         
         {approvedCourses.length === 0 ? (
           <div className="empty-state">
-            <p>Zatím nemáte žádné schválené kurzy</p>
+            <p>You have no approved courses yet</p>
             <button className="button" onClick={() => navigate('/courses')}>
-              Prohlédnout dostupné kurzy
+              Browse available courses
             </button>
           </div>
         ) : (
           <div className="courses-list">
             {approvedCourses.map(course => (
               <div key={course.id} className="course-card approved">
-                <div className="course-header">
+                <div className="course-card-header">
                   <h3>{course.title}</h3>
                   <span className="course-code">{course.code}</span>
-                  <span className="badge badge-success">✓ Schváleno</span>
                 </div>
-                <div className="course-body">
-                  <p><strong>Garant:</strong> {course.guarantee}</p>
+                <div className="course-status">
+                  <span className="badge badge-success">✓ Approved</span>
                 </div>
-                <div className="course-footer">
+                <div className="course-card-body">
+                  <p><strong>Guarantor:</strong> {course.guarantee}</p>
+                </div>
+                <div className="course-card-footer">
                   <button 
                     className="button"
                     onClick={() => navigate(`/course/${course.id}`)}
                   >
-                    Detail kurzu
+                    Course details
                   </button>
                 </div>
               </div>
@@ -143,9 +127,9 @@ const MyCourses = () => {
 
       {myCourses.length === 0 && (
         <div className="empty-state">
-          <p>Nejste zapsání do žádných kurzů</p>
+          <p>You are not enrolled in any courses</p>
           <button className="button" onClick={() => navigate('/courses')}>
-            Prohlédnout dostupné kurzy
+            Browse available courses
           </button>
         </div>
       )}
