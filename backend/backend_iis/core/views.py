@@ -18,6 +18,8 @@ class IsAdmin(permissions.BasePermission):
 
 class IsGuaranteeOrAdmin(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
+        if isinstance(obj, Term):
+            return is_admin(request.user) or obj.course.guarantee == request.user
         return is_admin(request.user) or obj.guarantee == request.user
 
 class IsLecturerOrGuaranteeOrAdmin(permissions.BasePermission):
