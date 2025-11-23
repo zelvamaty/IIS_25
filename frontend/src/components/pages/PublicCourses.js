@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './PublicCourses.css';
 import { coursesAPI } from '../services/api';
 
-const PublicCourses = ({ user, onShowLogin }) => {  // Pridané onShowLogin prop
+const PublicCourses = ({ user, onShowLogin }) => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('');
@@ -12,9 +12,24 @@ const PublicCourses = ({ user, onShowLogin }) => {  // Pridané onShowLogin prop
   const [error, setError] = useState(null);
   const [enrollingCourseId, setEnrollingCourseId] = useState(null);
   const [availableTypes, setAvailableTypes] = useState([]);
+  const [myEnrolledCourses, setMyEnrolledCourses] = useState([]);
+
   useEffect(() => {
     loadCourses();
-  }, []);
+    if (user) {
+      loadMyEnrollments();
+    }
+  }, [user]);
+
+  const loadMyEnrollments = async () => {
+    try {
+      const enrollments = await coursesAPI.getMyCourses();
+      setMyEnrolledCourses(enrollments.map(e => e.id));
+    } catch (err) {
+      console.error('Error loading enrollments:', err);
+    }
+  };
+
   const getTypeName = (type) => {
     const typeMap = {
       'HARDWARE': 'Hardware',
@@ -27,6 +42,7 @@ const PublicCourses = ({ user, onShowLogin }) => {  // Pridané onShowLogin prop
     };
     return typeMap[type] || type;
   };
+
   const loadCourses = async () => {
     try {
       setLoading(true);
@@ -35,14 +51,10 @@ const PublicCourses = ({ user, onShowLogin }) => {  // Pridané onShowLogin prop
       const approvedCourses = data.filter(course => course.approved);
       setCourses(approvedCourses);
       
-      // Extrahuj unikátne typy kurzov
       const types = [...new Set(approvedCourses.map(c => c.type).filter(Boolean))];
       setAvailableTypes(types);
-      
-      console.log('Courses:', approvedCourses); // DEBUG
-      console.log('Available types:', types); // DEBUG
     } catch (err) {
-      setError('Nepodařilo se načíst kurzy. Zkuste to prosím později.');
+      setError('Failed to load courses. Please try again later.');
       console.error('Error loading courses:', err);
     } finally {
       setLoading(false);
@@ -51,11 +63,10 @@ const PublicCourses = ({ user, onShowLogin }) => {  // Pridané onShowLogin prop
 
   const handleEnroll = async (courseId) => {
     if (!user) {
-      // Guest user trying to enroll - show login
       if (onShowLogin) {
         onShowLogin();
       } else {
-        alert('Pro zápis do kurzu se musíte přihlásit');
+        alert('You must be logged in to enroll in a course');
       }
       return;
     }
@@ -63,11 +74,12 @@ const PublicCourses = ({ user, onShowLogin }) => {  // Pridané onShowLogin prop
     try {
       setEnrollingCourseId(courseId);
       await coursesAPI.enrollInCourse(courseId);
-      alert('Úspěšně jste se zapsali do kurzu!');
+      alert('Successfully enrolled in the course!');
       await loadCourses();
+      await loadMyEnrollments();
     } catch (err) {
       console.error('Error enrolling in course:', err);
-      alert(err.message || 'Zápis do kurzu se nezdařil');
+      alert(err.message || 'Course enrollment failed');
     } finally {
       setEnrollingCourseId(null);
     }
@@ -88,7 +100,7 @@ const PublicCourses = ({ user, onShowLogin }) => {  // Pridané onShowLogin prop
     return (
       <div className="public-courses">
         <div className="loading-state">
-          <p>Načítání kurzů...</p>
+          <p>Loading courses...</p>
         </div>
       </div>
     );
@@ -100,7 +112,7 @@ const PublicCourses = ({ user, onShowLogin }) => {  // Pridané onShowLogin prop
         <div className="error-state">
           <p>{error}</p>
           <button className="button" onClick={loadCourses}>
-            Zkusit znovu
+            Try again
           </button>
         </div>
       </div>
@@ -110,47 +122,48 @@ const PublicCourses = ({ user, onShowLogin }) => {  // Pridané onShowLogin prop
   return (
     <div className="public-courses">
       <div className="filter-section">
-        <h3>Filtr kurzů:</h3>
+        <h3>Filter courses:</h3>
         <div className="filter-inputs">
           <div className="form-group">
-            <label className="form-label">Hledat kurz</label>
+            <label className="form-label">Search course</label>
             <input
               type="text"
               className="input-field"
-              placeholder="Zadejte název nebo kód kurzu..."
+              placeholder="Enter course name or code..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <div className="form-group">
-  <label className="form-label">Typ kurzu</label>
-  <select
-    className="input-field"
-    value={filterType}
-    onChange={(e) => setFilterType(e.target.value)}
-  >
-    <option value="">Všechny typy</option>
-    <option value="HARDWARE">Hardware</option>
-    <option value="OS">Operating Systems</option>
-    <option value="AI">Artificial Intelligence</option>
-    <option value="WEB">Web Development</option>
-    <option value="SECURITY">Security</option>
-    <option value="NETWORKS">Networks</option>
-    <option value="OTHER">Other</option>
-  </select>
-</div>
+            <label className="form-label">Course type</label>
+            <select
+              className="input-field"
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+            >
+              <option value="">All types</option>
+              <option value="HARDWARE">Hardware</option>
+              <option value="OS">Operating Systems</option>
+              <option value="AI">Artificial Intelligence</option>
+              <option value="WEB">Web Development</option>
+              <option value="SECURITY">Security</option>
+              <option value="NETWORKS">Networks</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
         </div>
       </div>
 
       {filteredCourses.length === 0 ? (
         <div className="empty-state">
-          <p>Žádné kurzy nenalezeny</p>
+          <p>No courses found</p>
         </div>
       ) : (
         <div className="courses-grid">
           {filteredCourses.map(course => {
             const isFull = course.enrolled_count >= course.capacity;
             const isEnrolling = enrollingCourseId === course.id;
+            const isEnrolled = myEnrolledCourses.includes(course.id);
 
             return (
               <div key={course.id} className="course-card">
@@ -159,57 +172,66 @@ const PublicCourses = ({ user, onShowLogin }) => {  // Pridané onShowLogin prop
                   <span className="course-code">{course.code}</span>
                 </div>
                 <div className="course-card-body">
-                {course.type && (
-  <p>
-    <strong>Typ:</strong> {getTypeName(course.type)}
-  </p>
-)}
+                  {course.type && (
+                    <p>
+                      <strong>Type:</strong> {getTypeName(course.type)}
+                    </p>
+                  )}
                   <p>
-                    <strong>Popis:</strong> {course.description || 'Bez popisu'}
+                    <strong>Description:</strong> {course.description || 'No description'}
                   </p>
                   <p>
-                    <strong>Garant:</strong>{' '}
+                    <strong>Guarantor:</strong>{' '}
                     {course.guarantee 
                       ? `${course.guarantee.first_name} ${course.guarantee.last_name}`
-                      : 'Neznámý'
+                      : 'Unknown'
                     }
                   </p>
                   {course.lecturers && course.lecturers.length > 0 && (
                     <p>
-                      <strong>Lektoři:</strong>{' '}
+                      <strong>Lecturers:</strong>{' '}
                       {course.lecturers.map(l => `${l.first_name} ${l.last_name}`).join(', ')}
                     </p>
                   )}
                   <p>
-                    <strong>Kapacita:</strong>{' '}
+                    <strong>Capacity:</strong>{' '}
                     <span className={isFull ? 'capacity-full' : 'capacity-available'}>
-                      {course.enrolled_count}/{course.capacity} míst
+                      {course.enrolled_count}/{course.capacity} seats
                     </span>
                   </p>
                   <p>
-                    <strong>Cena:</strong> {course.price} Kč
+                    <strong>Price:</strong> {course.price} CZK
                   </p>
                   {course.auto_confirm && (
                     <p className="auto-confirm-badge">
-                      ✓ Automatické potvrzení
+                      ✓ Auto confirmation
                     </p>
                   )}
                 </div>
                 <div className="course-card-footer">
                   {user ? (
-                    <button 
-                      className={`button ${isFull ? 'button-disabled' : 'button-success'}`}
-                      onClick={() => handleEnroll(course.id)}
-                      disabled={isFull || isEnrolling}
-                    >
-                      {isEnrolling ? '⏳ Zapisuji...' : isFull ? '❌ Obsazeno' : '✓ Zapsat se do kurzu'}
-                    </button>
+                    isEnrolled ? (
+                      <button 
+                        className="button button-info"
+                        disabled
+                      >
+                        ✓ Already enrolled
+                      </button>
+                    ) : (
+                      <button 
+                        className={`button ${isFull ? 'button-disabled' : 'button-success'}`}
+                        onClick={() => handleEnroll(course.id)}
+                        disabled={isFull || isEnrolling}
+                      >
+                        {isEnrolling ? '⏳ Enrolling...' : isFull ? '❌ Full' : '✓ Enroll in course'}
+                      </button>
+                    )
                   ) : (
                     <button 
                       className="button button-secondary"
                       onClick={() => handleEnroll(course.id)}
                     >
-                      🔒 Přihlásit se pro zápis
+                      🔒 Login to enroll
                     </button>
                   )}
                 </div>
