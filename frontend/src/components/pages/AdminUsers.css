@@ -29,7 +29,6 @@
   align-items: flex-end;
   flex-wrap: wrap;
   gap: 42px;
-
 }
 
 .search-inputs .form-group {
@@ -58,6 +57,24 @@
   font-weight: 600;
 }
 
+.admin-users .button-danger {
+  background: #ef4444;
+  color: white;
+}
+
+.admin-users .button-danger:hover {
+  background: #dc2626;
+}
+
+.admin-users .button-warning {
+  background: #f59e0b;
+  color: white;
+}
+
+.admin-users .button-warning:hover {
+  background: #d97706;
+}
+
 .badge-info {
   background: #dbeafe;
   color: #1e40af;
@@ -65,13 +82,6 @@
   border-radius: 12px;
   font-size: 13px;
   font-weight: 700;
-}
-.page-title {
-  color: #1e40af;
-  font-size: 48px;
-  font-weight: 700;
-  margin-bottom: 40px;
-  text-align: center;
 }
 
 .loading-state,
@@ -124,11 +134,7 @@
   font-weight: 700;
   margin: 0;
 }
-.name-cell {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
+
 .expandable-cell {
   display: flex;
   flex-direction: column;
@@ -150,21 +156,7 @@
 .expand-button:hover {
   color: #2563eb;
 }
-.expand-button {
-  background: none;
-  border: none;
-  color: #3b82f6;
-  font-size: 12px;
-  cursor: pointer;
-  padding: 0;
-  text-align: left;
-  font-weight: 600;
-  text-decoration: underline;
-}
 
-.expand-button:hover {
-  color: #2563eb;
-}
 .close-button {
   background: none;
   border: none;
@@ -180,11 +172,7 @@
   border-radius: 8px;
   transition: all 0.3s ease;
 }
-.button-danger {
-  background: #ef4444;
-  color: white;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-}
+
 .close-button:hover {
   background: #fee2e2;
   color: #ef4444;
@@ -196,9 +184,4 @@
 
 .edit-form .form-group {
   margin-bottom: 20px;
-}
-
-.badge-warning {
-  background: #f59e0b;
-  color: white;
 }
