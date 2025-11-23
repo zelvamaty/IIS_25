@@ -11,11 +11,22 @@ const PublicCourses = ({ user, onShowLogin }) => {  // Pridané onShowLogin prop
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [enrollingCourseId, setEnrollingCourseId] = useState(null);
-
+  const [availableTypes, setAvailableTypes] = useState([]);
   useEffect(() => {
     loadCourses();
   }, []);
-
+  const getTypeName = (type) => {
+    const typeMap = {
+      'HARDWARE': 'Hardware',
+      'OS': 'Operating Systems',
+      'AI': 'Artificial Intelligence',
+      'WEB': 'Web Development',
+      'SECURITY': 'Security',
+      'NETWORKS': 'Networks',
+      'OTHER': 'Other'
+    };
+    return typeMap[type] || type;
+  };
   const loadCourses = async () => {
     try {
       setLoading(true);
@@ -23,6 +34,13 @@ const PublicCourses = ({ user, onShowLogin }) => {  // Pridané onShowLogin prop
       const data = await coursesAPI.getCourses();
       const approvedCourses = data.filter(course => course.approved);
       setCourses(approvedCourses);
+      
+      // Extrahuj unikátne typy kurzov
+      const types = [...new Set(approvedCourses.map(c => c.type).filter(Boolean))];
+      setAvailableTypes(types);
+      
+      console.log('Courses:', approvedCourses); // DEBUG
+      console.log('Available types:', types); // DEBUG
     } catch (err) {
       setError('Nepodařilo se načíst kurzy. Zkuste to prosím později.');
       console.error('Error loading courses:', err);
@@ -105,18 +123,22 @@ const PublicCourses = ({ user, onShowLogin }) => {  // Pridané onShowLogin prop
             />
           </div>
           <div className="form-group">
-            <label className="form-label">Typ kurzu</label>
-            <select
-              className="input-field"
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-            >
-              <option value="">Všechny typy</option>
-              <option value="lecture">Přednáška</option>
-              <option value="exercise">Cvičení</option>
-              <option value="exam">Zkouška</option>
-            </select>
-          </div>
+  <label className="form-label">Typ kurzu</label>
+  <select
+    className="input-field"
+    value={filterType}
+    onChange={(e) => setFilterType(e.target.value)}
+  >
+    <option value="">Všechny typy</option>
+    <option value="HARDWARE">Hardware</option>
+    <option value="OS">Operating Systems</option>
+    <option value="AI">Artificial Intelligence</option>
+    <option value="WEB">Web Development</option>
+    <option value="SECURITY">Security</option>
+    <option value="NETWORKS">Networks</option>
+    <option value="OTHER">Other</option>
+  </select>
+</div>
         </div>
       </div>
 
@@ -137,11 +159,11 @@ const PublicCourses = ({ user, onShowLogin }) => {  // Pridané onShowLogin prop
                   <span className="course-code">{course.code}</span>
                 </div>
                 <div className="course-card-body">
-                  {course.type && (
-                    <p>
-                      <strong>Typ:</strong> {course.type}
-                    </p>
-                  )}
+                {course.type && (
+  <p>
+    <strong>Typ:</strong> {getTypeName(course.type)}
+  </p>
+)}
                   <p>
                     <strong>Popis:</strong> {course.description || 'Bez popisu'}
                   </p>

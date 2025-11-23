@@ -12,6 +12,7 @@ const CreateCourse = () => {
     title: '',
     code: '',
     description: '',
+    type: '', // ✅ PRIDANÉ
     price: '0',
     capacity: '30',
     auto_confirm: false
@@ -35,12 +36,14 @@ const CreateCourse = () => {
         code: formData.code,
         title: formData.title,
         description: formData.description,
+        type: formData.type, // ✅ PRIDANÉ
         price: parseFloat(formData.price),
         capacity: parseInt(formData.capacity),
         auto_confirm: formData.auto_confirm
       };
 
       const newCourse = await coursesAPI.createCourse(courseData);
+      console.log('Created course:', newCourse);
       alert('Kurz byl úspěšně vytvořen! Nyní jste garantem tohoto kurzu.');
       navigate('/instructor/courses'); // Presmeruj na moje kurzy
     } catch (err) {
@@ -109,7 +112,27 @@ const CreateCourse = () => {
               />
             </div>
           </div>
-
+          <div className="form-row">
+  <div className="form-group">
+    <label className="form-label">Typ kurzu *</label>
+    <select
+      name="type"
+      className="input-field"
+      value={formData.type}
+      onChange={handleChange}
+      required
+    >
+      <option value="">-- Vyberte typ --</option>
+      <option value="HARDWARE">Hardware</option>
+      <option value="OS">Operating Systems</option>
+      <option value="AI">Artificial Intelligence</option>
+      <option value="WEB">Web Development</option>
+      <option value="SECURITY">Security</option>
+      <option value="NETWORKS">Networks</option>
+      <option value="OTHER">Other</option>
+    </select>
+  </div>
+</div>
           <div className="form-row two-columns">
             <div className="form-group">
               <label className="form-label">Cena (Kč) *</label>
