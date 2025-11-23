@@ -60,6 +60,16 @@ Patchne to, co zadáte. Admin patchuje kohokoliv, user (pokud by měl práva) se
 }
 ```
 
+### \- method: "PATCH" - [http://127.0.0.1:8000/api/users/](http://127.0.0.1:8000/api/users/)\<id\>/change\_users\_password/
+
+Admin patchne uživatelovi heslo.
+
+```json
+{
+    "new_password": "UserovoNoveHeslo"
+}
+```
+
 ### \- method: "DELETE" - [http://127.0.0.1:8000/api/users/](http://127.0.0.1:8000/api/users/)\<id\>/delete\_user/
 
 Smaže uživatele. Může jen Admin nebo uživatel sám sebe.
