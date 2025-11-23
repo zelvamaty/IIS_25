@@ -1302,7 +1302,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                 className="button button-success"
                 disabled={editLoading}
               >
-                {editLoading ? 'Saving changes...' : 'ave Changes'}
+                {editLoading ? 'Saving changes...' : 'Save Changes'}
               </button>
               <button 
                 type="button" 
