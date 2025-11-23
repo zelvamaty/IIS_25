@@ -355,7 +355,7 @@ class TermViewSet(viewsets.ModelViewSet):
         if not term.requires_registration:
             self._auto_register_students(term)
 
-    @action(detail=True, methods=['patch'], permission_classes=[IsAdmin])
+    @action(detail=True, methods=['patch'], permission_classes=[IsGuaranteeOrAdmin])
     def patch_term(self, request, pk=None):
         term = self.get_object()
         serializer = self.get_serializer(term, data=request.data, partial=True)
@@ -364,7 +364,7 @@ class TermViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
         return Response(serializer.errors, status=400)
 
-    @action(detail=True, methods=['delete'], permission_classes=[IsAdmin])
+    @action(detail=True, methods=['delete'], permission_classes=[IsGuaranteeOrAdmin])
     def delete_term(self, request, pk=None):
         term = self.get_object()
         term.delete()
