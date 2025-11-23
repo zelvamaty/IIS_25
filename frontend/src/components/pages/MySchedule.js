@@ -18,33 +18,32 @@ const MySchedule = () => {
       setError(null);
       const data = await termsAPI.getSchedule();
       
-      // Transform API data to match component format
-      const transformedEvents = data.map(term => ({
-        id: term.id,
-        courseName: term.course?.title || 'Bez názvu',
-        termName: getTermTypeName(term.type),
-        date: term.start_time.split('T')[0], // Extract date from ISO string
-        startTime: new Date(term.start_time).toLocaleTimeString('cs-CZ', { 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        }),
-        endTime: new Date(term.end_time).toLocaleTimeString('cs-CZ', { 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        }),
-        room: term.room || 'Neznámá',
-        type: getTermTypeName(term.type),
-        instructor: term.course?.guarantee 
-          ? `${term.course.guarantee.first_name} ${term.course.guarantee.last_name}`
-          : 'Neznámý',
-        courseCode: term.course?.code || '',
-        capacity: term.capacity,
-        requiresRegistration: term.requires_registration
-      }));
-
+      const transformedEvents = data.map(term => {
+        return {
+          id: term.id,
+          courseName: term.course || 'Untitled',
+          termType: getTermTypeName(term.type),
+          date: term.start_time.split('T')[0],
+          startTime: new Date(term.start_time).toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false
+          }),
+          endTime: new Date(term.end_time).toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false
+          }),
+          room: term.room || 'Unknown',
+          courseCode: '',
+          capacity: term.capacity || 0,
+          requiresRegistration: term.requires_registration || false
+        };
+      });
+  
       setScheduleEvents(transformedEvents);
     } catch (err) {
-      setError('Nepodařilo se načíst rozvrh');
+      setError('Failed to load schedule');
       console.error('Error loading schedule:', err);
     } finally {
       setLoading(false);
@@ -53,16 +52,16 @@ const MySchedule = () => {
 
   const getTermTypeName = (type) => {
     const typeMap = {
-      'LECTURE': 'Přednáška',
-      'EXERCISE': 'Cvičení',
-      'EXAM': 'Zkouška'
+      'LECTURE': 'Lecture',
+      'EXERCISE': 'Exercise',
+      'EXAM': 'Exam'
     };
     return typeMap[type] || type;
   };
 
   const getWeekDays = () => {
     const start = new Date(currentDate);
-    start.setDate(start.getDate() - start.getDay() + 1); // Monday
+    start.setDate(start.getDate() - start.getDay() + 1);
     
     const days = [];
     for (let i = 0; i < 7; i++) {
@@ -89,9 +88,9 @@ const MySchedule = () => {
   };
 
   const formatDate = (date) => {
-    const days = ['Ne', 'Po', 'Út', 'St', 'Čt', 'Pá', 'So'];
-    const months = ['Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen', 
-                    'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'];
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                    'July', 'August', 'September', 'October', 'November', 'December'];
     return {
       dayName: days[date.getDay()],
       dayNumber: date.getDate(),
@@ -114,7 +113,7 @@ const MySchedule = () => {
     return (
       <div className="my-schedule">
         <div className="loading-state">
-          <p>Načítání rozvrhu...</p>
+          <p>Loading schedule...</p>
         </div>
       </div>
     );
@@ -126,7 +125,7 @@ const MySchedule = () => {
         <div className="error-state">
           <p>{error}</p>
           <button className="button" onClick={loadSchedule}>
-            Zkusit znovu
+            Try again
           </button>
         </div>
       </div>
@@ -142,13 +141,13 @@ const MySchedule = () => {
       <div className="schedule-header">
         <div className="schedule-controls">
           <button className="button button-secondary" onClick={() => changeWeek(-1)}>
-            ← Předchozí týden
+            ← Previous week
           </button>
           <button className="button" onClick={goToToday}>
-            Dnes
+            Today
           </button>
           <button className="button button-secondary" onClick={() => changeWeek(1)}>
-            Následující týden →
+            Next week →
           </button>
         </div>
         
@@ -188,24 +187,22 @@ const MySchedule = () => {
                         {event.courseCode && (
                           <div className="event-code">{event.courseCode}</div>
                         )}
-                        <div className="event-term">{event.termName}</div>
+                        <div className="event-type-badge">
+                          {event.termType}
+                        </div>
                         <div className="event-details">
-                          <span>📍 Místnost {event.room}</span>
-                          <span>👨‍🏫 {event.instructor}</span>
+                          <span>📍 Room {event.room}</span>
                         </div>
                         {event.requiresRegistration && (
                           <div className="requires-registration">
-                            ✓ Vyžaduje registraci
+                            ✓ Requires registration
                           </div>
                         )}
-                        <div className="event-type-badge">
-                          {event.type}
-                        </div>
                       </div>
                     ))
                   ) : (
                     <div className="no-events">
-                      {isWeekend ? 'Víkend' : 'Žádné termíny'}
+                      {isWeekend ? 'Weekend' : 'No terms'}
                     </div>
                   )}
                 </div>
@@ -215,30 +212,29 @@ const MySchedule = () => {
         </div>
       </div>
 
-      {/* Upcoming events list */}
       {upcomingEvents.length > 0 && (
         <div className="upcoming-section">
-          <h2 className="section-title">Nadcházející termíny</h2>
+          <h2 className="section-title">Upcoming Terms</h2>
           <div className="upcoming-list">
             {upcomingEvents.map(event => (
               <div key={event.id} className="upcoming-item">
                 <div className="upcoming-date">
                   <div className="upcoming-day">{new Date(event.date).getDate()}</div>
                   <div className="upcoming-month">
-                    {new Date(event.date).toLocaleDateString('cs-CZ', { month: 'short' })}
+                    {new Date(event.date).toLocaleDateString('en-US', { month: 'short' })}
                   </div>
                 </div>
                 <div className="upcoming-info">
                   <h4>{event.courseName}</h4>
-                  <p>{event.termName}</p>
+                  <p>{event.termType}</p>
                   <div className="upcoming-details">
                     <span>🕐 {event.startTime} - {event.endTime}</span>
-                    <span>📍 Místnost {event.room}</span>
+                    <span>📍 Room {event.room}</span>
                     <span>👨‍🏫 {event.instructor}</span>
                   </div>
                 </div>
                 <div className="upcoming-type">
-                  <span className="badge badge-info">{event.type}</span>
+                  <span className="badge badge-info">{event.termType}</span>
                 </div>
               </div>
             ))}
@@ -248,7 +244,7 @@ const MySchedule = () => {
 
       {scheduleEvents.length === 0 && !loading && (
         <div className="empty-state">
-          <p>Nemáte žádné naplánované termíny</p>
+          <p>You have no scheduled terms</p>
         </div>
       )}
     </div>
