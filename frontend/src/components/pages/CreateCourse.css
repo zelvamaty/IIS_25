@@ -20,7 +20,6 @@
   border-radius: 20px;
   padding: 40px;
   box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
-  
 }
 
 .form-section {
@@ -134,13 +133,6 @@
   font-weight: 500;
 }
 
-.form-actions {
-  display: flex;
-  gap: 15px;
-  padding-top: 20px;
-  border-top: 2px solid #e0e7ff;
-}
-
 .button {
   padding: 14px 32px;
   background: #3b82f6;
@@ -152,9 +144,9 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-  display: flex;           /* Pridané */
-  align-items: center;     /* Pridané */
-  justify-content: center; /* Pridané */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .button:hover {
@@ -172,6 +164,17 @@
   box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
 }
 
+.create-course .button-danger {
+  background: #ef4444;
+  color: white;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.create-course .button-danger:hover {
+  background: #dc2626;
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
 .button-secondary {
   background: #60a5fa;
 }
@@ -180,11 +183,24 @@
   background: #3b82f6;
 }
 
+.create-course .button-warning {
+  background: #f59e0b;
+  color: white;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.create-course .button-warning:hover {
+  background: #d97706;
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+}
+
 .form-actions {
   display: flex;
   gap: 16px;
   justify-content: flex-start;
   margin-top: 32px;
+  padding-top: 20px;
+  border-top: 2px solid #e0e7ff;
 }
 
 .form-actions .button {
@@ -200,13 +216,6 @@
 
 .form-actions .button-secondary {
   flex: 0 0 auto;
-}
-.page-title {
-  color: #1e40af;
-  font-size: 48px;
-  font-weight: 700;
-  margin-bottom: 40px;
-  text-align: center;
 }
 
 .error-message {

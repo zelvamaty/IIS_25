@@ -21,7 +21,6 @@
   padding: 30px;
   margin-bottom: 40px;
   box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
-  gap: 42px;
 }
 
 .filter-section h3 {
@@ -29,17 +28,13 @@
   color: #1e40af;
   font-size: 20px;
   font-weight: 600;
-  gap: 42px;
-
 }
 
 .filter-inputs {
   display: flex;
-  gap: 20px;
+  gap: 42px;
   align-items: flex-end;
   flex-wrap: wrap;
-  gap: 42px;
-
 }
 
 .filter-inputs .form-group {
@@ -96,6 +91,67 @@
   transform: translateY(0);
 }
 
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.public-courses .button-danger {
+  background: #ef4444;
+  color: white;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.public-courses .button-danger:hover:not(:disabled) {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
+.button-success {
+  background: #10b981;
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.button-success:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.button-secondary {
+  background: #60a5fa;
+}
+
+.button-secondary:hover {
+  background: #3b82f6;
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+}
+
+.button-info {
+  background-color: #10b981;
+  color: white;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.button-info:hover {
+  background-color: #10b981;
+}
+
+.button-disabled {
+  background: #94a3b8;
+  color: white;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.button-disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
 .courses-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
@@ -148,6 +204,19 @@
   font-weight: 700;
 }
 
+.course-code {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  backdrop-filter: blur(10px);
+}
+
 .course-card-body {
   padding: 25px;
   background: white;
@@ -189,16 +258,37 @@
   background: #2563eb;
 }
 
-.button-secondary {
-  background: #60a5fa;
+.capacity-full {
+  color: #ef4444;
+  font-weight: 700;
 }
 
-.button-secondary:hover {
-  background: #3b82f6;
-  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+.capacity-available {
+  color: #10b981;
+  font-weight: 700;
 }
 
-/* Responsive */
+.loading-state,
+.error-state,
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  background: white;
+  border-radius: 20px;
+  margin: 40px auto;
+  max-width: 600px;
+  box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
+}
+
+.loading-state p,
+.error-state p,
+.empty-state p {
+  color: #64748b;
+  font-size: 18px;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
 @media (max-width: 768px) {
   .public-courses {
     padding: 20px 15px;
@@ -224,95 +314,4 @@
   .filter-inputs .button {
     width: 100%;
   }
-  .loading-state,
-.error-state {
-  text-align: center;
-  padding: 80px 20px;
-  background: white;
-  border-radius: 20px;
-  margin: 40px auto;
-  max-width: 600px;
-  box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
 }
-
-.loading-state p,
-.error-state p {
-  color: #64748b;
-  font-size: 18px;
-  margin-bottom: 20px;
-}
-
-.button-info {
-  background-color: #10b981;
-  color: white;
-  cursor: not-allowed;
-  opacity: 0.8;
-}
-
-.button-info:hover {
-  background-color: #10b981;
-}
-
-.course-code {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-weight: 700;
-  font-size: 14px;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-  flex-shrink: 0;
-  backdrop-filter: blur(10px);
-}
-
-.empty-state {
-  text-align: center;
-  padding: 80px 20px;
-  color: #94a3b8;
-  font-size: 18px;
-  font-weight: 500;
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(30, 64, 175, 0.08);
-}
-.capacity-full {
-  color: #ef4444;
-  font-weight: 700;
-}
-
-.capacity-available {
-  color: #10b981;
-  font-weight: 700;
-}
-
-.button-success {
-  background: #10b981;
-  color: white;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-}
-
-.button-success:hover:not(:disabled) {
-  background: #059669;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
-}
-
-.button-disabled {
-  background: #94a3b8;
-  color: white;
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.button-disabled:hover {
-  transform: none;
-  box-shadow: none;
-}
-
-.button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-}
-
