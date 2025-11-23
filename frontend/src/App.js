@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Header from './components/common/Header';
 import Navigation from './components/common/Navigation';
 import Login from './components/pages/Login';
@@ -18,12 +18,12 @@ import { authAPI } from './components/services/api';
 import EditCourse from './components/pages/EditCourse';
 import './App.css';
 
-function App() {
+function AppContent() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [guestMode, setGuestMode] = useState(false);
 
-  // Check if user is already logged in
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem('token');
@@ -44,10 +44,17 @@ function App() {
 
   const handleLoginSuccess = (userInfo) => {
     setUser(userInfo);
+    const mappedRole = mapRole(userInfo.role);
+    if (mappedRole === 'Administrator') {
+      navigate('/admin/dashboard');
+    } else {
+      navigate('/courses');
+    }
   };
 
   const handleSkipLogin = () => {
     setGuestMode(true);
+    navigate('/courses');
   };
 
   const handleShowLogin = () => {
@@ -63,15 +70,15 @@ function App() {
     }
     setUser(null);
     setGuestMode(false);
+    navigate('/courses');
   };
 
-  // Map role from backend to frontend
   const mapRole = (backendRole) => {
     const roleMap = {
-      'ADMIN': 'Administrátor',
+      'ADMIN': 'Administrator',
       'USER': 'Student',
-      'GUARANTOR': 'Garant',
-      'LECTURER': 'Lektor'
+      'GUARANTOR': 'Guarantor',
+      'LECTURER': 'Lecturer'
     };
     return roleMap[backendRole] || backendRole;
   };
@@ -82,99 +89,101 @@ function App() {
     role: mapRole(user.role)
   } : null;
 
-  // Navigation items based on user role
   const getNavigationItems = () => {
     if (!mappedUser) {
       return [
-        { label: 'Kurzy', path: '/courses' }
+        { label: 'Courses', path: '/courses' }
       ];
     }
 
-    if (mappedUser.role === 'Administrátor') {
+    if (mappedUser.role === 'Administrator') {
       return [
         { label: 'Dashboard', path: '/admin/dashboard' },
-        { label: 'Kurzy', path: '/admin/courses' },
-        { label: 'Uživatelé', path: '/admin/users' },
-        { label: 'Místnosti', path: '/admin/rooms' },
-        { label: 'Moje výukové kurzy', path: '/instructor/courses' }, // PRIDANÉ
-        { label: 'Založit kurz', path: '/create-course' } // PRIDANÉ
+        { label: 'Courses', path: '/admin/courses' },
+        { label: 'Users', path: '/admin/users' },
+        { label: 'Rooms', path: '/admin/rooms' },
+        { label: 'My Teaching Courses', path: '/instructor/courses' },
+        { label: 'Create Course', path: '/create-course' }
       ];
     }
 
-    if (mappedUser.role === 'Garant' || mappedUser.role === 'Lektor') {
+    if (mappedUser.role === 'Guarantor' || mappedUser.role === 'Lecturer') {
       return [
-        { label: 'Můj profil', path: '/profile' },
-        { label: 'Moje kurzy', path: '/instructor/courses' },
-        { label: 'Založit kurz', path: '/create-course' }
+        { label: 'My Profile', path: '/profile' },
+        { label: 'My Courses', path: '/instructor/courses' },
+        { label: 'Create Course', path: '/create-course' }
       ];
     }
 
     if (mappedUser.role === 'Student') {
       return [
-        { label: 'Můj profil', path: '/profile' },
-        { label: 'Zapsané kurzy', path: '/student/my-courses' },
-        { label: 'Můj rozvrh', path: '/student/schedule' },
-        { label: 'Dostupné kurzy', path: '/courses' },
-        { label: 'Moje výukové kurzy', path: '/instructor/courses' },
-        { label: 'Vytvořit kurz', path: '/create-course' }
+        { label: 'My Profile', path: '/profile' },
+        { label: 'Enrolled Courses', path: '/student/my-courses' },
+        { label: 'My Schedule', path: '/student/schedule' },
+        { label: 'Available Courses', path: '/courses' },
+        { label: 'My Teaching Courses', path: '/instructor/courses' },
+        { label: 'Create Course', path: '/create-course' }
       ];
     }
 
     return [];
   };
 
+  const getDefaultRoute = () => {
+    if (!mappedUser) {
+      return '/courses';
+    }
+    
+    if (mappedUser.role === 'Administrator') {
+      return '/admin/dashboard';
+    }
+    
+    return '/courses';
+  };
+
   if (loading) {
-    return <div className="loading">Načítání...</div>;
+    return <div className="loading">Loading...</div>;
   }
 
-  // If not logged in AND not in guest mode, show login page
   if (!mappedUser && !guestMode) {
-    return (
-      <Router>
-        <Routes>
-          <Route path="*" element={<Login onLoginSuccess={handleLoginSuccess} onSkipLogin={handleSkipLogin} />} />
-        </Routes>
-      </Router>
-    );
+    return <Login onLoginSuccess={handleLoginSuccess} onSkipLogin={handleSkipLogin} />;
   }
 
   return (
-    <Router>
-      <div className="App">
-        <Header user={mappedUser} onLogout={handleLogout} onLogin={handleShowLogin} />
-        <Navigation items={getNavigationItems()} />
-        
-        <Routes>
+    <div className="App">
+      <Header user={mappedUser} onLogout={handleLogout} onLogin={handleShowLogin} />
+      <Navigation items={getNavigationItems()} />
+      
+      <Routes>
         <Route path="/edit-course/:id" element={<EditCourse />} />
+        <Route path="/" element={<Navigate to={getDefaultRoute()} replace />} />
+        <Route path="/courses" element={<PublicCourses user={mappedUser} onShowLogin={handleShowLogin} />} />
+        
+        <Route path="/admin/dashboard" element={mappedUser?.role === 'Administrator' ? <AdminDashboard /> : <Navigate to="/courses" />} />
+        <Route path="/admin/courses" element={mappedUser?.role === 'Administrator' ? <AdminCourses /> : <Navigate to="/courses" />} />
+        <Route path="/admin/users" element={mappedUser?.role === 'Administrator' ? <AdminUsers /> : <Navigate to="/courses" />} />
+        <Route path="/admin/rooms" element={mappedUser?.role === 'Administrator' ? <AdminRooms /> : <Navigate to="/courses" />} />
+        
+        <Route path="/create-course" element={mappedUser ? <CreateCourse /> : <Navigate to="/courses" />} />
+        <Route 
+          path="/instructor/courses" 
+          element={mappedUser ? <InstructorCourse userRole={mappedUser?.role} /> : <Navigate to="/courses" />} 
+        />
+        
+        <Route path="/student/my-courses" element={mappedUser?.role === 'Student' ? <MyCourses /> : <Navigate to="/courses" />} />
+        <Route path="/student/schedule" element={mappedUser?.role === 'Student' ? <MySchedule /> : <Navigate to="/courses" />} />
+        <Route path="/course/:id" element={mappedUser?.role === 'Student' ? <StudentCourseRegistration /> : <Navigate to="/courses" />} />
+        
+        <Route path="/profile" element={mappedUser ? <UserProfile user={mappedUser} /> : <Navigate to="/courses" />} />
+      </Routes>
+    </div>
+  );
+}
 
-          {/* Public routes */}
-          <Route path="/" element={<PublicCourses user={mappedUser} onShowLogin={handleShowLogin} />} />
-          <Route path="/courses" element={<PublicCourses user={mappedUser} onShowLogin={handleShowLogin} />} />
-          
-          {/* Admin routes */}
-          <Route path="/admin/dashboard" element={mappedUser?.role === 'Administrátor' ? <AdminDashboard /> : <Navigate to="/" />} />
-          <Route path="/admin/courses" element={mappedUser?.role === 'Administrátor' ? <AdminCourses /> : <Navigate to="/" />} />
-          <Route path="/admin/users" element={mappedUser?.role === 'Administrátor' ? <AdminUsers /> : <Navigate to="/" />} />
-          <Route path="/admin/rooms" element={mappedUser?.role === 'Administrátor' ? <AdminRooms /> : <Navigate to="/" />} />
-          
-          {/* Create course - dostupné pre Admin, Garant, Lektor, Student */}
-          <Route path="/create-course" element={mappedUser ? <CreateCourse /> : <Navigate to="/" />} />
-
-          {/* Instructor/Guarantor/Admin routes - UPRAVENÉ: Admin má tiež prístup */}
-          <Route 
-            path="/instructor/courses" 
-            element={mappedUser ? <InstructorCourse userRole={mappedUser?.role} /> : <Navigate to="/" />} 
-          />
-          
-          {/* Student routes */}
-          <Route path="/student/my-courses" element={mappedUser?.role === 'Student' ? <MyCourses /> : <Navigate to="/" />} />
-          <Route path="/student/schedule" element={mappedUser?.role === 'Student' ? <MySchedule /> : <Navigate to="/" />} />
-          <Route path="/course/:id" element={mappedUser?.role === 'Student' ? <StudentCourseRegistration /> : <Navigate to="/" />} />
-          
-          {/* Common routes */}
-          <Route path="/profile" element={mappedUser ? <UserProfile user={mappedUser} /> : <Navigate to="/" />} />
-        </Routes>
-      </div>
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }
