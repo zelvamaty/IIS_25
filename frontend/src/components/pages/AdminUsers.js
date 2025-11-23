@@ -10,6 +10,7 @@ const AdminUsers = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
+  const [expandedFields, setExpandedFields] = useState({});
   const [editFormData, setEditFormData] = useState({
     first_name: '',
     last_name: '',
@@ -33,7 +34,7 @@ const AdminUsers = () => {
       setUsers(data);
       setFilteredUsers(data);
     } catch (err) {
-      setError('Nepodařilo se načíst uživatele');
+      setError('Failed to load users');
       console.error('Error loading users:', err);
     } finally {
       setLoading(false);
@@ -43,7 +44,6 @@ const AdminUsers = () => {
   const filterUsers = () => {
     let filtered = [...users];
 
-    // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter(user =>
         `${user.first_name} ${user.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -52,7 +52,6 @@ const AdminUsers = () => {
       );
     }
 
-    // Filter by role
     if (roleFilter) {
       filtered = filtered.filter(user => user.role === roleFilter);
     }
@@ -62,6 +61,23 @@ const AdminUsers = () => {
 
   const handleSearch = () => {
     filterUsers();
+  };
+
+  const toggleFieldExpansion = (userId, field) => {
+    const key = `${userId}-${field}`;
+    setExpandedFields(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+
+  const truncateText = (text, maxLength = 20) => {
+    if (!text || text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  };
+
+  const isFieldExpanded = (userId, field) => {
+    return expandedFields[`${userId}-${field}`];
   };
 
   const handleEditUser = (user) => {
@@ -85,11 +101,11 @@ const AdminUsers = () => {
     e.preventDefault();
     try {
       await usersAPI.updateUser(editingUser.id, editFormData);
-      alert('Uživatel byl úspěšně upraven');
+      alert('User has been successfully updated');
       setEditingUser(null);
       await loadUsers();
     } catch (err) {
-      alert(err.message || 'Úprava uživatele se nezdařila');
+      alert(err.message || 'Updating user failed');
       console.error('Error updating user:', err);
     }
   };
@@ -105,26 +121,26 @@ const AdminUsers = () => {
   };
 
   const handleDeleteUser = async (id, username) => {
-    if (!window.confirm(`Opravdu chcete smazat uživatele ${username}?`)) {
+    if (!window.confirm(`Do you really want to delete user ${username}?`)) {
       return;
     }
 
     try {
       await usersAPI.deleteUser(id);
-      alert('Uživatel byl smazán');
+      alert('User has been deleted');
       await loadUsers();
     } catch (err) {
-      alert(err.message || 'Smazání uživatele se nezdařilo');
+      alert(err.message || 'Deleting user failed');
       console.error('Error deleting user:', err);
     }
   };
 
   const getRoleName = (role) => {
     const roleMap = {
-      'ADMIN': 'Administrátor',
+      'ADMIN': 'Administrator',
       'USER': 'Student',
-      'GUARANTOR': 'Garant',
-      'LECTURER': 'Lektor'
+      'GUARANTOR': 'Guarantor',
+      'LECTURER': 'Lecturer'
     };
     return roleMap[role] || role;
   };
@@ -143,7 +159,7 @@ const AdminUsers = () => {
     return (
       <div className="admin-users">
         <div className="loading-state">
-          <p>Načítání uživatelů...</p>
+          <p>Loading users...</p>
         </div>
       </div>
     );
@@ -155,7 +171,7 @@ const AdminUsers = () => {
         <div className="error-state">
           <p>{error}</p>
           <button className="button" onClick={loadUsers}>
-            Zkusit znovu
+            Try Again
           </button>
         </div>
       </div>
@@ -164,40 +180,23 @@ const AdminUsers = () => {
 
   return (
     <div className="admin-users">
-
       <div className="search-section">
         <div className="search-inputs">
           <div className="form-group">
             <input
               type="text"
               className="input-field"
-              placeholder="Hledat uživatele (jméno, username, email)..."
+              placeholder="Search users (name, username, email)..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className="form-group">
-            <select
-              className="input-field"
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
-            >
-              <option value="">Všechny role</option>
-              <option value="USER">Student</option>
-              <option value="LECTURER">Lektor</option>
-              <option value="GUARANTOR">Garant</option>
-              <option value="ADMIN">Administrátor</option>
-            </select>
-          </div>
-          <button className="button" onClick={handleSearch}>
-            🔍 Hledat
-          </button>
         </div>
       </div>
 
       {filteredUsers.length === 0 ? (
         <div className="empty-state">
-          <p>Žádní uživatelé nenalezeni</p>
+          <p>No users found</p>
         </div>
       ) : (
         <div className="users-table-container">
@@ -205,60 +204,111 @@ const AdminUsers = () => {
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Uživatelské jméno</th>
-                <th>Jméno a příjmení</th>
+                <th>Username</th>
+                <th>Name</th>
                 <th>Email</th>
-                <th>Role</th>
-                <th>Akce</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.map(user => (
-                <tr key={user.id}>
-                  <td>{user.id}</td>
-                  <td><strong>{user.username}</strong></td>
-                  <td>{user.first_name} {user.last_name}</td>
-                  <td>{user.email || '-'}</td>
-                  <td>
-                    <span className={`badge ${getRoleBadgeClass(user.role)}`}>
-                      {getRoleName(user.role)}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="action-buttons">
-                      <button 
-                        className="button button-warning button-small"
-                        onClick={() => handleEditUser(user)}
-                      >
-                        ✏️ Upravit
-                      </button>
-                      <button 
-                        className="button button-danger button-small"
-                        onClick={() => handleDeleteUser(user.id, user.username)}
-                      >
-                        🗑️ Smazat
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {filteredUsers.map(user => {
+                const fullName = `${user.first_name} ${user.last_name}`;
+                const username = user.username;
+                const email = user.email || '-';
+                
+                const isNameLong = fullName.length > 25;
+                const isUsernameLong = username.length > 20;
+                const isEmailLong = email.length > 25;
+
+                return (
+                  <tr key={user.id}>
+                    <td>{user.id}</td>
+                    <td>
+                      <div className="expandable-cell">
+                        <strong>
+                          {isFieldExpanded(user.id, 'username') || !isUsernameLong
+                            ? username
+                            : truncateText(username, 20)}
+                        </strong>
+                        {isUsernameLong && (
+                          <button 
+                            className="expand-button"
+                            onClick={() => toggleFieldExpansion(user.id, 'username')}
+                          >
+                            {isFieldExpanded(user.id, 'username') ? 'Show less' : 'Show more'}
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="expandable-cell">
+                        <span>
+                          {isFieldExpanded(user.id, 'name') || !isNameLong
+                            ? fullName
+                            : truncateText(fullName, 25)}
+                        </span>
+                        {isNameLong && (
+                          <button 
+                            className="expand-button"
+                            onClick={() => toggleFieldExpansion(user.id, 'name')}
+                          >
+                            {isFieldExpanded(user.id, 'name') ? 'Show less' : 'Show more'}
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="expandable-cell">
+                        <span>
+                          {isFieldExpanded(user.id, 'email') || !isEmailLong
+                            ? email
+                            : truncateText(email, 25)}
+                        </span>
+                        {isEmailLong && email !== '-' && (
+                          <button 
+                            className="expand-button"
+                            onClick={() => toggleFieldExpansion(user.id, 'email')}
+                          >
+                            {isFieldExpanded(user.id, 'email') ? 'Show less' : 'Show more'}
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="action-buttons">
+                        <button 
+                          className="button button-warning button-small"
+                          onClick={() => handleEditUser(user)}
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          className="button button-danger button-small"
+                          onClick={() => handleDeleteUser(user.id, user.username)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       )}
 
-      {/* Edit User Modal */}
       {editingUser && (
         <div className="modal-overlay" onClick={handleCancelEdit}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Upravit uživatele: {editingUser.username}</h2>
+              <h2>Edit User: {editingUser.username}</h2>
               <button className="close-button" onClick={handleCancelEdit}>×</button>
             </div>
 
             <form onSubmit={handleSaveEdit} className="edit-form">
               <div className="form-group">
-                <label className="form-label">Jméno</label>
+                <label className="form-label">First Name</label>
                 <input
                   type="text"
                   name="first_name"
@@ -270,7 +320,7 @@ const AdminUsers = () => {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Příjmení</label>
+                <label className="form-label">Last Name</label>
                 <input
                   type="text"
                   name="last_name"
@@ -292,32 +342,16 @@ const AdminUsers = () => {
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Role</label>
-                <select
-                  name="role"
-                  className="input-field"
-                  value={editFormData.role}
-                  onChange={handleEditFormChange}
-                  required
-                >
-                  <option value="USER">Student</option>
-                  <option value="LECTURER">Lektor</option>
-                  <option value="GUARANTOR">Garant</option>
-                  <option value="ADMIN">Administrátor</option>
-                </select>
-              </div>
-
               <div className="form-actions">
                 <button type="submit" className="button button-success">
-                  💾 Uložit změny
+                  Save Changes
                 </button>
                 <button 
                   type="button" 
                   className="button button-secondary"
                   onClick={handleCancelEdit}
                 >
-                  ❌ Zrušit
+                  Cancel
                 </button>
               </div>
             </form>

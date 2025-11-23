@@ -124,7 +124,47 @@
   font-weight: 700;
   margin: 0;
 }
+.name-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.expandable-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
 
+.expand-button {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.expand-button:hover {
+  color: #2563eb;
+}
+.expand-button {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.expand-button:hover {
+  color: #2563eb;
+}
 .close-button {
   background: none;
   border: none;
