@@ -223,7 +223,7 @@ const PublicCourses = ({ user, onShowLogin }) => {
                         onClick={() => handleEnroll(course.id)}
                         disabled={isFull || isEnrolling}
                       >
-                        {isEnrolling ? '⏳ Enrolling...' : isFull ? '❌ Full' : '✓ Enroll in course'}
+                        {isEnrolling ? '⏳ Enrolling...' : isFull ? 'Full' : '✓ Enroll in course'}
                       </button>
                     )
                   ) : (
