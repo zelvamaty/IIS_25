@@ -201,7 +201,6 @@ const AdminCourses = () => {
                 <th>Capacity</th>
                 <th>Price</th>
                 <th>Status</th>
-                <th>Actions</th>
               </tr>
             </thead>
             <tbody>

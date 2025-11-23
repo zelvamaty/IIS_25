@@ -207,7 +207,6 @@ const AdminUsers = () => {
                 <th>Username</th>
                 <th>Name</th>
                 <th>Email</th>
-                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
