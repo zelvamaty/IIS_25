@@ -37,6 +37,19 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   });
   const [termLoading, setTermLoading] = useState(false);
   const [termError, setTermError] = useState('');
+  
+  // Edit course state
+  const [editCourseData, setEditCourseData] = useState({
+    title: '',
+    code: '',
+    description: '',
+    type: '',
+    price: '',
+    capacity: '',
+    auto_confirm: false
+  });
+  const [editLoading, setEditLoading] = useState(false);
+  const [editError, setEditError] = useState('');
 
   useEffect(() => {
     loadCurrentUserAndCourses();
@@ -96,13 +109,6 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   const loadTermStudents = async (termId) => {
     try {
       const students = await termsAPI.getTermStudents(termId);
-      console.log('RAW Term students from API:', JSON.stringify(students, null, 2));
-      
-      // DEBUG - skontroluj či majú registration_id
-      students.forEach(s => {
-        console.log(`Student ${s.first_name}: has registration_id? ${!!s.registration_id}, value: ${s.registration_id}`);
-      });
-      
       setTermStudents(students);
     } catch (err) {
       console.error('Error loading term students:', err);
@@ -127,9 +133,6 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
     e.preventDefault();
     setGradeError('');
   
-    console.log('Selected Registration ID:', selectedRegistrationId); // DEBUG
-    console.log('Grade Value:', gradeValue); // DEBUG
-  
     if (!selectedRegistrationId || !gradeValue) {
       setGradeError('Vyplňte všechna pole');
       return;
@@ -140,8 +143,6 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
         registration: parseInt(selectedRegistrationId),
         value: parseFloat(gradeValue)
       };
-      
-      console.log('Sending grade data:', gradeData); // DEBUG
       
       await gradesAPI.createGrade(gradeData);
       
@@ -155,6 +156,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       console.error('Error adding grade:', err);
     }
   };
+  
   const handleDeleteGrade = async (gradeId) => {
     if (!window.confirm('Opravdu chcete smazat hodnocení?')) {
       return;
@@ -169,6 +171,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       console.error('Error deleting grade:', err);
     }
   };
+  
   const handleUpdateGrade = async (gradeId, newValue) => {
     if (!window.confirm('Opravdu chcete změnit hodnocení?')) {
       return;
@@ -274,15 +277,14 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
     }));
     setTermError('');
   };
+  
   const handleDeleteRegistration = async (registrationId) => {
-    console.log('Deleting registration ID:', registrationId);
-    
     if (!window.confirm('Opravdu chcete odebrat studenta z tohoto termínu?')) {
       return;
     }
   
     try {
-      await termsAPI.deleteRegistration(selectedTerm.id, registrationId); // ✅ Pridaný termId
+      await termsAPI.deleteRegistration(registrationId);
       alert('Student byl odebrán z termínu');
       await loadTermStudents(selectedTerm.id);
     } catch (err) {
@@ -290,6 +292,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       console.error('Error deleting registration:', err);
     }
   };
+  
   const handleRemoveStudent = async (enrollmentId) => {
     if (!selectedCourse) return;
     
@@ -306,6 +309,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       console.error('Error removing student:', err);
     }
   };
+  
   const handleCreateTerm = async (e) => {
     e.preventDefault();
     setTermLoading(true);
@@ -403,8 +407,8 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   const isGuarantor = selectedCourse && currentUser && selectedCourse.guarantee?.id === currentUser.id;
   const isLecturer = selectedCourse && currentUser && selectedCourse.lecturers?.some(l => l.id === currentUser.id);
   const isAdmin = currentUser?.role === 'ADMIN';
-  const canManageCourse = isGuarantor || isAdmin; // Pre vytváranie/mazanie termínov, schvaľovanie študentov
-  const canGradeStudents = isGuarantor || isLecturer || isAdmin; // Pre hodnotenie študentov
+  const canManageCourse = isGuarantor || isAdmin;
+  const canGradeStudents = isGuarantor || isLecturer || isAdmin;
   
   const pendingEnrollments = courseEnrollments.filter(e => e.role === 'PENDING');
   const approvedEnrollments = courseEnrollments.filter(e => e.role === 'APPROVED');
@@ -547,6 +551,25 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
             Lektoři ({selectedCourse.lecturers?.length || 0})
           </button>
         )}
+        {canManageCourse && (
+          <button 
+            className={`tab ${activeTab === 'edit-course' ? 'active' : ''}`}
+            onClick={() => {
+              setEditCourseData({
+                title: selectedCourse.title,
+                code: selectedCourse.code,
+                description: selectedCourse.description || '',
+                type: selectedCourse.type || '',
+                price: selectedCourse.price.toString(),
+                capacity: selectedCourse.capacity.toString(),
+                auto_confirm: selectedCourse.auto_confirm
+              });
+              setActiveTab('edit-course');
+            }}
+          >
+            ✏️ Upravit kurz
+          </button>
+        )}
       </div>
 
       {activeTab === 'terms' && (
@@ -585,7 +608,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                     <th>Místnost</th>
                     <th>Kapacita</th>
                     <th>Registrací</th>
-                    {canManageCourse && <th>Akce</th>}
+                    {(canManageCourse || isLecturer) && <th>Akce</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -613,17 +636,17 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                             >
                               Detail
                             </button>
-                            {canManageCourse && ( // Len garant/admin môže mazať
-        <button 
-          className="button button-danger button-small"
-          onClick={() => handleDeleteTerm(term.id)}
-        >
-          Smazat
-        </button>
-      )}
-    </div>
-  </td>
-)}
+                            {canManageCourse && (
+                              <button 
+                                className="button button-danger button-small"
+                                onClick={() => handleDeleteTerm(term.id)}
+                              >
+                                Smazat
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -633,7 +656,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
         </div>
       )}
 
-{activeTab === 'term-detail' && selectedTerm && (canManageCourse || isLecturer) && (
+      {activeTab === 'term-detail' && selectedTerm && (canManageCourse || isLecturer) && (
         <div className="tab-content">
           <div className="section-header">
             <h2 className="section-title">
@@ -677,27 +700,24 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                 <div className="form-group">
                   <label className="form-label">Student *</label>
                   <select
-  className="input-field"
-  value={selectedRegistrationId}
-  onChange={(e) => {
-    console.log('Selected value:', e.target.value); // DEBUG
-    setSelectedRegistrationId(e.target.value);
-  }}
-  required
->
-  <option value="">-- Vyberte studenta --</option>
-  {termStudents
-    .filter(s => !s.grade)
-    .map(student => (
-      <option 
-        key={student.registration_id} 
-        value={student.registration_id}  // ✅ TOTO MUSÍ BYŤ registration_id
-      >
-        {student.first_name} {student.last_name} ({student.username})
-      </option>
-    ))
-  }
-</select>
+                    className="input-field"
+                    value={selectedRegistrationId}
+                    onChange={(e) => setSelectedRegistrationId(e.target.value)}
+                    required
+                  >
+                    <option value="">-- Vyberte studenta --</option>
+                    {termStudents
+                      .filter(s => !s.grade)
+                      .map(student => (
+                        <option 
+                          key={student.registration_id} 
+                          value={student.registration_id}
+                        >
+                          {student.first_name} {student.last_name} ({student.username})
+                        </option>
+                      ))
+                    }
+                  </select>
                 </div>
 
                 <div className="form-group">
@@ -762,49 +782,49 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                         {new Date(student.registered_at).toLocaleDateString('cs-CZ')}
                       </td>
                       <td>
-  {student.grade ? (
-    <div>
-      <strong style={{ color: '#3b82f6', fontSize: '18px' }}>
-        {student.grade}
-      </strong>
-    </div>
-  ) : (
-    <span style={{ color: '#94a3b8' }}>Nehodnoceno</span>
-  )}
-</td>
-<td>
-  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-    {student.grade && student.grade_id && (
-      <>
-        <button 
-          className="button button-small"
-          onClick={() => {
-            const newValue = prompt('Nové hodnocení (0-100):', student.grade);
-            if (newValue && !isNaN(parseFloat(newValue))) {
-              handleUpdateGrade(student.grade_id, newValue);
-            }
-          }}
-        >
-          Upravit hodnocení
-        </button>
-        <button 
-          className="button button-danger button-small"
-          onClick={() => handleDeleteGrade(student.grade_id)}
-        >
-          Smazat hodnocení
-        </button>
-      </>
-    )}
-    {canManageCourse && (
-      <button 
-        className="button button-danger button-small"
-        onClick={() => handleDeleteRegistration(student.registration_id)}
-      >
-        Odebrat z termínu
-      </button>
-    )}
-  </div>
-</td>
+                        {student.grade ? (
+                          <div>
+                            <strong style={{ color: '#3b82f6', fontSize: '18px' }}>
+                              {student.grade}
+                            </strong>
+                          </div>
+                        ) : (
+                          <span style={{ color: '#94a3b8' }}>Nehodnoceno</span>
+                        )}
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                          {student.grade && student.grade_id && (
+                            <>
+                              <button 
+                                className="button button-small"
+                                onClick={() => {
+                                  const newValue = prompt('Nové hodnocení (0-100):', student.grade);
+                                  if (newValue && !isNaN(parseFloat(newValue))) {
+                                    handleUpdateGrade(student.grade_id, newValue);
+                                  }
+                                }}
+                              >
+                                Upravit hodnocení
+                              </button>
+                              <button 
+                                className="button button-danger button-small"
+                                onClick={() => handleDeleteGrade(student.grade_id)}
+                              >
+                                Smazat hodnocení
+                              </button>
+                            </>
+                          )}
+                          {canManageCourse && (
+                            <button 
+                              className="button button-danger button-small"
+                              onClick={() => handleDeleteRegistration(student.registration_id)}
+                            >
+                              Odebrat z termínu
+                            </button>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -943,55 +963,55 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
         </div>
       )}
 
-{activeTab === 'enrollments' && (
-  <div className="tab-content">
-    <h2 className="section-title">Schválení studenti</h2>
-    
-    {approvedEnrollments.length === 0 ? (
-      <div className="empty-state">
-        <p>Zatím nejsou žádní schválení studenti</p>
-      </div>
-    ) : (
-      <div className="table-container">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Student</th>
-              <th>Email</th>
-              <th>Datum zápisu</th>
-              {canManageCourse && <th>Akce</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {approvedEnrollments.map(enrollment => (
-              <tr key={enrollment.id}>
-                <td>
-                  {enrollment.student 
-                    ? `${enrollment.student.first_name} ${enrollment.student.last_name}`
-                    : 'Neznámý'}
-                </td>
-                <td>{enrollment.student?.email || '-'}</td>
-                <td>
-                  {new Date(enrollment.enrolled_at).toLocaleDateString('cs-CZ')}
-                </td>
-                {canManageCourse && (
-                  <td>
-                    <button 
-                      className="button button-danger button-small"
-                      onClick={() => handleRemoveStudent(enrollment.id)}
-                      >
-                      Odebrat z kurzu
-                    </button>
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    )}
-  </div>
-)}
+      {activeTab === 'enrollments' && (
+        <div className="tab-content">
+          <h2 className="section-title">Schválení studenti</h2>
+          
+          {approvedEnrollments.length === 0 ? (
+            <div className="empty-state">
+              <p>Zatím nejsou žádní schválení studenti</p>
+            </div>
+          ) : (
+            <div className="table-container">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Email</th>
+                    <th>Datum zápisu</th>
+                    {canManageCourse && <th>Akce</th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {approvedEnrollments.map(enrollment => (
+                    <tr key={enrollment.id}>
+                      <td>
+                        {enrollment.student 
+                          ? `${enrollment.student.first_name} ${enrollment.student.last_name}`
+                          : 'Neznámý'}
+                      </td>
+                      <td>{enrollment.student?.email || '-'}</td>
+                      <td>
+                        {new Date(enrollment.enrolled_at).toLocaleDateString('cs-CZ')}
+                      </td>
+                      {canManageCourse && (
+                        <td>
+                          <button 
+                            className="button button-danger button-small"
+                            onClick={() => handleRemoveStudent(enrollment.id)}
+                          >
+                            Odebrat z kurzu
+                          </button>
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
       {activeTab === 'lecturers' && canManageCourse && (
         <div className="tab-content">
@@ -1142,6 +1162,179 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {activeTab === 'edit-course' && canManageCourse && (
+        <div className="tab-content">
+          <div className="section-header">
+            <h2 className="section-title">Upravit kurz</h2>
+            <button 
+              className="button button-secondary"
+              onClick={() => setActiveTab('terms')}
+            >
+              ← Zpět
+            </button>
+          </div>
+
+          {editError && (
+            <div className="error-message">
+              {editError}
+            </div>
+          )}
+
+          <form onSubmit={async (e) => {
+            e.preventDefault();
+            setEditLoading(true);
+            setEditError('');
+
+            try {
+              const courseData = {
+                code: editCourseData.code,
+                title: editCourseData.title,
+                description: editCourseData.description,
+                type: editCourseData.type,
+                price: parseFloat(editCourseData.price),
+                capacity: parseInt(editCourseData.capacity),
+                auto_confirm: editCourseData.auto_confirm
+              };
+
+              await coursesAPI.updateCourse(selectedCourse.id, courseData);
+              alert('Kurz byl úspěšně upraven!');
+              await loadCourseDetails(selectedCourse.id);
+              setActiveTab('terms');
+            } catch (err) {
+              setEditError(err.message || 'Úprava kurzu se nezdařila');
+              console.error('Error updating course:', err);
+            } finally {
+              setEditLoading(false);
+            }
+          }} className="course-form">
+            <div className="form-section">
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Název kurzu *</label>
+                  <input
+                    type="text"
+                    name="title"
+                    className="input-field"
+                    value={editCourseData.title}
+                    onChange={(e) => setEditCourseData(prev => ({...prev, title: e.target.value}))}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Kód kurzu *</label>
+                  <input
+                    type="text"
+                    name="code"
+                    className="input-field"
+                    value={editCourseData.code}
+                    onChange={(e) => setEditCourseData(prev => ({...prev, code: e.target.value}))}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Typ kurzu *</label>
+                  <select
+                    name="type"
+                    className="input-field"
+                    value={editCourseData.type}
+                    onChange={(e) => setEditCourseData(prev => ({...prev, type: e.target.value}))}
+                    required
+                  >
+                    <option value="">-- Vyberte typ --</option>
+                    <option value="HARDWARE">Hardware</option>
+                    <option value="OS">Operating Systems</option>
+                    <option value="AI">Artificial Intelligence</option>
+                    <option value="WEB">Web Development</option>
+                    <option value="SECURITY">Security</option>
+                    <option value="NETWORKS">Networks</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Popis kurzu</label>
+                  <textarea
+                    name="description"
+                    className="input-field textarea"
+                    rows="4"
+                    value={editCourseData.description}
+                    onChange={(e) => setEditCourseData(prev => ({...prev, description: e.target.value}))}
+                  />
+                </div>
+              </div>
+
+              <div className="form-row two-columns">
+                <div className="form-group">
+                  <label className="form-label">Cena (Kč) *</label>
+                  <input
+                    type="number"
+                    name="price"
+                    className="input-field"
+                    min="0"
+                    step="0.01"
+                    value={editCourseData.price}
+                    onChange={(e) => setEditCourseData(prev => ({...prev, price: e.target.value}))}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Kapacita *</label>
+                  <input
+                    type="number"
+                    name="capacity"
+                    className="input-field"
+                    min="1"
+                    value={editCourseData.capacity}
+                    onChange={(e) => setEditCourseData(prev => ({...prev, capacity: e.target.value}))}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="checkbox-group">
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      name="auto_confirm"
+                      checked={editCourseData.auto_confirm}
+                      onChange={(e) => setEditCourseData(prev => ({...prev, auto_confirm: e.target.checked}))}
+                    />
+                    Automatické potvrzení studentů
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div className="form-actions">
+              <button 
+                type="submit" 
+                className="button button-success"
+                disabled={editLoading}
+              >
+                {editLoading ? '⏳ Ukládám změny...' : '✓ Uložit změny'}
+              </button>
+              <button 
+                type="button" 
+                className="button button-secondary"
+                onClick={() => setActiveTab('terms')}
+              >
+                Zrušit
+              </button>
+            </div>
+          </form>
         </div>
       )}
     </div>

@@ -15,6 +15,7 @@ import MyCourses from './components/pages/MyCourses';
 import MySchedule from './components/pages/MySchedule';
 import UserProfile from './components/pages/UserProfile';
 import { authAPI } from './components/services/api';
+import EditCourse from './components/pages/EditCourse';
 import './App.css';
 
 function App() {
@@ -144,6 +145,8 @@ function App() {
         <Navigation items={getNavigationItems()} />
         
         <Routes>
+        <Route path="/edit-course/:id" element={<EditCourse />} />
+
           {/* Public routes */}
           <Route path="/" element={<PublicCourses user={mappedUser} onShowLogin={handleShowLogin} />} />
           <Route path="/courses" element={<PublicCourses user={mappedUser} onShowLogin={handleShowLogin} />} />
