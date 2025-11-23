@@ -15,26 +15,29 @@ const StudentCourseRegistration = () => {
   const [registering, setRegistering] = useState(false);
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [myEnrollment, setMyEnrollment] = useState(null);
+
   useEffect(() => {
     loadCourseDetails();
   }, [id]);
+
   const handleUnregisterFromTerm = async (registrationId) => {
-    if (!window.confirm('Opravdu se chcete odregistrovat z tohoto termínu?')) {
+    if (!window.confirm('Do you really want to unregister from this term?')) {
       return;
     }
   
     try {
       setRegistering(true);
       await registrationsAPI.unregisterFromTerm(registrationId);
-      alert('Úspěšně jste se odregistrovali z termínu');
+      alert('You have successfully unregistered from the term');
       await loadCourseDetails();
     } catch (err) {
-      alert(err.message || 'Odregistrace z termínu se nezdařila');
+      alert(err.message || 'Unregistering from term failed');
       console.error('Error unregistering from term:', err);
     } finally {
       setRegistering(false);
     }
   };
+
   const loadCourseDetails = async () => {
     try {
       setLoading(true);
@@ -42,13 +45,11 @@ const StudentCourseRegistration = () => {
   
       const courseData = await coursesAPI.getCourseDetail(id);
       setCourse(courseData);
-      console.log('Course data:', courseData); // DEBUG
   
       const allTerms = await termsAPI.getTerms();
       const courseTerms = allTerms.filter(t => t.course?.id === parseInt(id));
       setTerms(courseTerms);
   
-      // Načítaj moje registrácie
       try {
         const registrations = await registrationsAPI.getMyRegistrations();
         setMyRegistrations(registrations);
@@ -56,35 +57,28 @@ const StudentCourseRegistration = () => {
         console.error('Error loading registrations:', err);
       }
   
-      // Zisti či som zapísaný v kurze
-    // Zisti či som zapísaný v kurze
-try {
-  const enrollments = await coursesAPI.getMyCourses(); // ✅ Použite getMyCourses namiesto getMyEnrollments
-  console.log('My enrollments:', enrollments); // DEBUG
-  console.log('Looking for course ID:', parseInt(id)); // DEBUG
-  
-  const courseEnrollment = enrollments.find(e => {
-    console.log('Checking enrollment:', e, 'course ID:', e.id); // ✅ OPRAVENÉ - použite e.id nie e.course?.id
-    return e.id === parseInt(id);
-  });
-  
-  console.log('Found enrollment:', courseEnrollment); // DEBUG
-  
-  if (courseEnrollment) {
-    setIsEnrolled(true);
-    setMyEnrollment(courseEnrollment);
-  } else {
-    setIsEnrolled(false);
-    setMyEnrollment(null);
-  }
-} catch (err) {
-  console.error('Error checking enrollment:', err);
-  setIsEnrolled(false);
-  setMyEnrollment(null);
-}
+      try {
+        const enrollments = await coursesAPI.getMyCourses();
+        
+        const courseEnrollment = enrollments.find(e => {
+          return e.id === parseInt(id);
+        });
+        
+        if (courseEnrollment) {
+          setIsEnrolled(true);
+          setMyEnrollment(courseEnrollment);
+        } else {
+          setIsEnrolled(false);
+          setMyEnrollment(null);
+        }
+      } catch (err) {
+        console.error('Error checking enrollment:', err);
+        setIsEnrolled(false);
+        setMyEnrollment(null);
+      }
   
     } catch (err) {
-      setError('Nepodařilo se načíst detail kurzu');
+      setError('Failed to load course details');
       console.error('Error loading course:', err);
     } finally {
       setLoading(false);
@@ -92,17 +86,17 @@ try {
   };
 
   const handleLeaveCourse = async () => {
-    if (!window.confirm(`Opravdu chcete ukončit kurz "${course.title}"? Tato akce je nevratná.`)) {
+    if (!window.confirm(`Do you really want to leave the course "${course.title}"? This action is irreversible.`)) {
       return;
     }
   
     try {
       setRegistering(true);
       await coursesAPI.leaveCourse(id);
-      alert('Úspěšně jste ukončili kurz');
+      alert('You have successfully left the course');
       navigate('/student/my-courses');
     } catch (err) {
-      alert(err.message || 'Ukončení kurzu se nezdařilo');
+      alert(err.message || 'Leaving course failed');
       console.error('Error leaving course:', err);
     } finally {
       setRegistering(false);
@@ -110,20 +104,20 @@ try {
   };
 
   const handleRegisterTerm = async (termId) => {
-    if (!window.confirm('Opravdu se chcete registrovat na tento termín?')) {
+    if (!window.confirm('Do you really want to register for this term?')) {
       return;
     }
 
     try {
       setRegistering(true);
       await registrationsAPI.registerForTerm(termId);
-      alert('Úspěšně jste se zaregistrovali na termín!');
+      alert('You have successfully registered for the term!');
       await loadCourseDetails();
     } catch (err) {
       if (err.message.includes('Already registered')) {
-        alert('Již jste registrováni na tento termín');
+        alert('You are already registered for this term');
       } else {
-        alert(err.message || 'Registrace na termín se nezdařila');
+        alert(err.message || 'Registration for term failed');
       }
       console.error('Error registering for term:', err);
     } finally {
@@ -132,7 +126,7 @@ try {
   };
 
   const handleEnrollCourse = async () => {
-    if (!window.confirm(`Opravdu se chcete zapsat do kurzu "${course.title}"?`)) {
+    if (!window.confirm(`Do you really want to enroll in the course "${course.title}"?`)) {
       return;
     }
 
@@ -141,14 +135,14 @@ try {
       await coursesAPI.enrollCourse(id);
       
       if (course.auto_confirm) {
-        alert('Úspěšně jste se zapsali do kurzu!');
+        alert('You have successfully enrolled in the course!');
       } else {
-        alert('Žádost o zápis byla odeslána. Čekejte na schválení garantem.');
+        alert('Enrollment request has been sent. Wait for guarantor approval.');
       }
       
       navigate('/student/my-courses');
     } catch (err) {
-      alert(err.message || 'Zápis do kurzu se nezdařil');
+      alert(err.message || 'Course enrollment failed');
       console.error('Error enrolling in course:', err);
     } finally {
       setRegistering(false);
@@ -157,9 +151,9 @@ try {
 
   const getTermTypeName = (type) => {
     const typeMap = {
-      'LECTURE': 'Přednáška',
-      'EXERCISE': 'Cvičení',
-      'EXAM': 'Zkouška'
+      'LECTURE': 'Lecture',
+      'EXERCISE': 'Exercise',
+      'EXAM': 'Exam'
     };
     return typeMap[type] || type;
   };
@@ -167,8 +161,8 @@ try {
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
     return {
-      date: date.toLocaleDateString('cs-CZ'),
-      time: date.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' })
+      date: date.toLocaleDateString('en-US'),
+      time: date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
     };
   };
 
@@ -184,11 +178,11 @@ try {
     if (!grade) return null;
     return (
       <div className="grade-display">
-        <span className="grade-label">Hodnocení:</span>
+        <span className="grade-label">Grade:</span>
         <span className="grade-value">{grade.value}</span>
         {grade.graded_at && (
           <span className="grade-date">
-            ({new Date(grade.graded_at).toLocaleDateString('cs-CZ')})
+            ({new Date(grade.graded_at).toLocaleDateString('en-US')})
           </span>
         )}
       </div>
@@ -199,7 +193,7 @@ try {
     return (
       <div className="student-course-registration">
         <div className="loading-state">
-          <p>Načítání detailu kurzu...</p>
+          <p>Loading course details...</p>
         </div>
       </div>
     );
@@ -209,9 +203,9 @@ try {
     return (
       <div className="student-course-registration">
         <div className="error-state">
-          <p>{error || 'Kurz nebyl nalezen'}</p>
+          <p>{error || 'Course not found'}</p>
           <button className="button" onClick={() => navigate('/courses')}>
-            ← Zpět na kurzy
+            ← Back to courses
           </button>
         </div>
       </div>
@@ -219,12 +213,10 @@ try {
   }
 
   return (
-    
     <div className="student-course-registration">
       <button className="button button-secondary" onClick={() => navigate('/courses')}>
-        ← Zpět na seznam kurzů
+        ← Back to course list
       </button>
-
 
       <div className="course-detail-card">
         <div className="course-header">
@@ -233,47 +225,48 @@ try {
         </div>
         
         <div className="course-info">
-          <p><strong>Garant:</strong> {course.guarantee 
+          <p><strong>Guarantor:</strong> {course.guarantee 
             ? `${course.guarantee.first_name} ${course.guarantee.last_name}`
-            : 'Neznámý'}</p>
+            : 'Unknown'}</p>
           
           {course.description && (
-            <p><strong>Popis:</strong> {course.description}</p>
+            <p><strong>Description:</strong> {course.description}</p>
           )}
           
-          <p><strong>Kapacita:</strong> {course.enrolled_count}/{course.capacity}</p>
-          <p><strong>Cena:</strong> {course.price} Kč</p>
+          <p><strong>Capacity:</strong> {course.enrolled_count}/{course.capacity}</p>
+          <p><strong>Price:</strong> {course.price} CZK</p>
           
           {course.auto_confirm && (
-            <p className="info-badge">✓ Automatické schválení po zápisu</p>
+            <p className="info-badge">✓ Automatic approval after enrollment</p>
           )}
         </div>
+
         <div className="course-actions">
-  {isEnrolled ? (
-    <button 
-      className="button button-danger"
-      onClick={handleLeaveCourse}
-      disabled={registering}
-    >
-      {registering ? '⏳ Ukončuji...' : '🚪 Ukončit kurz'}
-    </button>
-  ) : (
-    <button 
-      className="button button-success"
-      onClick={handleEnrollCourse}
-      disabled={registering || course.enrolled_count >= course.capacity}
-    >
-      {registering ? '⏳ Zapisuji...' : '📝 Zapsat se do k]urzu'}
-    </button>
-  )}
-</div>
+          {isEnrolled ? (
+            <button 
+              className="button button-danger"
+              onClick={handleLeaveCourse}
+              disabled={registering}
+            >
+              {registering ? '⏳ Leaving...' : '🚪 Leave Course'}
+            </button>
+          ) : (
+            <button 
+              className="button button-success"
+              onClick={handleEnrollCourse}
+              disabled={registering || course.enrolled_count >= course.capacity}
+            >
+              {registering ? '⏳ Enrolling...' : '📝 Enroll in Course'}
+            </button>
+          )}
+        </div>
       </div>
 
-      <h2 className="section-title">Dostupné termíny ({terms.length})</h2>
+      <h2 className="section-title">Available Terms ({terms.length})</h2>
 
       {terms.length === 0 ? (
         <div className="empty-state">
-          <p>Pro tento kurz zatím nejsou vytvořené žádné termíny</p>
+          <p>No terms have been created for this course yet</p>
         </div>
       ) : (
         <div className="terms-grid">
@@ -284,62 +277,59 @@ try {
             const isRegistered = !!myRegistration;
             
             return (
-              
               <div key={term.id} className={`term-card ${isRegistered ? 'registered' : ''}`}>
-              <div className="term-card-header">
-                <h3>{getTermTypeName(term.type)}</h3>
-                {isFull && <span className="badge badge-warning">Plno</span>}
-                {isRegistered && <span className="badge badge-success">✓ Registrován</span>}
-              </div>
-              
-              <div className="term-card-body">
-                <div className="term-info-item">
-                  <span className="term-icon">📅</span>
-                  <span>Datum: {date}</span>
+                <div className="term-card-header">
+                  <h3>{getTermTypeName(term.type)}</h3>
+                  {isFull && <span className="badge badge-warning">Full</span>}
+                  {isRegistered && <span className="badge badge-success">✓ Registered</span>}
                 </div>
-                <div className="term-info-item">
-                  <span className="term-icon">🕐</span>
-                  <span>Čas: {time}</span>
-                </div>
-                <div className="term-info-item">
-                  <span className="term-icon">📍</span>
-                  <span>Místnost: {term.room || 'Neurčeno'}</span>
-                </div>
-                <div className="term-info-item">
-                  <span className="term-icon">👥</span>
-                  <span>Obsazeno: {term.registrations_count || 0}/{term.capacity}</span>
-                </div>
-
-                  {/* Zobraz hodnotenie ak existuje */}
-                  {isRegistered && myRegistration.grade && (
-      <div className="term-grade">
-        {getGradeDisplay(myRegistration.grade)}
-      </div>
-    )}
-  </div>
                 
-                  <div className="term-card-footer">
-    {isRegistered ? (
-      <button 
-        className="button button-danger full-width"
-        onClick={() => handleUnregisterFromTerm(myRegistration.id)}
-        disabled={registering}
-      >
-        {registering ? '⏳ Odregistrovávám...' : '✗ Odregistrovat se'}
-      </button>
-    ) : (
-      term.requires_registration && (
-        <button 
-          className={`button full-width ${isFull ? '' : 'button-success'}`}
-          onClick={() => handleRegisterTerm(term.id)}
-          disabled={registering || isFull}
-        >
-          {isFull ? '📋 Plno' : '✓ Registrovat'}
-        </button>
-      )
-    )}
-  </div>
+                <div className="term-card-body">
+                  <div className="term-info-item">
+                    <span className="term-icon">📅</span>
+                    <span>Date: {date}</span>
+                  </div>
+                  <div className="term-info-item">
+                    <span className="term-icon">🕐</span>
+                    <span>Time: {time}</span>
+                  </div>
+                  <div className="term-info-item">
+                    <span className="term-icon">📍</span>
+                    <span>Room: {term.room || 'Not specified'}</span>
+                  </div>
+                  <div className="term-info-item">
+                    <span className="term-icon">👥</span>
+                    <span>Occupied: {term.registrations_count || 0}/{term.capacity}</span>
+                  </div>
 
+                  {isRegistered && myRegistration.grade && (
+                    <div className="term-grade">
+                      {getGradeDisplay(myRegistration.grade)}
+                    </div>
+                  )}
+                </div>
+                
+                <div className="term-card-footer">
+                  {isRegistered ? (
+                    <button 
+                      className="button button-danger full-width"
+                      onClick={() => handleUnregisterFromTerm(myRegistration.id)}
+                      disabled={registering}
+                    >
+                      {registering ? '⏳ Unregistering...' : '✗ Unregister'}
+                    </button>
+                  ) : (
+                    term.requires_registration && (
+                      <button 
+                        className={`button full-width ${isFull ? '' : 'button-success'}`}
+                        onClick={() => handleRegisterTerm(term.id)}
+                        disabled={registering || isFull}
+                      >
+                        {isFull ? '📋 Full' : '✓ Register'}
+                      </button>
+                    )
+                  )}
+                </div>
               </div>
             );
           })}
