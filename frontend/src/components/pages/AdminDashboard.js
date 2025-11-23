@@ -12,7 +12,6 @@ const AdminDashboard = () => {
     approvedCourses: 0,
     totalStudents: 0,
     pendingCourses: 0,
-    totalLecturers: 0,
     totalRooms: 0
   });
   const [upcomingTerms, setUpcomingTerms] = useState([]);
@@ -37,7 +36,6 @@ const AdminDashboard = () => {
       const approvedCourses = courses.filter(c => c.approved).length;
       const pendingCourses = courses.filter(c => !c.approved).length;
       const totalStudents = courses.reduce((sum, c) => sum + (c.enrolled_count || 0), 0);
-      const totalLecturers = users.filter(u => u.role === 'LECTURER' || u.role === 'GUARANTOR').length;
       const totalRooms = rooms.length;
 
       setStats({
@@ -45,7 +43,6 @@ const AdminDashboard = () => {
         approvedCourses,
         totalStudents,
         pendingCourses,
-        totalLecturers,
         totalRooms
       });
 
@@ -72,9 +69,8 @@ const AdminDashboard = () => {
   const statsCards = [
     { label: 'Total Courses', value: stats.totalCourses, color: '#3b82f6' },
     { label: 'Approved Courses', value: stats.approvedCourses, color: '#10b981' },
-    { label: 'Registered Students', value: stats.totalStudents, color: '#8b5cf6' },
     { label: 'Pending Approval', value: stats.pendingCourses, color: '#f59e0b' },
-    { label: 'Instructors', value: stats.totalLecturers, color: '#06b6d4' },
+    { label: 'Registered Students', value: stats.totalStudents, color: '#8b5cf6' },
     { label: 'Rooms', value: stats.totalRooms, color: '#ec4899' }
   ];
 
