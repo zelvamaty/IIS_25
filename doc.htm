@@ -52,8 +52,7 @@ spustit z odkazu.</p>
 projektu (např. PHP skripty) implementují jednotlivé případy použití.</p>
 
 <h3>Databáze</h3>
-
-Zde vložte grafické schéma relační databáze (tabulek v databázi).
+<img src="db.png" alt="Schéma databáze"/>
 
 <h2>Instalace</h2>
 
@@ -72,7 +71,7 @@ Zde vložte grafické schéma relační databáze (tabulek v databázi).
 
 <h4>Klon repozitáře</h4>
 <pre>
-cd ~
+cd ~/
 git clone git@github.com/swaggermaty:IIS_25.git
 </pre>
 
@@ -85,7 +84,7 @@ python3 -m venv .venv
 pip install -r requirements.txt
 </pre>
 
-2. Inicializace databáze
+2. Inicializace databáze - naplní databázi ukázkovými daty
 <pre>
 python3 manage.py makemigrations
 python3 manage.py migrate
@@ -99,9 +98,9 @@ python3 manage.py runserver
 
 3b. Spuštění backendu pro běh na produkci:
 <pre>
-daphne --bind &lt;adresa&gt; -p &lt;číslo portu&gt; backend_iis.asgi:application
+daphne --bind &lt;adresa&gt; --port &lt;číslo portu&gt; backend_iis.asgi:application
 </pre>
-Poznámka: Program <code>daphne</code> je samotná binárka serveru, nejedná se o nástroj pro řízení běhu (jako např. <code>systemctl</code>) - je tedy možné ji spouštět např. jako systémovou službu pod <code>systemd</code>.
+Poznámka: Program <code>daphne</code> je standalone server, nejedná se o nástroj pro řízení běhu (jako např. <code>systemctl</code>) - je tedy možné ji spouštět např. jako systémovou službu pod <code>systemd</code>.
 
 <h4>Instalace frontendu</h4>
 1. Konfigurace prostředí
@@ -126,7 +125,5 @@ serve -s build
 důvodu. Např. &#8222;Z časových důvodů nebyla implementována správa 
 uživatelů.&#8221; Pomůžete tím zrychlit hodnocení, když neimplementované 
 funkce nebudeme muset dlouze hledat.</p>
-
-
 
 </body></html>
