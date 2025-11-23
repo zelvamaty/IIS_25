@@ -24,12 +24,11 @@ class Command(BaseCommand):
                 Registration.objects.all().delete()
                 User.objects.exclude(is_superuser=True).delete()
 
-                # Password for all users will be 'pass1234'
                 common_password = 'pass1234'
                 
                 self.stdout.write('Creating Users...')
 
-                # -- Admin --
+                # admin user
                 admin_user = User.objects.create_user(
                     username='admin_main',
                     email='admin@test.com',
@@ -39,7 +38,7 @@ class Command(BaseCommand):
                     role=UserRole.ADMIN
                 )
 
-                # -- 5 Normal Users --
+                # normal users
                 users = []
                 for i in range(1, 6):
                     u = User.objects.create_user(
@@ -52,14 +51,12 @@ class Command(BaseCommand):
                     )
                     users.append(u)
                 
-                # Let's identify specific users for specific roles for clarity
                 guarantee_user = users[0]  # user1
                 student_1 = users[1]       # user2
                 student_2 = users[2]       # user3
                 student_3 = users[3]       # user4
                 student_4 = users[4]       # user5
 
-                # 3. Create Room
                 self.stdout.write('Creating Room...')
                 room = Room.objects.create(
                     name='Lab 101',
@@ -67,10 +64,9 @@ class Command(BaseCommand):
                     location='Building A, 1st Floor'
                 )
 
-                # 4. Create 2 Courses
                 self.stdout.write('Creating Courses...')
                 
-                # Course 1
+                # course 1
                 course1 = Course.objects.create(
                     code='CS101',
                     title='Intro to Python',
@@ -82,7 +78,7 @@ class Command(BaseCommand):
                     auto_confirm=True
                 )
 
-                # Course 2
+                # course 2
                 course2 = Course.objects.create(
                     code='CS202',
                     title='Advanced Django',
@@ -147,5 +143,4 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS('Successfully seeded database!'))
         self.stdout.write(f'Admin: {admin_user.username} / {common_password}')
         self.stdout.write(f'Guarantee: {guarantee_user.username}')
-        # self.stdout.write(f'Lecturers: {lecturer_1.username}, {lecturer_2.username}')
         self.stdout.write(f'Students: {student_1.username}, {student_2.username}')
