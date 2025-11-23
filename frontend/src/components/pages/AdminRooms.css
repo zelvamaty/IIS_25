@@ -359,10 +359,9 @@
     margin-bottom: 0;
   }
   
-  
   .modal-body .form-row.two-columns {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 20px;
   }
   
@@ -410,6 +409,11 @@
     justify-content: flex-end;
     gap: 12px;
   }
+
+  .modal-footer .button {
+    flex: 1;
+    max-width: 200px;
+  }
   
   .loading-state,
   .error-state {
@@ -447,5 +451,9 @@
   
     .rooms-stats {
       grid-template-columns: repeat(2, 1fr);
+    }
+
+    .modal-body .form-row.two-columns {
+      grid-template-columns: 1fr;
     }
   }
