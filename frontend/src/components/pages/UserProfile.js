@@ -9,7 +9,6 @@ const UserProfile = ({ user }) => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
   
-  // Profile edit data
   const [profileData, setProfileData] = useState({
     first_name: '',
     last_name: '',
@@ -18,7 +17,6 @@ const UserProfile = ({ user }) => {
   const [profileError, setProfileError] = useState('');
   const [profileSuccess, setProfileSuccess] = useState('');
 
-  // Password change data
   const [passwordData, setPasswordData] = useState({
     old_password: '',
     new_password1: '',
@@ -42,7 +40,7 @@ const UserProfile = ({ user }) => {
         email: data.email || ''
       });
     } catch (err) {
-      setError('Nepodařilo se načíst údaje uživatele');
+      setError('Failed to load user data');
       console.error('Error loading user:', err);
     } finally {
       setLoading(false);
@@ -64,15 +62,15 @@ const UserProfile = ({ user }) => {
 
     try {
       await usersAPI.updateUser(userDetails.id, profileData);
-      setProfileSuccess('Profil byl úspěšně upraven');
-      await loadUserDetails(); // Reload user data
+      setProfileSuccess('Profile has been successfully updated');
+      await loadUserDetails();
       
       setTimeout(() => {
         setIsEditingProfile(false);
         setProfileSuccess('');
       }, 2000);
     } catch (err) {
-      setProfileError(err.message || 'Úprava profilu selhala');
+      setProfileError(err.message || 'Profile update failed');
       console.error('Profile update error:', err);
     }
   };
@@ -91,18 +89,18 @@ const UserProfile = ({ user }) => {
     setPasswordSuccess('');
 
     if (passwordData.new_password1 !== passwordData.new_password2) {
-      setPasswordError('Nová hesla se neshodují');
+      setPasswordError('New passwords do not match');
       return;
     }
 
     if (passwordData.new_password1.length < 8) {
-      setPasswordError('Heslo musí mít alespoň 8 znaků');
+      setPasswordError('Password must be at least 8 characters');
       return;
     }
 
     try {
       await usersAPI.changePassword(passwordData);
-      setPasswordSuccess('Heslo bylo úspěšně změněno');
+      setPasswordSuccess('Password has been successfully changed');
       setPasswordData({
         old_password: '',
         new_password1: '',
@@ -113,36 +111,18 @@ const UserProfile = ({ user }) => {
         setPasswordSuccess('');
       }, 2000);
     } catch (err) {
-      setPasswordError(err.message || 'Změna hesla selhala');
+      setPasswordError(err.message || 'Password change failed');
       console.error('Password change error:', err);
     }
   };
 
-  const getRoleIcon = (role) => {
-    switch(role) {
-      case 'Student': return '🎓';
-      case 'Garant': return '👨‍🏫';
-      case 'Lektor': return '📚';
-      case 'Administrátor': return '⚙️';
-      default: return '👤';
-    }
-  };
 
-  const getRoleColor = (role) => {
-    switch(role) {
-      case 'Student': return '#3b82f6';
-      case 'Garant': return '#8b5cf6';
-      case 'Lektor': return '#10b981';
-      case 'Administrátor': return '#ef4444';
-      default: return '#64748b';
-    }
-  };
 
   if (loading) {
     return (
       <div className="user-profile">
         <div className="loading-state">
-          <p>Načítání profilu...</p>
+          <p>Loading profile...</p>
         </div>
       </div>
     );
@@ -154,7 +134,7 @@ const UserProfile = ({ user }) => {
         <div className="error-state">
           <p>{error}</p>
           <button className="button" onClick={loadUserDetails}>
-            Zkusit znovu
+            Try Again
           </button>
         </div>
       </div>
@@ -164,35 +144,28 @@ const UserProfile = ({ user }) => {
   return (
     <div className="user-profile">
       <div className="profile-container">
-        {/* Profile Header */}
         <div className="profile-header">
-          <div className="profile-avatar" style={{ borderColor: getRoleColor(user.role) }}>
-            <span className="avatar-icon">{getRoleIcon(user.role)}</span>
-          </div>
+          
           <div className="profile-header-info">
             <h1>{userDetails?.first_name} {userDetails?.last_name}</h1>
-            <div className="role-badge" style={{ background: getRoleColor(user.role) }}>
-              {user.role}
-            </div>
+            
           </div>
         </div>
 
-        {/* Profile Details */}
         <div className="profile-details">
           <div className="section-header">
-            <h2>Osobní údaje</h2>
+            <h2>Personal Information</h2>
             {!isEditingProfile && (
               <button 
                 className="button button-edit"
                 onClick={() => setIsEditingProfile(true)}
               >
-                ✏️ Upravit
+                Edit
               </button>
             )}
           </div>
 
           {isEditingProfile ? (
-            // EDIT MODE
             <div className="edit-section">
               {profileError && (
                 <div className="error-message">
@@ -208,12 +181,12 @@ const UserProfile = ({ user }) => {
 
               <form onSubmit={handleProfileSubmit} className="edit-form">
                 <div className="form-group">
-                  <label className="form-label">Jméno</label>
+                  <label className="form-label">First Name</label>
                   <input
                     type="text"
                     name="first_name"
                     className="input-field"
-                    placeholder="Zadejte jméno"
+                    placeholder="Enter first name"
                     value={profileData.first_name}
                     onChange={handleProfileChange}
                     required
@@ -221,12 +194,12 @@ const UserProfile = ({ user }) => {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Příjmení</label>
+                  <label className="form-label">Last Name</label>
                   <input
                     type="text"
                     name="last_name"
                     className="input-field"
-                    placeholder="Zadejte příjmení"
+                    placeholder="Enter last name"
                     value={profileData.last_name}
                     onChange={handleProfileChange}
                     required
@@ -239,7 +212,7 @@ const UserProfile = ({ user }) => {
                     type="email"
                     name="email"
                     className="input-field"
-                    placeholder="Zadejte email"
+                    placeholder="Enter email"
                     value={profileData.email}
                     onChange={handleProfileChange}
                   />
@@ -247,7 +220,7 @@ const UserProfile = ({ user }) => {
 
                 <div className="form-actions">
                   <button type="submit" className="button button-primary">
-                    💾 Uložit změny
+                    Save Changes
                   </button>
                   <button 
                     type="button" 
@@ -263,58 +236,46 @@ const UserProfile = ({ user }) => {
                       setProfileSuccess('');
                     }}
                   >
-                    ❌ Zrušit
+                    Cancel
                   </button>
                 </div>
               </form>
             </div>
           ) : (
-            // VIEW MODE
             <div className="details-grid">
               <div className="detail-item">
-                <span className="detail-icon">👤</span>
                 <div className="detail-content">
-                  <label>Uživatelské jméno</label>
+                  <label>Username</label>
                   <p>{userDetails?.username}</p>
                 </div>
               </div>
 
               <div className="detail-item">
-                <span className="detail-icon">📧</span>
                 <div className="detail-content">
                   <label>Email</label>
-                  <p>{userDetails?.email || 'Není nastaveno'}</p>
+                  <p>{userDetails?.email || 'Not set'}</p>
                 </div>
               </div>
 
               <div className="detail-item">
-                <span className="detail-icon">🏷️</span>
                 <div className="detail-content">
-                  <label>Jméno</label>
-                  <p>{userDetails?.first_name || 'Není nastaveno'}</p>
+                  <label>First Name</label>
+                  <p>{userDetails?.first_name || 'Not set'}</p>
                 </div>
               </div>
 
               <div className="detail-item">
-                <span className="detail-icon">🏷️</span>
                 <div className="detail-content">
-                  <label>Příjmení</label>
-                  <p>{userDetails?.last_name || 'Není nastaveno'}</p>
+                  <label>Last Name</label>
+                  <p>{userDetails?.last_name || 'Not set'}</p>
                 </div>
               </div>
 
-              <div className="detail-item">
-                <span className="detail-icon">🔑</span>
-                <div className="detail-content">
-                  <label>Role</label>
-                  <p>{user.role}</p>
-                </div>
-              </div>
+            
 
               <div className="detail-item">
-                <span className="detail-icon">🆔</span>
                 <div className="detail-content">
-                  <label>ID uživatele</label>
+                  <label>User ID</label>
                   <p>#{userDetails?.id}</p>
                 </div>
               </div>
@@ -322,22 +283,20 @@ const UserProfile = ({ user }) => {
           )}
         </div>
 
-        {/* Password Change Button */}
         {!isEditingProfile && (
           <div className="profile-actions">
             <button 
               className="button button-secondary"
               onClick={() => setIsEditingPassword(!isEditingPassword)}
             >
-              <span>🔒</span> {isEditingPassword ? 'Zrušit změnu hesla' : 'Změnit heslo'}
+             {isEditingPassword ? 'Cancel Password Change' : 'Change Password'}
             </button>
           </div>
         )}
 
-        {/* Password Change Form */}
         {isEditingPassword && (
           <div className="password-change-section">
-            <h2>Změna hesla</h2>
+            <h2>Change Password</h2>
             
             {passwordError && (
               <div className="error-message">
@@ -353,12 +312,12 @@ const UserProfile = ({ user }) => {
 
             <form onSubmit={handlePasswordSubmit} className="password-form">
               <div className="form-group">
-                <label className="form-label">Staré heslo</label>
+                <label className="form-label">Old Password</label>
                 <input
                   type="password"
                   name="old_password"
                   className="input-field"
-                  placeholder="Zadejte staré heslo"
+                  placeholder="Enter old password"
                   value={passwordData.old_password}
                   onChange={handlePasswordChange}
                   required
@@ -366,12 +325,12 @@ const UserProfile = ({ user }) => {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Nové heslo</label>
+                <label className="form-label">New Password</label>
                 <input
                   type="password"
                   name="new_password1"
                   className="input-field"
-                  placeholder="Zadejte nové heslo (min. 8 znaků)"
+                  placeholder="Enter new password (min. 8 characters)"
                   value={passwordData.new_password1}
                   onChange={handlePasswordChange}
                   required
@@ -380,12 +339,12 @@ const UserProfile = ({ user }) => {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Potvrzení nového hesla</label>
+                <label className="form-label">Confirm New Password</label>
                 <input
                   type="password"
                   name="new_password2"
                   className="input-field"
-                  placeholder="Zadejte nové heslo znovu"
+                  placeholder="Enter new password again"
                   value={passwordData.new_password2}
                   onChange={handlePasswordChange}
                   required
@@ -395,7 +354,7 @@ const UserProfile = ({ user }) => {
 
               <div className="form-actions">
                 <button type="submit" className="button button-primary">
-                  💾 Uložit nové heslo
+                  Save New Password
                 </button>
                 <button 
                   type="button" 
@@ -411,7 +370,7 @@ const UserProfile = ({ user }) => {
                     setPasswordSuccess('');
                   }}
                 >
-                  ❌ Zrušit
+                  Cancel
                 </button>
               </div>
             </form>

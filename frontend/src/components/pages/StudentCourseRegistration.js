@@ -251,7 +251,7 @@ const StudentCourseRegistration = () => {
               onClick={handleLeaveCourse}
               disabled={registering}
             >
-              {registering ? '⏳ Leaving...' : '🚪 Leave Course'}
+              {registering ? 'Leaving...' : ' Leave Course'}
             </button>
           ) : (
             <button 

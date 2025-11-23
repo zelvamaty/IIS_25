@@ -455,7 +455,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                     <span className="course-code">{course.code}</span>
                     {!course.approved ? (
                       <span className="badge badge-warning">
-                        ⏳ Waiting for administrator approval
+                         Waiting for administrator approval
                       </span>
                     ) : (
                       <span className="badge badge-success">
@@ -1053,7 +1053,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
 
                 <div className="form-actions">
                   <button type="submit" className="button button-success">
-                    ✓ Add Lecturer
+                    Add Lecturer
                   </button>
                   <button 
                     type="button" 
@@ -1302,7 +1302,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                 className="button button-success"
                 disabled={editLoading}
               >
-                {editLoading ? '⏳ Saving changes...' : '✓ Save Changes'}
+                {editLoading ? 'Saving changes...' : 'ave Changes'}
               </button>
               <button 
                 type="button" 

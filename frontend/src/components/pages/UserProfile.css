@@ -12,7 +12,6 @@
     gap: 30px;
   }
   
-  /* Header Section */
   .profile-header {
     background: white;
     border-radius: 20px;
@@ -60,7 +59,6 @@
     font-size: 16px;
   }
   
-  /* Stats */
   .profile-stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -110,7 +108,6 @@
     letter-spacing: 0.5px;
   }
   
-  /* Profile Details */
   .profile-details {
     background: white;
     border-radius: 20px;
@@ -181,11 +178,16 @@
     font-weight: 600;
   }
   
-  /* Actions */
   .profile-actions {
     display: flex;
     gap: 16px;
     flex-wrap: wrap;
+  }
+
+  .profile-actions .button {
+    padding: 12px 24px;
+    font-size: 14px;
+    width: auto;
   }
   
   .button {
@@ -224,7 +226,6 @@
     box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
   }
   
-  /* Responsive */
   @media (max-width: 768px) {
     .user-profile {
       padding: 20px 15px;
@@ -265,7 +266,9 @@
       width: 100%;
       justify-content: center;
     }
-  }.loading-state,
+  }
+
+  .loading-state,
   .error-state {
     text-align: center;
     padding: 80px 20px;
@@ -341,6 +344,10 @@
     margin-top: 10px;
   }
   
+  .form-actions .button {
+    flex: 1;
+  }
+  
   .error-message {
     background: #fee2e2;
     border: 2px solid #ef4444;
@@ -363,44 +370,6 @@
     margin-bottom: 20px;
   }
   
-  .button {
-    padding: 14px 28px;
-    border: none;
-    border-radius: 12px;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-  }
-  
-  .button-primary {
-    background: #3b82f6;
-    color: white;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-    flex: 1;
-  }
-  
-  .button-primary:hover {
-    background: #2563eb;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
-  }
-  
-  .button-secondary {
-    background: #60a5fa;
-    color: white;
-    flex: 1;
-  }
-  
-  .button-secondary:hover {
-    background: #3b82f6;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
-  }
   .section-header {
     display: flex;
     justify-content: space-between;
