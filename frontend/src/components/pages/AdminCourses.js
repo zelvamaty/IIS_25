@@ -284,7 +284,7 @@ const AdminCourses = () => {
                               Approve
                             </button>
                             <button 
-                              className="button button-warning button-small" 
+                              className="button button-danger button-small" 
                               onClick={() => handleRejectCourse(course.id, course.title)}
                             >
                               Reject
