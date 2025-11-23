@@ -834,13 +834,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       {activeTab === 'create-term' && canManageCourse && (
         <div className="tab-content">
           <div className="section-header">
-            <h2 className="section-title">Create New Term</h2>
-            <button 
-              className="button button-secondary"
-              onClick={() => setActiveTab('terms')}
-            >
-              ← Back
-            </button>
+          
           </div>
 
           <form onSubmit={handleCreateTerm} className="term-form">

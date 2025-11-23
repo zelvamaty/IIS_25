@@ -19,25 +19,28 @@ const StudentCourseRegistration = () => {
   useEffect(() => {
     loadCourseDetails();
   }, [id]);
-
   const handleUnregisterFromTerm = async (registrationId) => {
-    if (!window.confirm('Do you really want to unregister from this term?')) {
+    
+    const confirmed = window.confirm('Do you really want to unregister from this term?');
+    
+    if (!confirmed) {
       return;
     }
   
     try {
       setRegistering(true);
-      await registrationsAPI.unregisterFromTerm(registrationId);
+      console.log('Calling API to delete registration:', registrationId);
+      const result = await termsAPI.deleteRegistration(registrationId);
+      console.log('API response:', result);
       alert('You have successfully unregistered from the term');
       await loadCourseDetails();
     } catch (err) {
+      console.error('Full error:', err);
       alert(err.message || 'Unregistering from term failed');
-      console.error('Error unregistering from term:', err);
     } finally {
       setRegistering(false);
     }
   };
-
   const loadCourseDetails = async () => {
     try {
       setLoading(true);
@@ -171,9 +174,9 @@ const StudentCourseRegistration = () => {
   };
 
   const getMyRegistrationForTerm = (termId) => {
-    return myRegistrations.find(reg => reg.term === termId);
+    const reg = myRegistrations.find(reg => reg.term === termId);
+    return reg;
   };
-
   const getGradeDisplay = (grade) => {
     if (!grade) return null;
     return (
@@ -316,7 +319,7 @@ const StudentCourseRegistration = () => {
                       onClick={() => handleUnregisterFromTerm(myRegistration.id)}
                       disabled={registering}
                     >
-                      {registering ? '⏳ Unregistering...' : '✗ Unregister'}
+                      {registering ? 'Unregistering...' : '✗ Unregister'}
                     </button>
                   ) : (
                     term.requires_registration && (
@@ -325,7 +328,7 @@ const StudentCourseRegistration = () => {
                         onClick={() => handleRegisterTerm(term.id)}
                         disabled={registering || isFull}
                       >
-                        {isFull ? '📋 Full' : '✓ Register'}
+                        {isFull ? 'Full' : '✓ Register'}
                       </button>
                     )
                   )}
