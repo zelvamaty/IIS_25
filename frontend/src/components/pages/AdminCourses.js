@@ -10,6 +10,7 @@ const AdminCourses = () => {
   const [error, setError] = useState(null);
   const [filterStatus, setFilterStatus] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [expandedFields, setExpandedFields] = useState({});
 
   useEffect(() => {
     loadCourses();
@@ -22,11 +23,28 @@ const AdminCourses = () => {
       const data = await coursesAPI.getCourses();
       setCourses(data);
     } catch (err) {
-      setError('Nepodařilo se načíst kurzy');
+      setError('Failed to load courses');
       console.error('Error loading courses:', err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleFieldExpansion = (courseId, field) => {
+    const key = `${courseId}-${field}`;
+    setExpandedFields(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+
+  const truncateText = (text, maxLength = 20) => {
+    if (!text || text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  };
+
+  const isFieldExpanded = (courseId, field) => {
+    return expandedFields[`${courseId}-${field}`];
   };
 
   const handleNewCourse = () => {
@@ -34,60 +52,59 @@ const AdminCourses = () => {
   };
 
   const handleManageCourse = (courseId) => {
-    // Přesměrovat na detail kurzu v InstructorCourse
     navigate('/instructor/courses', { state: { selectedCourseId: courseId } });
   };
 
   const handleApproveCourse = async (id, title) => {
-    if (!window.confirm(`Schválit kurz "${title}"?`)) {
+    if (!window.confirm(`Approve course "${title}"?`)) {
       return;
     }
 
     try {
       await coursesAPI.approveCourse(id);
-      alert('Kurz byl schválen');
+      alert('Course has been approved');
       await loadCourses();
     } catch (err) {
-      alert(err.message || 'Schválení kurzu se nezdařilo');
+      alert(err.message || 'Approving course failed');
       console.error('Error approving course:', err);
     }
   };
 
   const handleRejectCourse = async (id, title) => {
-    if (!window.confirm(`Odmítnout kurz "${title}"?`)) {
+    if (!window.confirm(`Reject course "${title}"?`)) {
       return;
     }
 
     try {
       await coursesAPI.rejectCourse(id);
-      alert('Kurz byl odmítnut');
+      alert('Course has been rejected');
       await loadCourses();
     } catch (err) {
-      alert(err.message || 'Odmítnutí kurzu se nezdařilo');
+      alert(err.message || 'Rejecting course failed');
       console.error('Error rejecting course:', err);
     }
   };
 
   const handleDelete = async (id, title) => {
-    if (!window.confirm(`Opravdu chcete smazat kurz "${title}"?`)) {
+    if (!window.confirm(`Do you really want to delete course "${title}"?`)) {
       return;
     }
 
     try {
       await coursesAPI.deleteCourse(id);
-      alert('Kurz byl smazán');
+      alert('Course has been deleted');
       await loadCourses();
     } catch (err) {
-      alert(err.message || 'Smazání kurzu se nezdařilo');
+      alert(err.message || 'Deleting course failed');
       console.error('Error deleting course:', err);
     }
   };
 
   const getCourseTypeName = (type) => {
     const typeMap = {
-      'LECTURE': 'Přednáška',
-      'EXERCISE': 'Cvičení',
-      'EXAM': 'Zkouška'
+      'LECTURE': 'Lecture',
+      'EXERCISE': 'Exercise',
+      'EXAM': 'Exam'
     };
     return typeMap[type] || type;
   };
@@ -114,7 +131,7 @@ const AdminCourses = () => {
     return (
       <div className="admin-courses">
         <div className="loading-state">
-          <p>Načítání kurzů...</p>
+          <p>Loading courses...</p>
         </div>
       </div>
     );
@@ -126,7 +143,7 @@ const AdminCourses = () => {
         <div className="error-state">
           <p>{error}</p>
           <button className="button" onClick={loadCourses}>
-            Zkusit znovu
+            Try Again
           </button>
         </div>
       </div>
@@ -136,21 +153,20 @@ const AdminCourses = () => {
   return (
     <div className="admin-courses">
       <div className="page-header">
-        <h1 className="page-title">Správa kurzů</h1>
+        <h1 className="page-title">Course Management</h1>
         <button className="button button-success" onClick={handleNewCourse}>
-          ➕ Nový kurz
+          New Course
         </button>
       </div>
 
-      {/* Filters */}
       <div className="filter-section">
         <div className="filter-inputs">
           <div className="form-group">
-            <label className="form-label">Hledat kurz</label>
+            <label className="form-label">Search Course</label>
             <input
               type="text"
               className="input-field"
-              placeholder="Název nebo kód kurzu..."
+              placeholder="Course name or code..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -162,96 +178,132 @@ const AdminCourses = () => {
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
             >
-              <option value="">Všechny kurzy</option>
-              <option value="approved">Schválené</option>
-              <option value="pending">Čekající na schválení</option>
+              <option value="">All Courses</option>
+              <option value="approved">Approved</option>
+              <option value="pending">Pending Approval</option>
             </select>
           </div>
         </div>
       </div>
 
-     
-
-      {/* Courses Table */}
       {filteredCourses.length === 0 ? (
         <div className="empty-state">
-          <p>Žádné kurzy nenalezeny</p>
+          <p>No courses found</p>
         </div>
       ) : (
         <div className="courses-table-container">
           <table className="table">
             <thead>
               <tr>
-                <th>Kód</th>
-                <th>Název</th>
-                <th>Garant</th>
-                <th>Kapacita</th>
-                <th>Cena</th>
-                <th>Stav</th>
-                <th>Akce</th>
+                <th>Code</th>
+                <th>Title</th>
+                <th>Guarantor</th>
+                <th>Capacity</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredCourses.map(course => (
-                <tr key={course.id}>
-                  <td><strong>{course.code}</strong></td>
-                  <td>{course.title}</td>
-                  <td>
-                    {course.guarantee 
-                      ? `${course.guarantee.first_name} ${course.guarantee.last_name}`
-                      : 'Neznámý'}
-                  </td>
-                  <td>
-                    <span className={course.enrolled_count >= course.capacity ? 'capacity-full' : 'capacity-available'}>
-                      {course.enrolled_count}/{course.capacity}
-                    </span>
-                  </td>
-                  <td>{course.price} Kč</td>
-                  <td>
-                    {course.approved ? (
-                      <span className="badge badge-success">
-                        ✓ Schváleno
-                      </span>
-                    ) : (
-                      <span className="badge badge-warning">
-                        ⏳ Čeká na schválení
-                      </span>
-                    )}
-                  </td>
-                  <td>
-                    <div className="action-buttons">
-                      <button 
-                        className="button button-small" 
-                        onClick={() => handleManageCourse(course.id)}
-                      >
-                        ⚙️ Spravovat
-                      </button>
-                      {!course.approved && (
-                        <>
+              {filteredCourses.map(course => {
+                const guarantorName = course.guarantee 
+                  ? `${course.guarantee.first_name} ${course.guarantee.last_name}`
+                  : 'Unknown';
+                const isGuarantorLong = guarantorName.length > 20;
+                
+                const courseTitle = course.title || '';
+                const isTitleLong = courseTitle.length > 30;
+
+                return (
+                  <tr key={course.id}>
+                    <td><strong>{course.code}</strong></td>
+                    <td>
+                      <div className="expandable-cell">
+                        <span>
+                          {isFieldExpanded(course.id, 'title') || !isTitleLong
+                            ? courseTitle
+                            : truncateText(courseTitle, 30)}
+                        </span>
+                        {isTitleLong && (
                           <button 
-                            className="button button-success button-small" 
-                            onClick={() => handleApproveCourse(course.id, course.title)}
+                            className="expand-button"
+                            onClick={() => toggleFieldExpansion(course.id, 'title')}
                           >
-                            ✓ Schválit
+                            {isFieldExpanded(course.id, 'title') ? 'Show less' : 'Show more'}
                           </button>
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="expandable-cell">
+                        <span>
+                          {isFieldExpanded(course.id, 'guarantor') || !isGuarantorLong
+                            ? guarantorName
+                            : truncateText(guarantorName, 20)}
+                        </span>
+                        {isGuarantorLong && (
                           <button 
-                            className="button button-warning button-small" 
-                            onClick={() => handleRejectCourse(course.id, course.title)}
+                            className="expand-button"
+                            onClick={() => toggleFieldExpansion(course.id, 'guarantor')}
                           >
-                            ✗ Odmítnout
+                            {isFieldExpanded(course.id, 'guarantor') ? 'Show less' : 'Show more'}
                           </button>
-                        </>
+                        )}
+                      </div>
+                    </td>
+                    <td>
+                      <span className={course.enrolled_count >= course.capacity ? 'capacity-full' : 'capacity-available'}>
+                        {course.enrolled_count}/{course.capacity}
+                      </span>
+                    </td>
+                    <td>{course.price} CZK</td>
+                    <td>
+                      {course.approved ? (
+                        <span className="badge badge-success">
+                          Approved
+                        </span>
+                      ) : (
+                        <span className="badge badge-warning">
+                          Pending
+                        </span>
                       )}
-                      <button 
-                        className="button button-danger button-small" 
-                        onClick={() => handleDelete(course.id, course.title)}
-                      >
-                        🗑️ Smazat
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td>
+  <div className="action-buttons">
+    <button 
+      className="button button-small" 
+      onClick={() => handleManageCourse(course.id)}
+    >
+      Manage
+    </button>
+    {!course.approved ? (
+      <>
+        <button 
+          className="button button-success button-small" 
+          onClick={() => handleApproveCourse(course.id, course.title)}
+        >
+          Approve
+        </button>
+        <button 
+          className="button button-warning button-small" 
+          onClick={() => handleRejectCourse(course.id, course.title)}
+        >
+          Reject
+        </button>
+      </>
+    ) : (
+      <button 
+        className="button button-danger button-small" 
+        onClick={() => handleDelete(course.id, course.title)}
+      >
+        Delete
+      </button>
+    )}
+  </div>
+</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
