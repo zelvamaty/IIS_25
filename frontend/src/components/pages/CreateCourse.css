@@ -182,15 +182,24 @@
 
 .form-actions {
   display: flex;
-  gap: 15px;
-  padding-top: 20px;
-  border-top: 2px solid #e0e7ff;
+  gap: 16px;
+  justify-content: flex-start;
+  margin-top: 32px;
 }
 
 .form-actions .button {
   min-width: 160px;
-  padding: 14px 28px;
+  padding: 12px 24px;
   font-size: 16px;
+  font-weight: 600;
+}
+
+.form-actions .button-success {
+  flex: 0 0 auto;
+}
+
+.form-actions .button-secondary {
+  flex: 0 0 auto;
 }
 .page-title {
   color: #1e40af;

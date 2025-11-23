@@ -12,7 +12,7 @@ const CreateCourse = () => {
     title: '',
     code: '',
     description: '',
-    type: '', // ✅ PRIDANÉ
+    type: '',
     price: '0',
     capacity: '30',
     auto_confirm: false
@@ -36,18 +36,17 @@ const CreateCourse = () => {
         code: formData.code,
         title: formData.title,
         description: formData.description,
-        type: formData.type, // ✅ PRIDANÉ
+        type: formData.type,
         price: parseFloat(formData.price),
         capacity: parseInt(formData.capacity),
         auto_confirm: formData.auto_confirm
       };
 
       const newCourse = await coursesAPI.createCourse(courseData);
-      console.log('Created course:', newCourse);
-      alert('Kurz byl úspěšně vytvořen! Nyní jste garantem tohoto kurzu.');
-      navigate('/instructor/courses'); // Presmeruj na moje kurzy
+      alert('Course created successfully! You are now the guarantor of this course.');
+      navigate('/instructor/courses');
     } catch (err) {
-      setError(err.message || 'Vytvoření kurzu se nezdařilo');
+      setError(err.message || 'Course creation failed');
       console.error('Error creating course:', err);
     } finally {
       setLoading(false);
@@ -55,12 +54,11 @@ const CreateCourse = () => {
   };
 
   const handleCancel = () => {
-    navigate(-1); // Vrátiť sa späť
+    navigate(-1);
   };
 
   return (
     <div className="create-course">
-
       {error && (
         <div className="error-message">
           {error}
@@ -71,12 +69,12 @@ const CreateCourse = () => {
         <div className="form-section">
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label">Název kurzu *</label>
+              <label className="form-label">Course name *</label>
               <input
                 type="text"
                 name="title"
                 className="input-field"
-                placeholder="např. Webové technologie"
+                placeholder="e.g. Web Technologies"
                 value={formData.title}
                 onChange={handleChange}
                 required
@@ -86,12 +84,12 @@ const CreateCourse = () => {
 
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label">Kód kurzu *</label>
+              <label className="form-label">Course code *</label>
               <input
                 type="text"
                 name="code"
                 className="input-field"
-                placeholder="např. WEB-101"
+                placeholder="e.g. WEB-101"
                 value={formData.code}
                 onChange={handleChange}
                 required
@@ -101,41 +99,43 @@ const CreateCourse = () => {
 
           <div className="form-row">
             <div className="form-group">
-              <label className="form-label">Popis kurzu</label>
+              <label className="form-label">Course type *</label>
+              <select
+                name="type"
+                className="input-field"
+                value={formData.type}
+                onChange={handleChange}
+                required
+              >
+                <option value="">-- Select type --</option>
+                <option value="HARDWARE">Hardware</option>
+                <option value="OS">Operating Systems</option>
+                <option value="AI">Artificial Intelligence</option>
+                <option value="WEB">Web Development</option>
+                <option value="SECURITY">Security</option>
+                <option value="NETWORKS">Networks</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Course description</label>
               <textarea
                 name="description"
                 className="input-field textarea"
                 rows="4"
-                placeholder="Popište obsah a cíle kurzu..."
+                placeholder="Describe the content and goals of the course..."
                 value={formData.description}
                 onChange={handleChange}
               />
             </div>
           </div>
-          <div className="form-row">
-  <div className="form-group">
-    <label className="form-label">Typ kurzu *</label>
-    <select
-      name="type"
-      className="input-field"
-      value={formData.type}
-      onChange={handleChange}
-      required
-    >
-      <option value="">-- Vyberte typ --</option>
-      <option value="HARDWARE">Hardware</option>
-      <option value="OS">Operating Systems</option>
-      <option value="AI">Artificial Intelligence</option>
-      <option value="WEB">Web Development</option>
-      <option value="SECURITY">Security</option>
-      <option value="NETWORKS">Networks</option>
-      <option value="OTHER">Other</option>
-    </select>
-  </div>
-</div>
+
           <div className="form-row two-columns">
             <div className="form-group">
-              <label className="form-label">Cena (Kč) *</label>
+              <label className="form-label">Price (CZK) *</label>
               <input
                 type="number"
                 name="price"
@@ -149,7 +149,7 @@ const CreateCourse = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Kapacita *</label>
+              <label className="form-label">Capacity *</label>
               <input
                 type="number"
                 name="capacity"
@@ -171,15 +171,10 @@ const CreateCourse = () => {
                   checked={formData.auto_confirm}
                   onChange={handleChange}
                 />
-                Automatické potvrzení studentů
+                Automatic student confirmation
               </label>
             </div>
           </div>
-        </div>
-
-        <div className="info-message">
-          <p>ℹ️ Po vytvoření kurzu se automaticky stanete garantem tohoto kurzu.</p>
-          <p>💡 Kurz musí být schválen administrátorem, než bude viditelný pro ostatní.</p>
         </div>
 
         <div className="form-actions">
@@ -188,14 +183,14 @@ const CreateCourse = () => {
             className="button button-success"
             disabled={loading}
           >
-            {loading ? '⏳ Vytvářím kurz...' : '✓ Vytvořit kurz'}
+            {loading ? 'Creating course...' : 'Create course'}
           </button>
           <button 
             type="button" 
             className="button button-secondary"
             onClick={handleCancel}
           >
-            Zrušit
+            Cancel
           </button>
         </div>
       </form>
