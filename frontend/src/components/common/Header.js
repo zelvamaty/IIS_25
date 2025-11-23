@@ -15,14 +15,14 @@ const Header = ({ user, onLogout, onLogin }) => {
           <div className="user-section">
             {user ? (
               <div className="user-info">
-                <span className="user-name">{user.role}: {user.name}</span>
+                <span className="user-name">{user.name}</span>
                 <button className="button button-secondary" onClick={onLogout}>
-                  Odhlásit se
+                  Logout
                 </button>
               </div>
             ) : (
               <button className="button" onClick={onLogin}>
-                Přihlásit se
+                Login
               </button>
             )}
           </div>
