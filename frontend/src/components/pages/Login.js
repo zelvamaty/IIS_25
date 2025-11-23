@@ -7,13 +7,11 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
-  // Login form
   const [loginData, setLoginData] = useState({
     username: '',
     password: ''
   });
 
-  // Registration form
   const [registerData, setRegisterData] = useState({
     username: '',
     email: '',
@@ -48,12 +46,11 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
       const response = await authAPI.login(loginData);
       console.log('Login successful:', response);
       
-      // Get current user info
       const userInfo = await authAPI.getCurrentUser();
       onLoginSuccess(userInfo);
       
     } catch (err) {
-      setError(err.message || 'Přihlášení selhalo. Zkontrolujte své údaje.');
+      setError(err.message || 'Login failed. Please check your credentials.');
       console.error('Login error:', err);
     } finally {
       setLoading(false);
@@ -65,9 +62,14 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
     setLoading(true);
     setError('');
 
-    // Validate passwords match
     if (registerData.password1 !== registerData.password2) {
-      setError('Hesla se neshodují');
+      setError('Passwords do not match! Please check your passwords.');
+      setLoading(false);
+      return;
+    }
+
+    if (registerData.password1.length < 8) {
+      setError('Password must be at least 8 characters long!');
       setLoading(false);
       return;
     }
@@ -75,7 +77,6 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
     try {
       await authAPI.register(registerData);
       
-      // Auto login after registration
       await authAPI.login({
         username: registerData.username,
         password: registerData.password1
@@ -85,7 +86,7 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
       onLoginSuccess(userInfo);
       
     } catch (err) {
-      setError(err.message || 'Registrace selhala. Zkuste to znovu.');
+      setError(err.message || 'Registration failed. Please try again.');
       console.error('Registration error:', err);
     } finally {
       setLoading(false);
@@ -97,7 +98,6 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
       <div className="login-container">
         <div className="login-header">
           <h1>WIS2</h1>
-          <p>Systém pro správu konzultací</p>
         </div>
 
         <div className="login-tabs">
@@ -108,7 +108,7 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
               setError('');
             }}
           >
-            Přihlášení
+            Login
           </button>
           <button
             className={`tab ${!isLogin ? 'active' : ''}`}
@@ -117,26 +117,29 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
               setError('');
             }}
           >
-            Registrace
+            Register
           </button>
         </div>
 
         {error && (
-          <div className="error-message">
-            {error}
+          <div className="error-alert">
+            <div className="error-icon">⚠️</div>
+            <div className="error-content">
+              <strong>Error!</strong>
+              <p>{error}</p>
+            </div>
           </div>
         )}
 
         {isLogin ? (
-          // LOGIN FORM
           <form onSubmit={handleLoginSubmit} className="login-form">
             <div className="form-group">
-              <label className="form-label">Uživatelské jméno</label>
+              <label className="form-label">Username</label>
               <input
                 type="text"
                 name="username"
                 className="input-field"
-                placeholder="Zadejte uživatelské jméno"
+                placeholder="Enter your username"
                 value={loginData.username}
                 onChange={handleLoginChange}
                 required
@@ -144,12 +147,12 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Heslo</label>
+              <label className="form-label">Password</label>
               <input
                 type="password"
                 name="password"
                 className="input-field"
-                placeholder="Zadejte heslo"
+                placeholder="Enter your password"
                 value={loginData.password}
                 onChange={handleLoginChange}
                 required
@@ -161,19 +164,18 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
               className="button button-primary"
               disabled={loading}
             >
-              {loading ? 'Přihlašování...' : 'Přihlásit se'}
+              {loading ? 'Logging in...' : 'Login'}
             </button>
           </form>
         ) : (
-          // REGISTRATION FORM
           <form onSubmit={handleRegisterSubmit} className="login-form">
             <div className="form-group">
-              <label className="form-label">Uživatelské jméno *</label>
+              <label className="form-label">Username *</label>
               <input
                 type="text"
                 name="username"
                 className="input-field"
-                placeholder="Zvolte si uživatelské jméno"
+                placeholder="Choose a username"
                 value={registerData.username}
                 onChange={handleRegisterChange}
                 required
@@ -186,7 +188,7 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
                 type="email"
                 name="email"
                 className="input-field"
-                placeholder="vas.email@example.com"
+                placeholder="your.email@example.com"
                 value={registerData.email}
                 onChange={handleRegisterChange}
                 required
@@ -195,12 +197,12 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
 
             <div className="form-row">
               <div className="form-group">
-                <label className="form-label">Jméno *</label>
+                <label className="form-label">First Name *</label>
                 <input
                   type="text"
                   name="first_name"
                   className="input-field"
-                  placeholder="Jméno"
+                  placeholder="First name"
                   value={registerData.first_name}
                   onChange={handleRegisterChange}
                   required
@@ -208,12 +210,12 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Příjmení *</label>
+                <label className="form-label">Last Name *</label>
                 <input
                   type="text"
                   name="last_name"
                   className="input-field"
-                  placeholder="Příjmení"
+                  placeholder="Last name"
                   value={registerData.last_name}
                   onChange={handleRegisterChange}
                   required
@@ -222,26 +224,27 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Heslo *</label>
+              <label className="form-label">Password *</label>
               <input
                 type="password"
                 name="password1"
                 className="input-field"
-                placeholder="Zadejte heslo"
+                placeholder="At least 8 characters"
                 value={registerData.password1}
                 onChange={handleRegisterChange}
                 required
                 minLength={8}
               />
+              <small className="form-hint">Password must contain at least 8 characters</small>
             </div>
 
             <div className="form-group">
-              <label className="form-label">Potvrzení hesla *</label>
+              <label className="form-label">Confirm Password *</label>
               <input
                 type="password"
                 name="password2"
                 className="input-field"
-                placeholder="Zadejte heslo znovu"
+                placeholder="Enter password again"
                 value={registerData.password2}
                 onChange={handleRegisterChange}
                 required
@@ -254,18 +257,17 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
               className="button button-primary"
               disabled={loading}
             >
-              {loading ? 'Registrace...' : 'Registrovat se'}
+              {loading ? 'Registering...' : 'Register'}
             </button>
           </form>
         )}
 
-        {/* Skip login button */}
         <div className="skip-login">
           <button
             className="button-link"
             onClick={onSkipLogin}
           >
-            Pokračovat bez přihlášení
+            Continue without login
           </button>
         </div>
       </div>
