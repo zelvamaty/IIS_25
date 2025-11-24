@@ -389,8 +389,8 @@ class TermViewSet(viewsets.ModelViewSet):
     def schedule(self, request, pk=None):
         user = request.user
         registrations = Registration.objects.filter(user=user).select_related('term')
-        term_data = [{'id': reg.term.id, 'course': reg.term.course.title,
-                      'room': reg.term.room_id , 'type': reg.term.type,
+        term_data = [{'id': reg.term.id, 'title': reg.term.name, 'description': reg.term.description,'course': reg.term.course.title,
+                      'room': reg.term.room_id , 'type': reg.term.type, 'capacity': reg.term.capacity,
                       'start_time': reg.term.start_time, 'end_time': reg.term.end_time}
                      for reg in registrations]
         return Response(term_data)
