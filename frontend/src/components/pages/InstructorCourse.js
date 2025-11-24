@@ -94,8 +94,6 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   };
 
   const handleEditTerm = (term) => {
-    console.log('Editing term:', term); // Debug log
-    console.log('Term room value:', term.room, 'Type:', typeof term.room); // Debug log
     
     setEditingTerm(term);
     setEditTermData({

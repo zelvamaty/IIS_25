@@ -116,7 +116,6 @@ const MyCourses = () => {
         ) : (
           <div className="courses-list">
             {approvedCourses.map(course => (
-              console.log('Rendering approved course:', course), // Debug log
               <div key={course.id} className="course-card approved">
                 <div className="course-card-header">
                   <h3>{course.title}</h3>

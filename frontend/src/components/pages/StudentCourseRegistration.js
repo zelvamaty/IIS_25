@@ -252,7 +252,7 @@ const StudentCourseRegistration = () => {
       <h2 className="section-title">Available Terms ({terms.length})</h2>
 
       {terms.length === 0 ? (
-        <div className="empty-state">
+        <div className="">
           <p>No terms have been created for this course yet</p>
         </div>
       ) : (
@@ -325,7 +325,7 @@ const StudentCourseRegistration = () => {
                       onClick={() => handleUnregisterFromTerm(myRegistration.id)}
                       disabled={registering}
                     >
-                      {registering ? 'Unregistering...' : '✗ Unregister'}
+                      {registering ? 'Unregistering...' : 'Unregister'}
                     </button>
                   ) : (
                     term.requires_registration && (

@@ -79,16 +79,7 @@ const AdminRooms = () => {
     }));
   };
 
-  const handleEquipmentChange = (e) => {
-    const { value, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      equipment: checked
-        ? [...prev.equipment, value]
-        : prev.equipment.filter(item => item !== value)
-    }));
-  };
-
+ 
   const handleSave = async () => {
     if (!formData.name || !formData.name.trim()) {
       alert('Room name is required');
@@ -167,7 +158,6 @@ const AdminRooms = () => {
     return matchesSearch && matchesBuilding;
   });
 
-  const uniqueBuildings = [...new Set(rooms.map(r => r.building).filter(Boolean))];
 
   if (loading) {
     return (

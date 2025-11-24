@@ -63,8 +63,6 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
 
   const validateRegisterForm = () => {
     const errors = {};
-    
-    // Username validation
     if (!registerData.username || registerData.username.trim() === '') {
       errors.username = 'Username is required';
     } else if (registerData.username.length < 3) {
@@ -74,15 +72,12 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
     } else if (!/^[a-zA-Z0-9_]+$/.test(registerData.username)) {
       errors.username = 'Username can only contain letters, numbers, and underscores';
     }
-    
-    // Email validation
     if (!registerData.email || registerData.email.trim() === '') {
       errors.email = 'Email address is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(registerData.email)) {
       errors.email = 'Please enter a valid email address (e.g., name@example.com)';
     }
     
-    // First name validation
     if (!registerData.first_name || registerData.first_name.trim() === '') {
       errors.first_name = 'First name is required';
     } else if (registerData.first_name.length < 2) {
@@ -90,8 +85,6 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
     } else if (registerData.first_name.length > 30) {
       errors.first_name = 'First name cannot exceed 30 characters';
     }
-    
-    // Last name validation
     if (!registerData.last_name || registerData.last_name.trim() === '') {
       errors.last_name = 'Last name is required';
     } else if (registerData.last_name.length < 2) {
@@ -99,8 +92,6 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
     } else if (registerData.last_name.length > 30) {
       errors.last_name = 'Last name cannot exceed 30 characters';
     }
-    
-    // Password validation
     if (!registerData.password1 || registerData.password1.trim() === '') {
       errors.password1 = 'Password is required';
     } else if (registerData.password1.length < 8) {
@@ -112,8 +103,6 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
     } else if (!/(?=.*\d)/.test(registerData.password1)) {
       errors.password1 = 'Password must contain at least one number';
     }
-    
-    // Confirm password validation
     if (!registerData.password2 || registerData.password2.trim() === '') {
       errors.password2 = 'Please confirm your password';
     } else if (registerData.password1 !== registerData.password2) {

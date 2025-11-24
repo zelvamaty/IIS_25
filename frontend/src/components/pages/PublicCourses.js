@@ -204,7 +204,7 @@ const PublicCourses = ({ user, onShowLogin }) => {
                   </p>
                   {course.auto_confirm && (
                     <p className="auto-confirm-badge">
-                      ✓ Auto confirmation
+                      Auto confirmation
                     </p>
                   )}
                 </div>
@@ -215,7 +215,7 @@ const PublicCourses = ({ user, onShowLogin }) => {
                         className="button button-info"
                         disabled
                       >
-                        ✓ Already enrolled
+                         Already enrolled
                       </button>
                     ) : (
                       <button 
@@ -223,7 +223,7 @@ const PublicCourses = ({ user, onShowLogin }) => {
                         onClick={() => handleEnroll(course.id)}
                         disabled={isFull || isEnrolling}
                       >
-                        {isEnrolling ? '⏳ Enrolling...' : isFull ? 'Full' : '✓ Enroll in course'}
+                        {isEnrolling ? ' Enrolling...' : isFull ? 'Full' : 'Enroll in course'}
                       </button>
                     )
                   ) : (

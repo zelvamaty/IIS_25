@@ -100,14 +100,7 @@ const AdminCourses = () => {
     }
   };
 
-  const getCourseTypeName = (type) => {
-    const typeMap = {
-      'LECTURE': 'Lecture',
-      'EXERCISE': 'Exercise',
-      'EXAM': 'Exam'
-    };
-    return typeMap[type] || type;
-  };
+  
 
   const filteredCourses = courses.filter(course => {
     const matchesSearch = 
@@ -122,10 +115,6 @@ const AdminCourses = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const totalCourses = courses.length;
-  const approvedCourses = courses.filter(c => c.approved).length;
-  const pendingCourses = courses.filter(c => !c.approved).length;
-  const totalStudents = courses.reduce((sum, c) => sum + (c.enrolled_count || 0), 0);
 
   if (loading) {
     return (
