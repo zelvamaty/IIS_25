@@ -50,14 +50,36 @@ spustit z odkazu.</p>
 
 <h2>Implementace</h2>
 
+<h3>Overview</h3>
+Pro implementaci jsme zvolili Python framework Django pro backend a React pro frontend.
+
 <h3>Backend</h3>
-<code>core/urls.py</code> - základ routeru<br>
-<code>core/views.py</code> - presentery<br>
-<code>core/models.py</code> - datový model<br>
-<code>core/serializers.py</code> - serializace modelu na JSON a validace<br>
+<table>
+	<tr><th>Soubor</th><th>Účel</th></tr>
+	<tr><td><code>core/urls.py</code></td><td>Základ routeru</td></tr>
+	<tr><td><code>core/views.py</code></td><td>Presentery</td></tr>
+	<tr><td><code>core/models.py</code></td><td>Datový model</td></tr>
+	<tr><td><code>core/serializers.py</code></td><td>Serializace modelu na JSON a validace</td></tr>
+</table>
 
 <h3>Frontend</h3>
-peta pls dopln, ja sa v tom nevyznam :skull:
+<table>
+	<tr><th>Soubor</th><th>Účel</th></tr>
+	<tr><td><code>AdminCourses.js</code></td><td>Schvalování kurzů (admin only)</td></tr>
+	<tr><td><code>AdminDashboard.js</code></td><td>Dashboard (admin only)</td></tr>
+	<tr><td><code>AdminRooms.js</code></td><td>Správa místností (admin only)</td></tr>
+	<tr><td><code>AdminUsers.js</code></td><td>Správa uživatelů (admin only)</td></tr>
+	<tr><td><code>CreateCourse.js</code></td><td>Formulář pro vytvoření kurzu</td></tr>
+	<tr><td><code>EditCourse.js</code></td><td>Formulář pro úpravu kurzu</td></tr>
+	<tr><td><code>InstructorCourse</code></td><td>Správa kurzu garantem</td></tr>
+	<tr><td><code>Login.js</code></td><td>Formulář pro přihlášení</td></tr>
+	<tr><td><code>MyCourses.js</code></td><td>Zobrazení kurzů, do kterých je uživatel zapsán</td></tr>
+	<tr><td><code>MySchedule.js</code></td><td>Zobrazení rozvrhu uživatele</td></tr>
+	<tr><td><code>PublicCourses.js</code></td><td>Zobrazení kurzů pro věřejnost</td></tr>
+	<tr><td><code>StudentCourseRegistration.js</code></td><td>Registrace uživatele na termín kurzu</td></tr>
+	<tr><td><code>UserProfile.js</code></td><td>Zobrazení a úpravy profilu uživatele</td></tr>
+</table>
+Poznámka: Všechny skripty implementující případy užití jsou umístěny v podadresáři <code>src/components/pages/</code><br>
 
 <h3>Databáze</h3>
 <img src="db.png" alt="Schéma databáze"/>
@@ -166,8 +188,11 @@ npm start
 </pre>
 
 <b>2b. Spuštění frontendu pro běh na produkci:<br /></b>
-Před nasazením do produkce je nutné změnit základní URL pro volání backendu. Tuto změnu můžeme provést v souboru <code>public/config.js</code>, změnou hodnoty konstanty <code>API_BASE_URL</code>.
-Poté je možné aplikaci sestavit standardním způsobem:
+Před nasazením do produkce je nutné změnit základní URL pro volání backendu. Toho docílíme vytvořením souboru <code>.env</code>, do kterého vložíme následující řádek:
+<pre>
+REACT_APP_API_BASE_URL=&lt;base URL&gt;
+</pre>
+Poté je možné aplikaci sestavit a spustit standardním způsobem:
 <pre>
 npm run build
 serve -s build
