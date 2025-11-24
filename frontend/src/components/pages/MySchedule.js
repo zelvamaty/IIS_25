@@ -34,7 +34,6 @@ const MySchedule = () => {
       setLoading(true);
       setError(null);
       const data = await termsAPI.getSchedule();
-      
       const transformedEvents = data.map(term => {
         return {
           id: term.id,
@@ -217,7 +216,7 @@ const MySchedule = () => {
                         </div>
                         {event.requiresRegistration && (
                           <div className="requires-registration">
-                            ✓ Requires registration
+                            Requires registration
                           </div>
                         )}
                       </div>

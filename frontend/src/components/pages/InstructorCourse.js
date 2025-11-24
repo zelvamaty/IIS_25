@@ -94,6 +94,9 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   };
 
   const handleEditTerm = (term) => {
+    console.log('Editing term:', term); // Debug log
+    console.log('Term room value:', term.room, 'Type:', typeof term.room); // Debug log
+    
     setEditingTerm(term);
     setEditTermData({
       title: term.title || '',
@@ -101,7 +104,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       type: term.type,
       start_time: new Date(term.start_time).toISOString().slice(0, 16),
       end_time: new Date(term.end_time).toISOString().slice(0, 16),
-      room: term.room || '',
+      room: term.room || '', // This should be the room ID
       capacity: term.capacity.toString(),
       requires_registration: term.requires_registration
     });
@@ -115,7 +118,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   
     try {
       const termData = {
-        name: editTermData.title || 'default_term_name',  // Backend expects 'name', not 'title'
+        name: editTermData.title || 'default_term_name',  
         type: editTermData.type,
         start_time: new Date(editTermData.start_time).toISOString(),
         end_time: new Date(editTermData.end_time).toISOString(),
@@ -958,7 +961,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
 
             <div className="form-row">
               <div className="form-group">
-                <label className="form-label">Term Description</label>
+                <label className="form-label">Term Description *</label>
                 <textarea
                   name="description"
                   className="input-field textarea"
@@ -1101,7 +1104,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
           <form onSubmit={handleUpdateTerm} className="term-form">
             <div className="form-row">
               <div className="form-group">
-                <label className="form-label">Term Title</label>
+                <label className="form-label">Term Title *</label>
                 <input
                   type="text"
                   name="title"
