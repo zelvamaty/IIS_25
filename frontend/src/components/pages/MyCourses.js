@@ -18,9 +18,19 @@ const MyCourses = () => {
       setLoading(true);
       setError(null);
       
-      const courses = await coursesAPI.getMyCourses();
-      setMyCourses(courses);
-
+      const allCourses = await coursesAPI.getCourses();
+      
+      const myEnrollments = await coursesAPI.getMyCourses();
+      const myEnrolledIds = myEnrollments.map(e => e.id);
+      const myCourses = allCourses.filter(c => myEnrolledIds.includes(c.id));
+      
+      const coursesWithRoles = myCourses.map(course => {
+        const enrollment = myEnrollments.find(e => e.id === course.id);
+        return { ...course, role: enrollment?.role };
+      });
+      
+      setMyCourses(coursesWithRoles);
+  
     } catch (err) {
       setError('Failed to load courses');
       console.error('Error loading my courses:', err);
@@ -59,7 +69,7 @@ const MyCourses = () => {
     <div className="my-courses">
       {pendingCourses.length > 0 && (
         <div className="courses-section">
-          <h2 className="section-title"> Pending Approval</h2>
+          <h2 className="section-title">Pending Approval</h2>
           <div className="courses-list">
             {pendingCourses.map(course => (
               <div key={course.id} className="course-card pending">
@@ -71,7 +81,13 @@ const MyCourses = () => {
                   <span className="badge badge-warning">Waiting for approval</span>
                 </div>
                 <div className="course-card-body">
-                  <p><strong>Guarantor:</strong> {course.guarantee}</p>
+                  <p>
+                  <strong>Guarantor:</strong>{' '}
+                    {course.guarantee 
+                      ? `${course.guarantee.first_name} ${course.guarantee.last_name}`
+                      : 'Unknown'
+                    }
+                  </p>
                 </div>
                 <div className="course-card-footer">
                   <button 
@@ -88,7 +104,7 @@ const MyCourses = () => {
       )}
 
       <div className="courses-section">
-        <h2 className="section-title"> Approved Courses</h2>
+        <h2 className="section-title">Approved Courses</h2>
         
         {approvedCourses.length === 0 ? (
           <div className="empty-state">
@@ -100,6 +116,7 @@ const MyCourses = () => {
         ) : (
           <div className="courses-list">
             {approvedCourses.map(course => (
+              console.log('Rendering approved course:', course), // Debug log
               <div key={course.id} className="course-card approved">
                 <div className="course-card-header">
                   <h3>{course.title}</h3>
@@ -109,7 +126,13 @@ const MyCourses = () => {
                   <span className="badge badge-success">✓ Approved</span>
                 </div>
                 <div className="course-card-body">
-                  <p><strong>Guarantor:</strong> {course.guarantee}</p>
+                  <p>
+                  <strong>Guarantor:</strong>{' '}
+                    {course.guarantee 
+                      ? `${course.guarantee.first_name} ${course.guarantee.last_name}`
+                      : 'Unknown'
+                    }
+                  </p>
                 </div>
                 <div className="course-card-footer">
                   <button 
