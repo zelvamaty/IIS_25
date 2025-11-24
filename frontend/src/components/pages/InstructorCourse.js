@@ -863,7 +863,6 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                     <th>Student</th>
                     <th>Registration</th>
                     <th>Grade</th>
-                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1250,7 +1249,6 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                   <tr>
                     <th>Student</th>
                     <th>Enrollment Date</th>
-                    {(canManageCourse || isLecturer) && <th>Actions</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -1364,7 +1362,6 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                       <th>Name</th>
                       <th>Username</th>
                       <th>Email</th>
-                      <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
