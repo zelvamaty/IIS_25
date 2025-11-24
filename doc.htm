@@ -162,7 +162,8 @@ npm start
 </pre>
 
 <b>2b. Spuštění frontendu pro běh na produkci:<br /></b>
-Před nasazením do produkce je nutné změnit základní URL pro volání backendu. Toho můžeme docílit 
+Před nasazením do produkce je nutné změnit základní URL pro volání backendu. Tuto změnu můžeme provést v souboru <code>public/config.js</code>, změnou hodnoty konstanty <code>API_BASE_URL</code>.
+Poté je možné aplikaci sestavit standardním způsobem:
 <pre>
 npm run build
 serve -s build
