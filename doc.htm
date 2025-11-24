@@ -15,7 +15,7 @@
 
 <dl>
 	<dt>Autoři</dt>
-	<dd>Matouš Havlíček
+	<dd>Matouš Havlíček (vedoucí týmu)
 	    <a href="mailto:xhavli66@stud.fit.vutbr.cz">xhavli66@stud.fit.vutbr.cz</a> -
 		návrh a implementace backendu, návrh databáze, testování
 	</dd>
@@ -37,7 +37,12 @@
 <tbody><tr><th>Login</th><th>Heslo</th><th>Role</th></tr>
 <tr><td>admin_main</td><td>pass1324</td><td>Administrátor</td></tr>
 <tr><td>user1</td><td>pass1234</td><td>Registrovaný uživatel - garant kurzu </td></tr>
-<tr><td>user2</td><td>pass1234</td><td>Lektor</td></tr>
+<tr><td>user2</td><td>pass1234</td><td>Registrovaný uživatel - student</td></tr>
+<tr><td>user3</td><td>pass1234</td><td>Registrovaný uživatel - student</td></tr>
+<tr><td>user4</td><td>pass1234</td><td>Registrovaný uživatel - student</td></tr>
+<tr><td>user5</td><td>pass1234</td><td>Registrovaný uživatel - student</td></tr>
+<tr><td>user6</td><td>pass1234</td><td>Registrovaný uživatel - lektor</td></tr>
+<tr><td>user7</td><td>pass1234</td><td>Registrovaný uživatel - lektor</td></tr>
 </tbody></table>
 
 <h3>Video</h3>
@@ -51,7 +56,9 @@ spustit z odkazu.</p>
 <h2>Implementace</h2>
 
 <h3>Overview</h3>
-Pro implementaci jsme zvolili Python framework Django pro backend a React pro frontend.
+Pro implementaci jsme zvolili framework Django (Python) pro backend a React (JavaScript) pro frontend. Na produkci jsou oba tyto servery skryté za Apache 2, který pracuje jako
+zpětné proxy, běžíci na tom samém serveru. Celý tento systém je dále chráněn proxy serverem od služby Cloudflare, na kterém je nakonfigurována služba DNS. Komunikace
+mezi serverama probíhá prostřednictvím protokolu HTTPS, s výjimkou serverů aplikace - ty běží pouze na localhostu, tedy nepovažujeme zde za potřebné šifrování komunikace.
 
 <h3>Backend</h3>
 <table>
@@ -94,7 +101,7 @@ Poznámka: Všechny skripty implementující případy užití jsou umístěny v
 </ul>
 
 <h3>Postup instalace</h3>
-<i>Předpokládme funkční instalaci databázového serveru MariaDB, případně jinou implementaci MySQL.</i>
+<i>Předpokládme funkční instalaci databázového serveru MariaDB (případně jinoé implementace MySQL) s vytvořenou databází a uživatelem, který má plná práva nad touto databází.</i>
 
 <h4>Klon repozitáře</h4>
 <pre>
@@ -188,9 +195,9 @@ npm start
 </pre>
 
 <b>2b. Spuštění frontendu pro běh na produkci:<br /></b>
-Před nasazením do produkce je nutné změnit základní URL pro volání backendu. Toho docílíme vytvořením souboru <code>.env</code> v adresáři <code>~/IIS_25/frontend</code>, do kterého vložíme následující řádek:
+Před nasazením do produkce je nutné změnit základní URL pro volání backendu. Toho docílíme vytvořením souboru <code>.env</code> v adresáři <code>~/IIS_25/frontend</code>, do kterého vložíme následující řádek (bez &lt;&gt;):
 <pre>
-REACT_APP_API_BASE_URL=&lt;base URL&gt;
+REACT_APP_API_BASE_URL=&lt;base_URL&gt;
 </pre>
 Poté je možné aplikaci sestavit pro běh v produkci a spustit standardním způsobem:
 <pre>

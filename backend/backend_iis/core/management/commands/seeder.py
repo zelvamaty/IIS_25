@@ -30,7 +30,7 @@ class Command(BaseCommand):
 
                 # admin user
                 admin_user = User.objects.create_user(
-                    username='admin_main',
+                    username='admin',
                     email='admin@test.com',
                     password=common_password,
                     first_name='Super',
@@ -40,7 +40,7 @@ class Command(BaseCommand):
 
                 # normal users
                 users = []
-                for i in range(1, 6):
+                for i in range(1, 8):
                     u = User.objects.create_user(
                         username=f'user{i}',
                         email=f'user{i}@test.com',
@@ -51,11 +51,13 @@ class Command(BaseCommand):
                     )
                     users.append(u)
                 
-                guarantee_user = users[0]  # user1
-                student_1 = users[1]       # user2
-                student_2 = users[2]       # user3
-                student_3 = users[3]       # user4
-                student_4 = users[4]       # user5
+                guarantee = users[0]        # user1
+                student_1 = users[1]        # user2
+                student_2 = users[2]        # user3
+                student_3 = users[3]        # user4
+                student_4 = users[4]        # user5
+                teacher_1 = users[5]        # user6
+                teacher_2 = users[6]        # user7
 
                 self.stdout.write('Creating Room...')
                 room = Room.objects.create(
@@ -73,10 +75,11 @@ class Command(BaseCommand):
                     description='Basic programming concepts',
                     price=100.00,
                     capacity=30,
-                    guarantee=guarantee_user, # User1 is guarantee
+                    guarantee=guarantee, # User1 is guarantee
                     approved=True,
                     auto_confirm=True
                 )
+                course1.lecturers.add(teacher_1)
 
                 # course 2
                 course2 = Course.objects.create(
@@ -85,8 +88,21 @@ class Command(BaseCommand):
                     description='Web development mastery',
                     price=200.00,
                     capacity=20,
-                    guarantee=guarantee_user, # User1 is guarantee
+                    guarantee=guarantee, # User1 is guarantee
                     approved=True,
+                    auto_confirm=False
+                )
+                course2.lecturers.add(teacher_2)
+
+                # course that has not been approved yet
+                not_approved_course = Course.objects.create(
+                    code='CS404',
+                    title='Spring Development',
+                    description='Intermediate Java development',
+                    price=200.00,
+                    capacity=20,
+                    guarantee=teacher_1, # User6 is guarantee
+                    approved=False,
                     auto_confirm=False
                 )
 
@@ -142,5 +158,6 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS('Successfully seeded database!'))
         self.stdout.write(f'Admin: {admin_user.username} / {common_password}')
-        self.stdout.write(f'Guarantee: {guarantee_user.username}')
-        self.stdout.write(f'Students: {student_1.username}, {student_2.username}')
+        self.stdout.write(f'Guarantee: {guarantee.username}')
+        self.stdout.write(f'Teachers: {teacher_1.username}, {teacher_2.username}')
+        self.stdout.write(f'Students: {student_1.username}, {student_2.username}, {student_3.username}, {student_4.username}')
