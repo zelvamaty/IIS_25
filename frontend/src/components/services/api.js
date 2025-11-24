@@ -299,7 +299,6 @@ leaveCourse: async (courseId) => {
     });
     return handleResponse(response);
   },
-  
   approveEnrollment: async (courseId, enrollmentId) => {
     const response = await fetch(`${API_BASE_URL}/courses/${courseId}/approve_enrollment/`, {
       method: 'POST',
@@ -489,7 +488,6 @@ export const registrationsAPI = {
 // 7. GRADES API
 // ============================================
 export const gradesAPI = {
-  // Get grades (student sees own, lecturer sees their courses)
   getGrades: async () => {
     const response = await fetch(`${API_BASE_URL}/grades/`, {
       method: 'GET',

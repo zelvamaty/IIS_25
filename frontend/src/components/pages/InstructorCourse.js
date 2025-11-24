@@ -309,22 +309,19 @@ const [editTermError, setEditTermError] = useState('');
       try {
         const students = await coursesAPI.getEnrollments(courseId);
         
-        const enrollments = students
-          .filter(student => student.role !== 'REJECTED')
-          .map(student => ({
-            id: student.enrollment_id,
-            student: {
-              id: student.id,
-              username: student.username,
-              first_name: student.first_name,
-              last_name: student.last_name,
-              email: student.email || ''
-            },
-            approved: student.role === 'APPROVED',
-            role: student.role,
-            enrolled_at: new Date().toISOString()
-          }));
-        
+        const enrollments = students.map(student => ({
+          id: student.enrollment_id,
+          student: {
+            id: student.id,
+            username: student.username,
+            first_name: student.first_name,
+            last_name: student.last_name,
+            email: student.email || ''
+          },
+          approved: student.role === 'APPROVED' || !student.role, 
+          role: student.role || 'APPROVED', 
+          enrolled_at: student.enrolled_at || new Date().toISOString()
+        }));
         setCourseEnrollments(enrollments);
       } catch (err) {
         console.log('Error loading students:', err);
