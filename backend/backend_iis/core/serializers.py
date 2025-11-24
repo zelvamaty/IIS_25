@@ -116,11 +116,12 @@ class RoomSerializer(serializers.ModelSerializer):
 class TermSerializer(serializers.ModelSerializer):
     course = CourseSerializer(read_only=True)
     course_id = serializers.PrimaryKeyRelatedField(queryset=Course.objects.all(), source='course', write_only=True)
+    room_name = serializers.CharField(source='room.name', read_only=True)
 
     registrations_count = serializers.IntegerField(source='registrations.count', read_only=True)
     class Meta:
         model = Term
-        fields = ['id','name', 'description', 'course', 'course_id', 'type' ,'requires_registration' ,'capacity' , 'registrations_count', 'room', 'start_time', 'end_time']
+        fields = ['id','name', 'description', 'course', 'course_id', 'type' ,'requires_registration' ,'capacity' , 'registrations_count', 'room_name', 'start_time', 'end_time']
 
     def validate(self, data):
         name = data.get('name', getattr(self.instance, 'name', None))
