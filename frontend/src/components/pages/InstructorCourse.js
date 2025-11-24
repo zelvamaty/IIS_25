@@ -25,7 +25,17 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   const [selectedRegistrationId, setSelectedRegistrationId] = useState('');
   const [gradeValue, setGradeValue] = useState('');
   const [gradeError, setGradeError] = useState('');
-  
+  const [editingTerm, setEditingTerm] = useState(null);
+const [editTermData, setEditTermData] = useState({
+  type: '',
+  start_time: '',
+  end_time: '',
+  room: '',
+  capacity: '',
+  requires_registration: true
+});
+const [editTermLoading, setEditTermLoading] = useState(false);
+const [editTermError, setEditTermError] = useState('');
   const [termFormData, setTermFormData] = useState({
     type: '',
     start_time: '',
@@ -78,7 +88,70 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       console.error('Error loading users:', err);
     }
   };
-
+  const handleEditTerm = (term) => {
+    setEditingTerm(term);
+    setEditTermData({
+      type: term.type,
+      start_time: new Date(term.start_time).toISOString().slice(0, 16),
+      end_time: new Date(term.end_time).toISOString().slice(0, 16),
+      room: term.room || '',
+      capacity: term.capacity.toString(),
+      requires_registration: term.requires_registration
+    });
+    setActiveTab('edit-term');
+  };
+  
+  const handleUpdateTerm = async (e) => {
+    e.preventDefault();
+    setEditTermLoading(true);
+    setEditTermError('');
+  
+    try {
+      const termData = {
+        type: editTermData.type,
+        start_time: new Date(editTermData.start_time).toISOString(),
+        end_time: new Date(editTermData.end_time).toISOString(),
+        capacity: parseInt(editTermData.capacity),
+        requires_registration: editTermData.requires_registration
+      };
+  
+      if (editTermData.room) {
+        termData.room = parseInt(editTermData.room);
+      } else {
+        termData.room = null;
+      }
+  
+      await termsAPI.updateTerm(editingTerm.id, termData);
+      alert('Term has been successfully updated!');
+      
+      setEditingTerm(null);
+      setEditTermData({
+        type: '',
+        start_time: '',
+        end_time: '',
+        room: '',
+        capacity: '',
+        requires_registration: true
+      });
+      
+      await loadCourseDetails(selectedCourse.id);
+      setActiveTab('terms');
+    } catch (err) {
+      setEditTermError(err.message || 'Updating term failed');
+      console.error('Error updating term:', err);
+    } finally {
+      setEditTermLoading(false);
+    }
+  };
+  
+  const handleEditTermFormChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setEditTermData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+    setEditTermError('');
+  };
   const loadCurrentUserAndCourses = async () => {
     try {
       setLoading(true);
@@ -608,7 +681,6 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                     <th>Room</th>
                     <th>Capacity</th>
                     <th>Registrations</th>
-                    {(canManageCourse || isLecturer) && <th>Actions</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -637,13 +709,21 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                               Detail
                             </button>
                             {canManageCourse && (
-                              <button 
-                                className="button button-danger button-small"
-                                onClick={() => handleDeleteTerm(term.id)}
-                              >
-                                Delete
-                              </button>
-                            )}
+  <>
+    <button 
+      className="button button-small"
+      onClick={() => handleEditTerm(term)}
+    >
+      Edit
+    </button>
+    <button 
+      className="button button-danger button-small"
+      onClick={() => handleDeleteTerm(term.id)}
+    >
+      Delete
+    </button>
+  </>
+)}
                           </div>
                         </td>
                       )}
@@ -955,7 +1035,131 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
           </form>
         </div>
       )}
+{activeTab === 'edit-term' && canManageCourse && editingTerm && (
+  <div className="tab-content">
+    <div className="section-header">
+      <h2 className="section-title">Edit Term</h2>
+    </div>
 
+    {editTermError && (
+      <div className="error-message">
+        {editTermError}
+      </div>
+    )}
+
+    <form onSubmit={handleUpdateTerm} className="term-form">
+      <div className="form-row">
+        <div className="form-group">
+          <label className="form-label">Term Type *</label>
+          <select
+            name="type"
+            className="input-field"
+            value={editTermData.type}
+            onChange={handleEditTermFormChange}
+            required
+          >
+            <option value="">Select type</option>
+            <option value="LECTURE">Lecture</option>
+            <option value="EXERCISE">Exercise</option>
+            <option value="EXAM">Exam</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="form-row two-columns">
+        <div className="form-group">
+          <label className="form-label">Start Date and Time *</label>
+          <input
+            type="datetime-local"
+            name="start_time"
+            className="input-field"
+            value={editTermData.start_time}
+            onChange={handleEditTermFormChange}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">End Date and Time *</label>
+          <input
+            type="datetime-local"
+            name="end_time"
+            className="input-field"
+            value={editTermData.end_time}
+            onChange={handleEditTermFormChange}
+            required
+          />
+        </div>
+      </div>
+
+      <div className="form-row two-columns">
+        <div className="form-group">
+          <label className="form-label">Room</label>
+          <select
+            name="room"
+            className="input-field"
+            value={editTermData.room}
+            onChange={handleEditTermFormChange}
+          >
+            <option value="">No room</option>
+            {rooms.map(room => (
+              <option key={room.id} value={room.id}>
+                {room.name || `Room ${room.id}`}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Capacity *</label>
+          <input
+            type="number"
+            name="capacity"
+            className="input-field"
+            min="1"
+            value={editTermData.capacity}
+            onChange={handleEditTermFormChange}
+            required
+          />
+        </div>
+      </div>
+
+      <div className="form-row">
+        <div className="checkbox-group">
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              name="requires_registration"
+              checked={editTermData.requires_registration}
+              onChange={handleEditTermFormChange}
+            />
+            Requires student registration
+          </label>
+        </div>
+      </div>
+
+      <div className="form-actions">
+        <button 
+          type="submit" 
+          className="button button-success"
+          disabled={editTermLoading}
+        >
+          {editTermLoading ? '⏳ Updating...' : '✓ Update Term'}
+        </button>
+        <button 
+          type="button" 
+          className="button button-secondary"
+          onClick={() => {
+            setEditingTerm(null);
+            setActiveTab('terms');
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+)}
       {activeTab === 'enrollments' && (
         <div className="tab-content">
           <h2 className="section-title">Approved Students</h2>
