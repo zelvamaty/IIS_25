@@ -305,7 +305,7 @@ const StudentCourseRegistration = () => {
                   </div>
                   <div className="term-info-item">
                     <span className="term-icon">📍</span>
-                    <span>Room: {term.room || 'Not specified'}</span>
+                    <span>Room: {term.room_name || 'Not specified'}</span>
                   </div>
                   <div className="term-info-item">
                     <span className="term-icon">👥</span>
