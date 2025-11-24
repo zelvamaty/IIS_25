@@ -6,6 +6,7 @@
     	table { border-collapse: collapse; }
     	td, th { border: 1px solid black; padding: 0.3em 0.5em; text-align: left; }
     	dt { font-weight: bold; margin-top: 0.5em; }
+		pre {border: 1px solid black; padding: 5px 5px 5px 5px;}
     </style>
 </head>
 <body>
@@ -14,7 +15,7 @@
 
 <dl>
 	<dt>Autoři</dt>
-	<dd>Matouš Havlíček
+	<dd>Matouš Havlíček (vedoucí týmu)
 	    <a href="mailto:xhavli66@stud.fit.vutbr.cz">xhavli66@stud.fit.vutbr.cz</a> -
 		návrh a implementace backendu, návrh databáze, testování
 	</dd>
@@ -34,9 +35,14 @@
 <h2>Uživatelé systému pro testování</h2>
 <table>
 <tbody><tr><th>Login</th><th>Heslo</th><th>Role</th></tr>
-<tr><td>admin</td><td>admin</td><td>Administrátor</td></tr>
-<tr><td>prodavac</td><td>prodavac</td><td>Prodavač</td></tr>
-<tr><td>franta</td><td>franta</td><td>Zákazník</td></tr>
+<tr><td>admin_main</td><td>pass1324</td><td>Administrátor</td></tr>
+<tr><td>user1</td><td>pass1234</td><td>Registrovaný uživatel - garant kurzu </td></tr>
+<tr><td>user2</td><td>pass1234</td><td>Registrovaný uživatel - student</td></tr>
+<tr><td>user3</td><td>pass1234</td><td>Registrovaný uživatel - student</td></tr>
+<tr><td>user4</td><td>pass1234</td><td>Registrovaný uživatel - student</td></tr>
+<tr><td>user5</td><td>pass1234</td><td>Registrovaný uživatel - student</td></tr>
+<tr><td>user6</td><td>pass1234</td><td>Registrovaný uživatel - lektor</td></tr>
+<tr><td>user7</td><td>pass1234</td><td>Registrovaný uživatel - lektor</td></tr>
 </tbody></table>
 
 <h3>Video</h3>
@@ -48,12 +54,42 @@ Video nahrajte například na VUT Google Drive, kde ho bude možné přímo
 spustit z odkazu.</p> 
 
 <h2>Implementace</h2>
-<p>Stručná dokumentace k implementaci, která popisuje, které části 
-projektu (např. PHP skripty) implementují jednotlivé případy použití.</p>
+
+<h3>Overview</h3>
+Pro implementaci jsme zvolili framework Django (Python) pro backend a React (JavaScript) pro frontend. Na produkci jsou oba tyto servery skryté za Apache 2, který pracuje jako
+zpětné proxy, běžíci na tom samém serveru. Celý tento systém je dále chráněn proxy serverem od služby Cloudflare, na kterém je nakonfigurována služba DNS. Komunikace
+mezi serverama probíhá prostřednictvím protokolu HTTPS, s výjimkou serverů aplikace - ty běží pouze na localhostu, tedy nepovažujeme zde za potřebné šifrování komunikace.
+
+<h3>Backend</h3>
+<table>
+	<tr><th>Soubor</th><th>Účel</th></tr>
+	<tr><td><code>core/urls.py</code></td><td>Základ routeru</td></tr>
+	<tr><td><code>core/views.py</code></td><td>Presentery</td></tr>
+	<tr><td><code>core/models.py</code></td><td>Datový model</td></tr>
+	<tr><td><code>core/serializers.py</code></td><td>Serializace modelu na JSON a validace</td></tr>
+</table>
+
+<h3>Frontend</h3>
+<table>
+	<tr><th>Soubor</th><th>Účel</th></tr>
+	<tr><td><code>AdminCourses.js</code></td><td>Schvalování kurzů (admin only)</td></tr>
+	<tr><td><code>AdminDashboard.js</code></td><td>Dashboard (admin only)</td></tr>
+	<tr><td><code>AdminRooms.js</code></td><td>Správa místností (admin only)</td></tr>
+	<tr><td><code>AdminUsers.js</code></td><td>Správa uživatelů (admin only)</td></tr>
+	<tr><td><code>CreateCourse.js</code></td><td>Formulář pro vytvoření kurzu</td></tr>
+	<tr><td><code>EditCourse.js</code></td><td>Formulář pro úpravu kurzu</td></tr>
+	<tr><td><code>InstructorCourse</code></td><td>Správa kurzu garantem</td></tr>
+	<tr><td><code>Login.js</code></td><td>Formulář pro přihlášení</td></tr>
+	<tr><td><code>MyCourses.js</code></td><td>Zobrazení kurzů, do kterých je uživatel zapsán</td></tr>
+	<tr><td><code>MySchedule.js</code></td><td>Zobrazení rozvrhu uživatele</td></tr>
+	<tr><td><code>PublicCourses.js</code></td><td>Zobrazení kurzů pro věřejnost</td></tr>
+	<tr><td><code>StudentCourseRegistration.js</code></td><td>Registrace uživatele na termín kurzu</td></tr>
+	<tr><td><code>UserProfile.js</code></td><td>Zobrazení a úpravy profilu uživatele</td></tr>
+</table>
+Poznámka: Všechny skripty implementující případy užití jsou umístěny v podadresáři <code>src/components/pages/</code><br>
 
 <h3>Databáze</h3>
-
-Zde vložte grafické schéma relační databáze (tabulek v databázi).
+<img src="db.png" alt="Schéma databáze"/>
 
 <h2>Instalace</h2>
 
@@ -65,19 +101,18 @@ Zde vložte grafické schéma relační databáze (tabulek v databázi).
 </ul>
 
 <h3>Postup instalace</h3>
-<ul>
-	<li>Git repozitář ke stažení <a href="https://github.com/swaggermaty/IIS_25">zde</a>.</li>
-	<li>Předpokládme funkční instalaci databázového serveru MariaDB, případně jinou implementaci MySQL.</li>
-</ul>
+<i>Předpokládme funkční instalaci databázového serveru MariaDB (případně jinoé implementace MySQL) s vytvořenou databází a uživatelem, který má plná práva nad touto databází.</i>
 
 <h4>Klon repozitáře</h4>
 <pre>
-cd ~
+cd ~/
 git clone git@github.com/swaggermaty:IIS_25.git
 </pre>
 
 <h4>Instalace backendu</h4>
-1. Konfigurace prostředí:
+<b>1. Konfigurace prostředí:<br /></b>
+<i>1.1. Inicializace virtuálního prostředí (silně doporučeno)<br /></i>
+V terminálu zadejte tyto příkazy:
 <pre>
 cd ~/IIS_25/backend
 python3 -m venv .venv
@@ -85,48 +120,92 @@ python3 -m venv .venv
 pip install -r requirements.txt
 </pre>
 
-2. Inicializace databáze
+<i>1.2. Konfigurace běhového prostředí - <code>settings.py</code> (volitelné)<br /></i>
+Pokud zprovozňujete aplikaci pouze na localhostu, nejsou potřebné žádne úpravy tohoto souboru.
+Pro běh na produkci ale důrazně doporučujeme si vytvořit soubor, ve kterém budou umístěny příslušné přetížení konstant a ten pak použijeme jako soubor nastavení. Další možností je úprava 
+samotného souboru <code>settings.py</code>, ale tuto možnost spíš nedoporučujeme z důvodu možné ztráty předvolených hodnot nastavení.<br />
+Soubor pro přetížení předvolených hodnot lze vytvořit nasledujícím způsobem:
+<pre>
+vi ~/IIS_25/backend/backend_iis/backend_iis/local_settings.py
+</pre>
+a vložit do něj nasledující obsah:
+<pre>
+from settings import *		# zahrne předvolená nastavení
+
+# Bezpečnostní klíč - nahraďte náhodným ASCII řetězcem o délce alespoň 50 znaků, tento klíč je používán ke zabezpečení podepsaných dat
+SECRET_KEY = 'django-insecure-m)c@0!p#gq9x&9*s-g88=8q&z*k^q8$d!q$8y!s#k!a^e(x1@v'
+
+# Debugovací režim - jeho zapnutí na produkci odhaluje citlivé údaje o běhu, silně doporučujeme vypínat pro běh na produkci!
+DEBUG = False
+
+# Konfigurace připojení do databáze
+DATABASES = {				
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',	# použitý DBMS (např. pro PostgreSQL použijte 'django.db.backends.postgres')
+        'NAME': 'django',                       # název databáze
+        'USER': 'django',                       # uživatelské jméno pro přihlášení
+        'PASSWORD': 'heslonaGITU',              # uživatelské heslo
+        'HOST': 'localhost',                    # doménové jméno nebo IP adresa DBMS
+        'PORT': '3306',                         # port, na kterém běží DBMS
+    }
+}
+
+# Seznam povolených zdrojů požadavků - zde umístíme base URL frontendu.
+CORS_ALLOWED_ORIGINS = [
+    "http://example.com:3000/"
+]
+</pre>
+Více v bodě 3b.<br />
+
+<b>2. Inicializace databáze - naplní databázi ukázkovými daty</b>
 <pre>
 python3 manage.py makemigrations
 python3 manage.py migrate
 python3 manage.py seeder
 </pre>
 
-3a. Spuštění backendu pro vývoj na localhostu:
+<b>3a. Spuštění backendu pro vývoj na localhostu:</b>
 <pre>
 python3 manage.py runserver
 </pre>
 
-3b. Spuštění backendu pro běh na produkci:
+<b>3b. Spuštění backendu pro běh na produkci:</b><br />
+Jak již bylo v bodě 1.2 zmíněno, předvolené parametry aplikace jsou definovány ve zdrojovém souboru <code>backend_iis/settings.py</code>. Pro aplikaci přetížení těchto parametrů
+je nutné nastavit proměnnou prostředí <code>DJANGO_SETTINGS_MODULE</code> tak, aby obsahovala celý název modulu, ve kterém se tato přetížení nachází. Toho můžeme docílit např. tímto zbůsobem:
 <pre>
-daphne --bind &lt;adresa&gt; -p &lt;číslo portu&gt; backend_iis.asgi:application
+DJANGO_SETTINGS_MODULE=backend_iis.local_settings daphne --bind &lt;adresa&gt; --port &lt;číslo portu&gt; backend_iis.asgi:application
 </pre>
-Poznámka: Program <code>daphne</code> je samotná binárka serveru, nejedná se o nástroj pro řízení běhu (jako např. <code>systemctl</code>) - je tedy možné ji spouštět např. jako systémovou službu pod <code>systemd</code>.
+nebo také tuto proměnnou exportovat:
+<pre>
+export DJANGO_SETTINGS_MODULE=backend_iis.local_settings 
+daphne --bind &lt;adresa&gt; --port &lt;číslo portu&gt; backend_iis.asgi:application
+</pre>
+Poznámka: Program <code>daphne</code> je standalone server, nejedná se o nástroj pro řízení běhu (jako např. <code>systemctl</code>) - je tedy možné ho spouštět např. jako systémovou službu pod <code>systemd</code>.
 
 <h4>Instalace frontendu</h4>
-1. Konfigurace prostředí
+<b>1. Inicializace prostředí</b>
 <pre>
 cd ~/IIS_25/frontend
 npm install
 </pre>
 
-2a. Spuštění frontendu pro vývoj:
+<b>2a. Spuštění frontendu pro vývoj:</b>
 <pre>
 npm start
 </pre>
 
-2b. Spuštění frontendu pro běh na produkci:
+<b>2b. Spuštění frontendu pro běh na produkci:<br /></b>
+Před nasazením do produkce je nutné změnit základní URL pro volání backendu. Toho docílíme vytvořením souboru <code>.env</code> v adresáři <code>~/IIS_25/frontend</code>, do kterého vložíme následující řádek (bez &lt;&gt;):
+<pre>
+REACT_APP_API_BASE_URL=&lt;base_URL&gt;
+</pre>
+Poté je možné aplikaci sestavit pro běh v produkci a spustit standardním způsobem:
 <pre>
 npm run build
 serve -s build
 </pre>
 
 <h2>Známé problémy</h2>
-<p>Zde popište, které body zadání nejsou implementovány a z jakého 
-důvodu. Např. &#8222;Z časových důvodů nebyla implementována správa 
-uživatelů.&#8221; Pomůžete tím zrychlit hodnocení, když neimplementované 
-funkce nebudeme muset dlouze hledat.</p>
-
-
+Nic, o čem bychom vědeli.
 
 </body></html>
