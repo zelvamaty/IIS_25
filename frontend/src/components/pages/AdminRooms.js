@@ -90,20 +90,45 @@ const AdminRooms = () => {
   };
 
   const handleSave = async () => {
+    if (!formData.name || !formData.name.trim()) {
+      alert('Room name is required');
+      return;
+    }
+    
+    if (!formData.building || !formData.building.trim()) {
+      alert('Building is required');
+      return;
+    }
+    
+    if (!formData.floor || formData.floor === '') {
+      alert('Floor is required');
+      return;
+    }
+    
+    if (!formData.capacity || formData.capacity === '') {
+      alert('Capacity is required');
+      return;
+    }
+    
+    if (parseInt(formData.capacity) < 1) {
+      alert('Capacity must be at least 1');
+      return;
+    }
+  
     try {
       const location = formData.building && formData.floor 
         ? `${formData.building}, ${formData.floor}. floor`
         : (formData.building || '');
-
+  
       const roomData = {
-        name: formData.name,
+        name: formData.name.trim(),
         capacity: parseInt(formData.capacity),
         location: location,
-        building: formData.building,
-        floor: formData.floor ? parseInt(formData.floor) : null,
+        building: formData.building.trim(),
+        floor: parseInt(formData.floor),
         equipment: formData.equipment,
       };
-
+  
       if (editingRoom) {
         await roomsAPI.updateRoom(editingRoom.id, roomData);
         alert('Room has been successfully updated');
@@ -111,7 +136,7 @@ const AdminRooms = () => {
         await roomsAPI.createRoom(roomData);
         alert('Room has been successfully created');
       }
-
+  
       setShowModal(false);
       await loadRooms();
     } catch (err) {
