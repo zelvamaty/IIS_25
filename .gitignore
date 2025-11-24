@@ -3,14 +3,14 @@ __pycache__/
 *.py[codz]
 *$py.class
 
-# environment-specific stuff
-backend/backend_iis/backend_iis/settings.py
-
 # C extensions
 *.so
 
 # OS-specific stuff
 .DS_Store
+
+# IDE stuff
+.idea/
 
 # Node.js stuff
 node_modules/
