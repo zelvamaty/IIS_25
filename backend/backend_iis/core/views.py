@@ -390,7 +390,7 @@ class TermViewSet(viewsets.ModelViewSet):
         user = request.user
         registrations = Registration.objects.filter(user=user).select_related('term')
         term_data = [{'id': reg.term.id, 'course': reg.term.course.title,
-                      'roomId': reg.term.room_id,
+                      'room': reg.term.room_id , 'type': reg.term.type,
                       'start_time': reg.term.start_time, 'end_time': reg.term.end_time}
                      for reg in registrations]
         return Response(term_data)
