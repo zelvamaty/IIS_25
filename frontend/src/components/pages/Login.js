@@ -128,7 +128,6 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
 
     try {
       const response = await authAPI.login(loginData);
-      console.log('Login successful:', response);
       
       const userInfo = await authAPI.getCurrentUser();
       onLoginSuccess(userInfo);
@@ -154,7 +153,7 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
     setLoading(true);
     setError('');
     setFieldErrors({});
-
+  
     try {
       await authAPI.register(registerData);
       
@@ -167,14 +166,59 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
       onLoginSuccess(userInfo);
       
     } catch (err) {
-      if (err.message && err.message.includes('username')) {
+      console.error('Registration error:', err);
+      
+      if (err.response && err.response.data) {
+        const backendErrors = err.response.data;
+        const newFieldErrors = {};
+        let generalError = '';
+        
+        if (backendErrors.username) {
+          newFieldErrors.username = Array.isArray(backendErrors.username) 
+            ? backendErrors.username[0] 
+            : backendErrors.username;
+        }
+        
+        if (backendErrors.email) {
+          newFieldErrors.email = Array.isArray(backendErrors.email) 
+            ? backendErrors.email[0] 
+            : backendErrors.email;
+        }
+        
+        if (backendErrors.password1 || backendErrors.password) {
+          const passwordError = backendErrors.password1 || backendErrors.password;
+          newFieldErrors.password1 = Array.isArray(passwordError) 
+            ? passwordError[0] 
+            : passwordError;
+        }
+        
+        if (backendErrors.password2) {
+          newFieldErrors.password2 = Array.isArray(backendErrors.password2) 
+            ? backendErrors.password2[0] 
+            : backendErrors.password2;
+        }
+        
+        if (backendErrors.non_field_errors) {
+          generalError = Array.isArray(backendErrors.non_field_errors)
+            ? backendErrors.non_field_errors.join(' ')
+            : backendErrors.non_field_errors;
+        }
+        
+        if (Object.keys(newFieldErrors).length > 0) {
+          setFieldErrors(newFieldErrors);
+          setError('Please fix the errors below before continuing');
+        } else if (generalError) {
+          setError(generalError);
+        } else {
+          setError('Registration failed. Please check your information and try again.');
+        }
+      } else if (err.message && err.message.includes('username')) {
         setError('This username is already taken. Please choose a different one.');
       } else if (err.message && err.message.includes('email')) {
         setError('This email is already registered. Please use a different email or try logging in.');
       } else {
-        setError('Registration failed. Please check your information and try again.');
+        setError(err.message || 'Registration failed. Please check your information and try again.');
       }
-      console.error('Registration error:', err);
     } finally {
       setLoading(false);
     }

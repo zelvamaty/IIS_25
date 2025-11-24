@@ -23,9 +23,7 @@ const StudentCourseRegistration = () => {
   const handleUnregisterFromTerm = async (registrationId) => {
     try {
       setRegistering(true);
-      console.log('Calling API to delete registration:', registrationId);
       const result = await termsAPI.deleteRegistration(registrationId);
-      console.log('API response:', result);
       alert('You have successfully unregistered from the term');
       await loadCourseDetails();
     } catch (err) {
