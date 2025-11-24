@@ -134,7 +134,7 @@ DEBUG = False
 # Konfigurace připojení do databáze
 DATABASES = {				
     'default': {
-        'ENGINE': 'django.db.backends.mysql',	# použitý DBMS (např. pro PostgreSQL použijte 'django.db.backends.mysql')
+        'ENGINE': 'django.db.backends.mysql',	# použitý DBMS (např. pro PostgreSQL použijte 'django.db.backends.postgres')
         'NAME': 'django',                       # název databáze
         'USER': 'django',                       # uživatelské jméno pro přihlášení
         'PASSWORD': 'heslonaGITU',              # uživatelské heslo
@@ -188,20 +188,17 @@ npm start
 </pre>
 
 <b>2b. Spuštění frontendu pro běh na produkci:<br /></b>
-Před nasazením do produkce je nutné změnit základní URL pro volání backendu. Toho docílíme vytvořením souboru <code>.env</code>, do kterého vložíme následující řádek:
+Před nasazením do produkce je nutné změnit základní URL pro volání backendu. Toho docílíme vytvořením souboru <code>.env</code> v adresáři <code>~/IIS_25/frontend</code>, do kterého vložíme následující řádek:
 <pre>
 REACT_APP_API_BASE_URL=&lt;base URL&gt;
 </pre>
-Poté je možné aplikaci sestavit a spustit standardním způsobem:
+Poté je možné aplikaci sestavit pro běh v produkci a spustit standardním způsobem:
 <pre>
 npm run build
 serve -s build
 </pre>
 
 <h2>Známé problémy</h2>
-<p>Zde popište, které body zadání nejsou implementovány a z jakého 
-důvodu. Např. &#8222;Z časových důvodů nebyla implementována správa 
-uživatelů.&#8221; Pomůžete tím zrychlit hodnocení, když neimplementované 
-funkce nebudeme muset dlouze hledat.</p>
+Nic, o čem bychom vědeli.
 
 </body></html>
