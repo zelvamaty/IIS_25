@@ -179,36 +179,7 @@
     flex-shrink: 0;
   }
   
-  .room-equipment {
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 2px solid #e0e7ff;
-  }
-  
-  .equipment-label {
-    color: #1e40af;
-    font-weight: 600;
-    font-size: 14px;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  
-  .equipment-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  
-  .equipment-tag {
-    background: #dbeafe;
-    color: #1e40af;
-    padding: 6px 12px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 600;
-  }
-  
+
   .room-footer {
     padding: 0 24px 24px;
     display: flex;

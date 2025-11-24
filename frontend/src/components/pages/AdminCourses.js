@@ -186,7 +186,7 @@ const AdminCourses = () => {
       </div>
 
       {filteredCourses.length === 0 ? (
-        <div className="empty-state">
+        <div className="">
           <p>No courses found</p>
         </div>
       ) : (

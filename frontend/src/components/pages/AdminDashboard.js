@@ -15,6 +15,7 @@ const AdminDashboard = () => {
     totalRooms: 0
   });
   const [upcomingTerms, setUpcomingTerms] = useState([]);
+  const [rooms, setRooms] = useState([]);
 
   useEffect(() => {
     loadDashboardData();
@@ -46,6 +47,8 @@ const AdminDashboard = () => {
         totalRooms
       });
 
+      setRooms(rooms);
+
       const today = new Date();
       const nextWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
       
@@ -66,6 +69,13 @@ const AdminDashboard = () => {
       setLoading(false);
     }
   };
+
+  const getRoomName = (roomId) => {
+    if (!roomId) return 'No room';
+    const room = rooms.find(r => r.id === roomId);
+    return room ? (room.name || `Room ${room.id}`) : 'Not specified';
+  };
+
   const statsCards = [
     { label: 'Total Courses', value: stats.totalCourses, color: '#3b82f6' },
     { label: 'Approved Courses', value: stats.approvedCourses, color: '#10b981' },
@@ -118,16 +128,16 @@ const AdminDashboard = () => {
 
   return (
     <div className="admin-dashboard">
-<div className="stats-grid">
-  {statsCards.map((stat, index) => (
-    <div key={index} className="stat-card" style={{ borderTopColor: stat.color }}>
-      <div className="stat-value" style={{ color: stat.color }}>
-        {stat.value}
+      <div className="stats-grid">
+        {statsCards.map((stat, index) => (
+          <div key={index} className="stat-card">
+            <div className="stat-value" style={{ color: stat.color }}>
+              {stat.value}
+            </div>
+            <div className="stat-label">{stat.label}</div>
+          </div>
+        ))}
       </div>
-      <div className="stat-label">{stat.label}</div>
-    </div>
-  ))}
-</div>
 
       <div className="dashboard-content">
         <div className="dashboard-section">
@@ -156,19 +166,17 @@ const AdminDashboard = () => {
                           : 'Unknown'}
                       </div>
                       <div className="upcoming-time">
-                        {date.time} | {term.room || 'No room'}
+                        {date.time} | {getRoomName(term.room)}
                       </div>
                     </div>
                     <div className="upcoming-capacity">
-                      {term.registered_count || 0}/{term.capacity}
-                    </div>
+                    {term.registrations_count || term.registered_count || 0}/{term.capacity}                    </div>
                   </div>
                 );
               })}
             </div>
           )}
         </div>
-
       </div>
 
       <div className="quick-actions">

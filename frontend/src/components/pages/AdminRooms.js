@@ -215,7 +215,7 @@ const AdminRooms = () => {
     </div>
 
       {filteredRooms.length === 0 ? (
-        <div className="empty-state">
+        <div className="">
           <p>No rooms found</p>
         </div>
       ) : (

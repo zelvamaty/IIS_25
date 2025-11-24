@@ -240,7 +240,7 @@ const AdminUsers = () => {
       </div>
 
       {filteredUsers.length === 0 ? (
-        <div className="empty-state">
+        <div className="">
           <p>No users found</p>
         </div>
       ) : (

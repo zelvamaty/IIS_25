@@ -533,7 +533,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       <div className="instructor-course">
         
         {myCourses.length === 0 ? (
-          <div className="empty-state">
+          <div className="">
             <p>You don't have any courses as guarantor or lecturer yet</p>
             <button className="button" onClick={() => navigate('/create-course')}>
               Create Course
@@ -852,7 +852,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
           )}
 
           {termStudents.length === 0 ? (
-            <div className="empty-state">
+            <div className="">
               <p>No one is registered for this term yet</p>
             </div>
           ) : (

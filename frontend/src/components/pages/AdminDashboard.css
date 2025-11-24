@@ -28,8 +28,9 @@
     text-align: center;
     box-shadow: 0 2px 12px rgba(30, 64, 175, 0.08);
     transition: all 0.3s ease;
-    border-top: 3px solid;
+    border: none;
     position: relative;
+    overflow: hidden;
   }
   
   .stat-card:hover {
@@ -94,7 +95,10 @@
     border-color: #3b82f6;
     transform: translateX(6px);
   }
-  
+  .stat-card::before,
+.stat-card::after {
+  display: none;
+}
   .activity-icon {
     font-size: 28px;
     width: 48px;
@@ -213,33 +217,29 @@
   }
   
   .actions-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
   }
   
   .action-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    padding: 32px 24px;
-    background: #f8fafc;
-    border: 2px solid #e0e7ff;
-    border-radius: 16px;
+    flex: 1;
+    min-width: 150px;
+    padding: 16px 24px;
+    background: #3b82f6;
+    border: none;
+    border-radius: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
-    color: #475569;
+    color: white;
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
   }
   
   .action-card:hover {
-    background: #3b82f6;
-    color: white;
-    border-color: #3b82f6;
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+    background: #2563eb;
+    transform: scale(1.05);
   }
   
   .action-icon {

@@ -107,7 +107,7 @@ const MyCourses = () => {
         <h2 className="section-title">Approved Courses</h2>
         
         {approvedCourses.length === 0 ? (
-          <div className="empty-state">
+          <div className="">
             <p>You have no approved courses yet</p>
             <button className="button" onClick={() => navigate('/courses')}>
               Browse available courses
