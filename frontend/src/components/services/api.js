@@ -382,14 +382,7 @@ export const termsAPI = {
     });
     return handleResponse(response);
   },
-// updateTerm: async (termId, termData) => {
-//   const response = await fetch(`${API_BASE_URL}/terms/${termId}/patch_term/`, {
-//     method: 'PATCH',
-//     headers: getAuthHeaders(),
-//     body: JSON.stringify(termData)
-//   });
-//   return handleResponse(response);
-// },
+
   getTermStudents: async (termId) => {
     const response = await fetch(`${API_BASE_URL}/terms/${termId}/list_registered_students/`, {
       method: 'GET',

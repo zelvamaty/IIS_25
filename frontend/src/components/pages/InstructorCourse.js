@@ -26,17 +26,21 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   const [gradeValue, setGradeValue] = useState('');
   const [gradeError, setGradeError] = useState('');
   const [editingTerm, setEditingTerm] = useState(null);
-const [editTermData, setEditTermData] = useState({
-  type: '',
-  start_time: '',
-  end_time: '',
-  room: '',
-  capacity: '',
-  requires_registration: true
-});
-const [editTermLoading, setEditTermLoading] = useState(false);
-const [editTermError, setEditTermError] = useState('');
+  const [editTermData, setEditTermData] = useState({
+    title: '',
+    description: '',
+    type: '',
+    start_time: '',
+    end_time: '',
+    room: '',
+    capacity: '',
+    requires_registration: true
+  });
+  const [editTermLoading, setEditTermLoading] = useState(false);
+  const [editTermError, setEditTermError] = useState('');
   const [termFormData, setTermFormData] = useState({
+    title: '',
+    description: '',
     type: '',
     start_time: '',
     end_time: '',
@@ -88,9 +92,12 @@ const [editTermError, setEditTermError] = useState('');
       console.error('Error loading users:', err);
     }
   };
+
   const handleEditTerm = (term) => {
     setEditingTerm(term);
     setEditTermData({
+      title: term.title || '',
+      description: term.description || '',
       type: term.type,
       start_time: new Date(term.start_time).toISOString().slice(0, 16),
       end_time: new Date(term.end_time).toISOString().slice(0, 16),
@@ -108,6 +115,8 @@ const [editTermError, setEditTermError] = useState('');
   
     try {
       const termData = {
+        title: editTermData.title,
+        description: editTermData.description,
         type: editTermData.type,
         start_time: new Date(editTermData.start_time).toISOString(),
         end_time: new Date(editTermData.end_time).toISOString(),
@@ -126,6 +135,8 @@ const [editTermError, setEditTermError] = useState('');
       
       setEditingTerm(null);
       setEditTermData({
+        title: '',
+        description: '',
         type: '',
         start_time: '',
         end_time: '',
@@ -152,6 +163,7 @@ const [editTermError, setEditTermError] = useState('');
     }));
     setEditTermError('');
   };
+
   const loadCurrentUserAndCourses = async () => {
     try {
       setLoading(true);
@@ -360,10 +372,12 @@ const [editTermError, setEditTermError] = useState('');
       console.error('Error deleting registration:', err);
     }
   };
+
   const truncateText = (text, maxLength) => {
     if (!text || text.length <= maxLength) return text;
     return text.substring(0, maxLength) + '...';
   };
+
   const handleRemoveStudent = async (enrollmentId) => {
     if (!selectedCourse) return;
     
@@ -389,6 +403,8 @@ const [editTermError, setEditTermError] = useState('');
     try {
       const termData = {
         course_id: selectedCourse.id,
+        title: termFormData.title,
+        description: termFormData.description,
         type: termFormData.type,
         start_time: new Date(termFormData.start_time).toISOString(),
         end_time: new Date(termFormData.end_time).toISOString(),
@@ -404,6 +420,8 @@ const [editTermError, setEditTermError] = useState('');
       alert('Term has been successfully created!');
       
       setTermFormData({
+        title: '',
+        description: '',
         type: '',
         start_time: '',
         end_time: '',
@@ -678,12 +696,16 @@ const [editTermError, setEditTermError] = useState('');
                     <th>Room</th>
                     <th>Capacity</th>
                     <th>Registrations</th>
+                   
                   </tr>
                 </thead>
                 <tbody>
                   {courseTerms.map(term => (
                     <tr key={term.id}>
-                      <td>{getTermTypeName(term.type)}</td>
+                      <td>
+                        {term.title && <div><strong>{term.title}</strong></div>}
+                        {getTermTypeName(term.type)}
+                      </td>
                       <td>
                         {new Date(term.start_time).toLocaleString('en-US', {
                           day: '2-digit',
@@ -706,21 +728,21 @@ const [editTermError, setEditTermError] = useState('');
                               Detail
                             </button>
                             {canManageCourse && (
-  <>
-    <button 
-      className="button button-small"
-      onClick={() => handleEditTerm(term)}
-    >
-      Edit
-    </button>
-    <button 
-      className="button button-danger button-small"
-      onClick={() => handleDeleteTerm(term.id)}
-    >
-      Delete
-    </button>
-  </>
-)}
+                              <>
+                                <button 
+                                  className="button button-small"
+                                  onClick={() => handleEditTerm(term)}
+                                >
+                                  Edit
+                                </button>
+                                <button 
+                                  className="button button-danger button-small"
+                                  onClick={() => handleDeleteTerm(term.id)}
+                                >
+                                  Delete
+                                </button>
+                              </>
+                            )}
                           </div>
                         </td>
                       )}
@@ -751,6 +773,8 @@ const [editTermError, setEditTermError] = useState('');
             <p><strong>Date:</strong> {new Date(selectedTerm.start_time).toLocaleString('en-US')}</p>
             <p><strong>Room:</strong> {getRoomName(selectedTerm.room)}</p>
             <p><strong>Capacity:</strong> {selectedTerm.registrations_count || 0}/{selectedTerm.capacity}</p>
+            {selectedTerm.title && <p><strong>Title:</strong> {selectedTerm.title}</p>}
+            {selectedTerm.description && <p><strong>Description:</strong> {selectedTerm.description}</p>}
           </div>
 
           <div className="section-header">
@@ -790,7 +814,7 @@ const [editTermError, setEditTermError] = useState('');
                           key={student.registration_id} 
                           value={student.registration_id}
                         >
-        {truncateText(`${student.first_name} ${student.last_name}`, 25)} ({truncateText(student.username, 15)})
+                          {truncateText(`${student.first_name} ${student.last_name}`, 25)} ({truncateText(student.username, 15)})
                         </option>
                       ))
                     }
@@ -844,13 +868,14 @@ const [editTermError, setEditTermError] = useState('');
                     <th>Student</th>
                     <th>Registration</th>
                     <th>Grade</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {termStudents.map(student => (
                     <tr key={student.registration_id}>
                       <td>
-                      {truncateText(`${student.first_name} ${student.last_name}`, 30)}
+                        {truncateText(`${student.first_name} ${student.last_name}`, 30)}
                         <br />
                         <small style={{ color: '#64748b' }}>({student.username})</small>
                       </td>
@@ -913,10 +938,38 @@ const [editTermError, setEditTermError] = useState('');
       {activeTab === 'create-term' && canManageCourse && (
         <div className="tab-content">
           <div className="section-header">
-          
+            <h2 className="section-title">Create New Term</h2>
           </div>
 
           <form onSubmit={handleCreateTerm} className="term-form">
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Term Title</label>
+                <input
+                  type="text"
+                  name="title"
+                  className="input-field"
+                  placeholder="e.g., Week 1 - Introduction"
+                  value={termFormData.title}
+                  onChange={handleTermFormChange}
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Term Description</label>
+                <textarea
+                  name="description"
+                  className="input-field textarea"
+                  rows="3"
+                  placeholder="Additional details about this term..."
+                  value={termFormData.description}
+                  onChange={handleTermFormChange}
+                />
+              </div>
+            </div>
+
             <div className="form-row">
               <div className="form-group">
                 <label className="form-label">Term Type *</label>
@@ -1032,131 +1085,161 @@ const [editTermError, setEditTermError] = useState('');
           </form>
         </div>
       )}
-{activeTab === 'edit-term' && canManageCourse && editingTerm && (
-  <div className="tab-content">
-    <div className="section-header">
-      <h2 className="section-title">Edit Term</h2>
-    </div>
 
-    {editTermError && (
-      <div className="error-message">
-        {editTermError}
-      </div>
-    )}
+      {activeTab === 'edit-term' && canManageCourse && editingTerm && (
+        <div className="tab-content">
+          <div className="section-header">
+            <h2 className="section-title">Edit Term</h2>
+          </div>
 
-    <form onSubmit={handleUpdateTerm} className="term-form">
-      <div className="form-row">
-        <div className="form-group">
-          <label className="form-label">Term Type *</label>
-          <select
-            name="type"
-            className="input-field"
-            value={editTermData.type}
-            onChange={handleEditTermFormChange}
-            required
-          >
-            <option value="">Select type</option>
-            <option value="LECTURE">Lecture</option>
-            <option value="EXERCISE">Exercise</option>
-            <option value="EXAM">Exam</option>
-          </select>
+          {editTermError && (
+            <div className="error-message">
+              {editTermError}
+            </div>
+          )}
+
+          <form onSubmit={handleUpdateTerm} className="term-form">
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Term Title</label>
+                <input
+                  type="text"
+                  name="title"
+                  className="input-field"
+                  placeholder="e.g., Week 1 - Introduction"
+                  value={editTermData.title}
+                  onChange={handleEditTermFormChange}
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Term Description</label>
+                <textarea
+                  name="description"
+                  className="input-field textarea"
+                  rows="3"
+                  placeholder="Additional details about this term..."
+                  value={editTermData.description}
+                  onChange={handleEditTermFormChange}
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Term Type *</label>
+                <select
+                  name="type"
+                  className="input-field"
+                  value={editTermData.type}
+                  onChange={handleEditTermFormChange}
+                  required
+                >
+                  <option value="">Select type</option>
+                  <option value="LECTURE">Lecture</option>
+                  <option value="EXERCISE">Exercise</option>
+                  <option value="EXAM">Exam</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-row two-columns">
+              <div className="form-group">
+                <label className="form-label">Start Date and Time *</label>
+                <input
+                  type="datetime-local"
+                  name="start_time"
+                  className="input-field"
+                  value={editTermData.start_time}
+                  onChange={handleEditTermFormChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">End Date and Time *</label>
+                <input
+                  type="datetime-local"
+                  name="end_time"
+                  className="input-field"
+                  value={editTermData.end_time}
+                  onChange={handleEditTermFormChange}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="form-row two-columns">
+              <div className="form-group">
+                <label className="form-label">Room</label>
+                <select
+                  name="room"
+                  className="input-field"
+                  value={editTermData.room}
+                  onChange={handleEditTermFormChange}
+                >
+                  <option value="">No room</option>
+                  {rooms.map(room => (
+                    <option key={room.id} value={room.id}>
+                      {room.name || `Room ${room.id}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Capacity *</label>
+                <input
+                  type="number"
+                  name="capacity"
+                  className="input-field"
+                  min="1"
+                  value={editTermData.capacity}
+                  onChange={handleEditTermFormChange}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="checkbox-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    name="requires_registration"
+                    checked={editTermData.requires_registration}
+                    onChange={handleEditTermFormChange}
+                  />
+                  Requires student registration
+                </label>
+              </div>
+            </div>
+
+            <div className="form-actions">
+              <button 
+                type="submit" 
+                className="button button-success"
+                disabled={editTermLoading}
+              >
+                {editTermLoading ? '⏳ Updating...' : '✓ Update Term'}
+              </button>
+              <button 
+                type="button" 
+                className="button button-secondary"
+                onClick={() => {
+                  setEditingTerm(null);
+                  setActiveTab('terms');
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
         </div>
-      </div>
+      )}
 
-      <div className="form-row two-columns">
-        <div className="form-group">
-          <label className="form-label">Start Date and Time *</label>
-          <input
-            type="datetime-local"
-            name="start_time"
-            className="input-field"
-            value={editTermData.start_time}
-            onChange={handleEditTermFormChange}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label className="form-label">End Date and Time *</label>
-          <input
-            type="datetime-local"
-            name="end_time"
-            className="input-field"
-            value={editTermData.end_time}
-            onChange={handleEditTermFormChange}
-            required
-          />
-        </div>
-      </div>
-
-      <div className="form-row two-columns">
-        <div className="form-group">
-          <label className="form-label">Room</label>
-          <select
-            name="room"
-            className="input-field"
-            value={editTermData.room}
-            onChange={handleEditTermFormChange}
-          >
-            <option value="">No room</option>
-            {rooms.map(room => (
-              <option key={room.id} value={room.id}>
-                {room.name || `Room ${room.id}`}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="form-group">
-          <label className="form-label">Capacity *</label>
-          <input
-            type="number"
-            name="capacity"
-            className="input-field"
-            min="1"
-            value={editTermData.capacity}
-            onChange={handleEditTermFormChange}
-            required
-          />
-        </div>
-      </div>
-
-      <div className="form-row">
-        <div className="checkbox-group">
-          <label className="checkbox-label">
-            <input
-              type="checkbox"
-              name="requires_registration"
-              checked={editTermData.requires_registration}
-              onChange={handleEditTermFormChange}
-            />
-            Requires student registration
-          </label>
-        </div>
-      </div>
-
-      <div className="form-actions">
-        <button 
-          type="submit" 
-          className="button button-success"
-          disabled={editTermLoading}
-        >
-          {editTermLoading ? '⏳ Updating...' : '✓ Update Term'}
-        </button>
-        <button 
-          type="button" 
-          className="button button-secondary"
-          onClick={() => {
-            setEditingTerm(null);
-            setActiveTab('terms');
-          }}
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
-  </div>
-)}
       {activeTab === 'enrollments' && (
         <div className="tab-content">
           <h2 className="section-title">Approved Students</h2>
@@ -1172,34 +1255,35 @@ const [editTermError, setEditTermError] = useState('');
                   <tr>
                     <th>Student</th>
                     <th>Enrollment Date</th>
-                    {(canManageCourse || isLecturer) && <th>Actions</th>}                  </tr>
+                    {(canManageCourse || isLecturer) && <th>Actions</th>}
+                  </tr>
                 </thead>
                 <tbody>
-  {approvedEnrollments.map(enrollment => (
-    <tr key={enrollment.id}>
-      <td>
-        {enrollment.student 
-          ? truncateText(`${enrollment.student.first_name} ${enrollment.student.last_name}`, 30)
-          : 'Unknown'}
-      </td>
-      <td>
-        {new Date(enrollment.enrolled_at).toLocaleDateString('en-US')}
-      </td>
-      {(canManageCourse || isLecturer) && (
-        <td>
-          {canManageCourse && (
-            <button 
-              className="button button-danger button-small"
-              onClick={() => handleRemoveStudent(enrollment.id)}
-            >
-              Remove from Course
-            </button>
-          )}
-        </td>
-      )}
-    </tr>
-  ))}
-</tbody>
+                  {approvedEnrollments.map(enrollment => (
+                    <tr key={enrollment.id}>
+                      <td>
+                        {enrollment.student 
+                          ? truncateText(`${enrollment.student.first_name} ${enrollment.student.last_name}`, 30)
+                          : 'Unknown'}
+                      </td>
+                      <td>
+                        {new Date(enrollment.enrolled_at).toLocaleDateString('en-US')}
+                      </td>
+                      {(canManageCourse || isLecturer) && (
+                        <td>
+                          {canManageCourse && (
+                            <button 
+                              className="button button-danger button-small"
+                              onClick={() => handleRemoveStudent(enrollment.id)}
+                            >
+                              Remove from Course
+                            </button>
+                          )}
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
               </table>
             </div>
           )}
@@ -1313,8 +1397,6 @@ const [editTermError, setEditTermError] = useState('');
               <p>The course doesn't have any lecturers yet</p>
             </div>
           )}
-
-          
         </div>
       )}
 
@@ -1331,10 +1413,10 @@ const [editTermError, setEditTermError] = useState('');
               {pendingEnrollments.map(enrollment => (
                 <div key={enrollment.id} className="waiting-student-item">
                   <span className="student-info">
-      {enrollment.student 
-        ? `${truncateText(`${enrollment.student.first_name} ${enrollment.student.last_name}`, 25)} (${truncateText(enrollment.student.username, 15)})`
-        : 'Unknown'}
-    </span>
+                    {enrollment.student 
+                      ? `${truncateText(`${enrollment.student.first_name} ${enrollment.student.last_name}`, 25)} (${truncateText(enrollment.student.username, 15)})`
+                      : 'Unknown'}
+                  </span>
                   <div className="student-actions">
                     <button 
                       className="button button-success button-small"
@@ -1358,7 +1440,6 @@ const [editTermError, setEditTermError] = useState('');
 
       {activeTab === 'edit-course' && canManageCourse && (
         <div className="tab-content">
-       
           {editError && (
             <div className="error-message">
               {editError}
