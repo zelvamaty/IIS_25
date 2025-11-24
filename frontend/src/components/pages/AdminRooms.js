@@ -38,17 +38,27 @@ const AdminRooms = () => {
   };
 
   const handleEdit = (room) => {
+    
+    let building = room.building || '';
+    let floor = room.floor || '';
+    if (!building && room.location) {
+      const parts = room.location.split(',');
+      if (parts.length >= 2) {
+        building = parts[0].trim();
+        floor = parts[1].replace(/\D/g, ''); 
+      }
+    }
+    
     setEditingRoom(room);
     setFormData({
       name: room.name || '',
       capacity: room.capacity || '',
-      building: room.building || '',
-      floor: room.floor || '',
+      building: building,
+      floor: floor,
       equipment: room.equipment || [],
     });
     setShowModal(true);
   };
-
   const handleAddNew = () => {
     setEditingRoom(null);
     setFormData({
