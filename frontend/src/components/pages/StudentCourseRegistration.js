@@ -258,7 +258,6 @@ const StudentCourseRegistration = () => {
       ) : (
         <div className="terms-grid">
           {terms.map(term => {
-            console.log('Rendering term:', term);
             const { date, time } = formatDateTime(term.start_time);
             const isFull = isTermFull(term);
             const myRegistration = getMyRegistrationForTerm(term.id);
