@@ -107,6 +107,15 @@ export const usersAPI = {
     return handleResponse(response);
   },
 
+  changeUserPassword: async (userId, passwordData) => {
+    const response = await fetch(`${API_BASE_URL}/users/${userId}/change_users_password/`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(passwordData)
+    });
+    const result = await handleResponse(response);
+    return result;
+  },
   // Get current user details
   getCurrentUser: async () => {
     const response = await fetch(`${API_BASE_URL}/users/me/`, {

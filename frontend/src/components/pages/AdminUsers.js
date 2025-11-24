@@ -10,6 +10,7 @@ const AdminUsers = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editingUser, setEditingUser] = useState(null);
+  const [changingPasswordUser, setChangingPasswordUser] = useState(null);
   const [expandedFields, setExpandedFields] = useState({});
   const [editFormData, setEditFormData] = useState({
     first_name: '',
@@ -17,6 +18,11 @@ const AdminUsers = () => {
     email: '',
     role: ''
   });
+  const [passwordFormData, setPasswordFormData] = useState({
+    new_password: '',
+    confirm_password: ''
+  });
+  const [passwordError, setPasswordError] = useState('');
 
   useEffect(() => {
     loadUsers();
@@ -88,6 +94,62 @@ const AdminUsers = () => {
       email: user.email || '',
       role: user.role
     });
+  };
+
+  const handleChangePassword = (user) => {
+    setChangingPasswordUser(user);
+    setPasswordFormData({
+      new_password: '',
+      confirm_password: ''
+    });
+    setPasswordError('');
+  };
+
+  const handlePasswordFormChange = (e) => {
+    setPasswordFormData({
+      ...passwordFormData,
+      [e.target.name]: e.target.value
+    });
+    setPasswordError('');
+  };
+
+  const handleSavePassword = async (e) => {
+    e.preventDefault();
+    setPasswordError('');
+  
+    if (passwordFormData.new_password !== passwordFormData.confirm_password) {
+      setPasswordError('Passwords do not match');
+      return;
+    }
+  
+    if (passwordFormData.new_password.length < 8) {
+      setPasswordError('Password must be at least 8 characters');
+      return;
+    }
+  
+    try {
+      const result = await usersAPI.changeUserPassword(changingPasswordUser.id, {
+        new_password: passwordFormData.new_password
+      });
+      
+      setChangingPasswordUser(null);
+      setPasswordFormData({
+        new_password: '',
+        confirm_password: ''
+      });
+    } catch (err) {
+      console.error('Full error:', err);
+      setPasswordError(err.message || 'Changing password failed');
+    }
+  };
+
+  const handleCancelPasswordChange = () => {
+    setChangingPasswordUser(null);
+    setPasswordFormData({
+      new_password: '',
+      confirm_password: ''
+    });
+    setPasswordError('');
   };
 
   const handleEditFormChange = (e) => {
@@ -207,6 +269,7 @@ const AdminUsers = () => {
                 <th>Username</th>
                 <th>Name</th>
                 <th>Email</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -274,23 +337,29 @@ const AdminUsers = () => {
                       </div>
                     </td>
                     <td>
-  <div className="action-buttons">
-    <button 
-      className="button button-warning button-small"
-      onClick={() => handleEditUser(user)}
-    >
-      Edit
-    </button>
-    {user.role !== 'ADMIN' && (
-      <button 
-        className="button button-danger button-small"
-        onClick={() => handleDeleteUser(user.id, user.username)}
-      >
-        Delete
-      </button>
-    )}
-  </div>
-</td>
+                      <div className="action-buttons">
+                        <button 
+                          className="button button-warning button-small"
+                          onClick={() => handleEditUser(user)}
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          className="button button-secondary button-small"
+                          onClick={() => handleChangePassword(user)}
+                        >
+                          Change Password
+                        </button>
+                        {user.role !== 'ADMIN' && (
+                          <button 
+                            className="button button-danger button-small"
+                            onClick={() => handleDeleteUser(user.id, user.username)}
+                          >
+                            Delete
+                          </button>
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 );
               })}
@@ -351,6 +420,66 @@ const AdminUsers = () => {
                   type="button" 
                   className="button button-secondary"
                   onClick={handleCancelEdit}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {changingPasswordUser && (
+        <div className="modal-overlay" onClick={handleCancelPasswordChange}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Change Password: {changingPasswordUser.username}</h2>
+              <button className="close-button" onClick={handleCancelPasswordChange}>×</button>
+            </div>
+
+            <form onSubmit={handleSavePassword} className="edit-form">
+              {passwordError && (
+                <div className="error-message">
+                  {passwordError}
+                </div>
+              )}
+
+              <div className="form-group">
+                <label className="form-label">New Password</label>
+                <input
+                  type="password"
+                  name="new_password"
+                  className="input-field"
+                  placeholder="Enter new password (min. 8 characters)"
+                  value={passwordFormData.new_password}
+                  onChange={handlePasswordFormChange}
+                  required
+                  minLength={8}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Confirm New Password</label>
+                <input
+                  type="password"
+                  name="confirm_password"
+                  className="input-field"
+                  placeholder="Enter new password again"
+                  value={passwordFormData.confirm_password}
+                  onChange={handlePasswordFormChange}
+                  required
+                  minLength={8}
+                />
+              </div>
+
+              <div className="form-actions">
+                <button type="submit" className="button button-success">
+                  Change Password
+                </button>
+                <button 
+                  type="button" 
+                  className="button button-secondary"
+                  onClick={handleCancelPasswordChange}
                 >
                   Cancel
                 </button>

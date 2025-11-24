@@ -290,7 +290,10 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       console.error('Error deleting registration:', err);
     }
   };
-  
+  const truncateText = (text, maxLength) => {
+    if (!text || text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  };
   const handleRemoveStudent = async (enrollmentId) => {
     if (!selectedCourse) return;
     
@@ -397,7 +400,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   };
 
   const getRoomName = (roomId) => {
-    if (!roomId) return 'Not specified';
+    if (!roomId) return 'Unknown';
     const room = rooms.find(r => r.id === roomId);
     return room ? (room.name || `Room ${room.id}`) : 'Not specified';
   };
@@ -710,7 +713,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                           key={student.registration_id} 
                           value={student.registration_id}
                         >
-                          {student.first_name} {student.last_name} ({student.username})
+        {truncateText(`${student.first_name} ${student.last_name}`, 25)} ({truncateText(student.username, 15)})
                         </option>
                       ))
                     }
@@ -771,7 +774,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                   {termStudents.map(student => (
                     <tr key={student.registration_id}>
                       <td>
-                        {student.first_name} {student.last_name}
+                      {truncateText(`${student.first_name} ${student.last_name}`, 30)}
                         <br />
                         <small style={{ color: '#64748b' }}>({student.username})</small>
                       </td>
@@ -976,10 +979,10 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                   {approvedEnrollments.map(enrollment => (
                     <tr key={enrollment.id}>
                       <td>
-                        {enrollment.student 
-                          ? `${enrollment.student.first_name} ${enrollment.student.last_name}`
-                          : 'Unknown'}
-                      </td>
+        {enrollment.student 
+          ? truncateText(`${enrollment.student.first_name} ${enrollment.student.last_name}`, 30)
+          : 'Unknown'}
+      </td>
                       <td>
                         {new Date(enrollment.enrolled_at).toLocaleDateString('en-US')}
                       </td>
@@ -1127,10 +1130,10 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
               {pendingEnrollments.map(enrollment => (
                 <div key={enrollment.id} className="waiting-student-item">
                   <span className="student-info">
-                    {enrollment.student 
-                      ? `${enrollment.student.first_name} ${enrollment.student.last_name} (${enrollment.student.username})`
-                      : 'Unknown'}
-                  </span>
+      {enrollment.student 
+        ? `${truncateText(`${enrollment.student.first_name} ${enrollment.student.last_name}`, 25)} (${truncateText(enrollment.student.username, 15)})`
+        : 'Unknown'}
+    </span>
                   <div className="student-actions">
                     <button 
                       className="button button-success button-small"
