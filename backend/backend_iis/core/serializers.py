@@ -121,7 +121,7 @@ class TermSerializer(serializers.ModelSerializer):
     registrations_count = serializers.IntegerField(source='registrations.count', read_only=True)
     class Meta:
         model = Term
-        fields = ['id','name', 'description', 'course', 'course_id', 'type' ,'requires_registration' ,'capacity' , 'registrations_count', 'room_name', 'start_time', 'end_time']
+        fields = ['id','name', 'description', 'course', 'course_id', 'type' ,'requires_registration' ,'capacity' , 'registrations_count','room', 'room_name', 'start_time', 'end_time']
 
     def validate(self, data):
         name = data.get('name', getattr(self.instance, 'name', None))
