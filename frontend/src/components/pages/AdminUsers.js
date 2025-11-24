@@ -13,6 +13,7 @@ const AdminUsers = () => {
   const [changingPasswordUser, setChangingPasswordUser] = useState(null);
   const [expandedFields, setExpandedFields] = useState({});
   const [editFormData, setEditFormData] = useState({
+    username: '',
     first_name: '',
     last_name: '',
     email: '',
@@ -65,10 +66,7 @@ const AdminUsers = () => {
     setFilteredUsers(filtered);
   };
 
-  const handleSearch = () => {
-    filterUsers();
-  };
-
+ 
   const toggleFieldExpansion = (userId, field) => {
     const key = `${userId}-${field}`;
     setExpandedFields(prev => ({
@@ -89,6 +87,7 @@ const AdminUsers = () => {
   const handleEditUser = (user) => {
     setEditingUser(user);
     setEditFormData({
+      username: user.username,
       first_name: user.first_name,
       last_name: user.last_name,
       email: user.email || '',
@@ -128,10 +127,11 @@ const AdminUsers = () => {
     }
   
     try {
-      const result = await usersAPI.changeUserPassword(changingPasswordUser.id, {
+      await usersAPI.changeUserPassword(changingPasswordUser.id, {
         new_password: passwordFormData.new_password
       });
       
+      alert('User password has been successfully changed');
       setChangingPasswordUser(null);
       setPasswordFormData({
         new_password: '',
@@ -175,6 +175,7 @@ const AdminUsers = () => {
   const handleCancelEdit = () => {
     setEditingUser(null);
     setEditFormData({
+      username: '',
       first_name: '',
       last_name: '',
       email: '',
@@ -197,25 +198,7 @@ const AdminUsers = () => {
     }
   };
 
-  const getRoleName = (role) => {
-    const roleMap = {
-      'ADMIN': 'Administrator',
-      'USER': 'Student',
-      'GUARANTOR': 'Guarantor',
-      'LECTURER': 'Lecturer'
-    };
-    return roleMap[role] || role;
-  };
-
-  const getRoleBadgeClass = (role) => {
-    const classMap = {
-      'ADMIN': 'badge-danger',
-      'USER': 'badge-info',
-      'GUARANTOR': 'badge-warning',
-      'LECTURER': 'badge-success'
-    };
-    return classMap[role] || 'badge-info';
-  };
+ 
 
   if (loading) {
     return (
@@ -377,6 +360,18 @@ const AdminUsers = () => {
             </div>
 
             <form onSubmit={handleSaveEdit} className="edit-form">
+              <div className="form-group">
+                <label className="form-label">Username</label>
+                <input
+                  type="text"
+                  name="username"
+                  className="input-field"
+                  value={editFormData.username}
+                  onChange={handleEditFormChange}
+                  required
+                />
+              </div>
+
               <div className="form-group">
                 <label className="form-label">First Name</label>
                 <input

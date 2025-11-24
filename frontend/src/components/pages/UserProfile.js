@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './UserProfile.css';
 import { usersAPI } from '../services/api';
 
-const UserProfile = ({ user,onProfileUpdate }) => {
+const UserProfile = ({ user, onProfileUpdate }) => {
   const [userDetails, setUserDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -11,6 +11,7 @@ const UserProfile = ({ user,onProfileUpdate }) => {
   const [expandedFields, setExpandedFields] = useState({});
   
   const [profileData, setProfileData] = useState({
+    username: '',
     first_name: '',
     last_name: '',
     email: ''
@@ -36,6 +37,7 @@ const UserProfile = ({ user,onProfileUpdate }) => {
       const data = await usersAPI.getCurrentUser();
       setUserDetails(data);
       setProfileData({
+        username: data.username || '',
         first_name: data.first_name || '',
         last_name: data.last_name || '',
         email: data.email || ''
@@ -71,6 +73,7 @@ const UserProfile = ({ user,onProfileUpdate }) => {
     });
     setProfileError('');
   };
+
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
     setProfileError('');
@@ -81,7 +84,6 @@ const UserProfile = ({ user,onProfileUpdate }) => {
       setProfileSuccess('Profile has been successfully updated');
       await loadUserDetails();
       
-      // Call the parent callback to refresh user data
       if (onProfileUpdate) {
         await onProfileUpdate();
       }
@@ -211,6 +213,19 @@ const UserProfile = ({ user,onProfileUpdate }) => {
 
               <form onSubmit={handleProfileSubmit} className="edit-form">
                 <div className="form-group">
+                  <label className="form-label">Username</label>
+                  <input
+                    type="text"
+                    name="username"
+                    className="input-field"
+                    placeholder="Enter username"
+                    value={profileData.username}
+                    onChange={handleProfileChange}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
                   <label className="form-label">First Name</label>
                   <input
                     type="text"
@@ -258,6 +273,7 @@ const UserProfile = ({ user,onProfileUpdate }) => {
                     onClick={() => {
                       setIsEditingProfile(false);
                       setProfileData({
+                        username: userDetails.username || '',
                         first_name: userDetails.first_name || '',
                         last_name: userDetails.last_name || '',
                         email: userDetails.email || ''
