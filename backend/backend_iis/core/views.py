@@ -129,6 +129,7 @@ class UserViewSet(viewsets.ModelViewSet):
         user.save()
         return Response({'detail': 'User password changed successfully.'})
 
+
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
@@ -164,7 +165,8 @@ class CourseViewSet(viewsets.ModelViewSet):
         if request.user.role != 'ADMIN':
             return Response({'detail': 'Only admins can reject courses.'}, status=403)
         course.approved = False
-        course.save()
+        
+        course.delete()
         return Response({'detail': 'Course rejected.'})
 
     @action(detail=True, methods=['patch'], permission_classes=[IsGuaranteeOrAdmin])
