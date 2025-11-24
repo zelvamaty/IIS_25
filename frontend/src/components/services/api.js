@@ -9,20 +9,16 @@ const getAuthHeaders = () => {
   };
 };
 
-// Handle API errors
 const handleResponse = async (response) => {
   if (!response.ok) {
     let errorMessage = 'API request failed';
     try {
       const error = await response.json();
-      
-      // Handle different error formats
       if (error.detail) {
         errorMessage = error.detail;
       } else if (error.message) {
         errorMessage = error.message;
       } else if (typeof error === 'object') {
-        // Handle field errors (e.g., {username: ["This field is required"]})
         const errors = Object.entries(error)
           .map(([field, messages]) => {
             if (Array.isArray(messages)) {
@@ -38,7 +34,6 @@ const handleResponse = async (response) => {
     }
     throw new Error(errorMessage);
   }
-  
   // Handle 204 No Content
   if (response.status === 204) {
     return null;
@@ -97,7 +92,6 @@ export const authAPI = {
 // 2. USERS API
 // ============================================
 export const usersAPI = {
-  // Get all users (admin sees all, user sees only themselves)
   getUsers: async () => {
     const response = await fetch(`${API_BASE_URL}/users/`, {
       method: 'GET',
@@ -184,7 +178,6 @@ removeStudent: async (courseId, enrollmentId) => {
   });
   return handleResponse(response);
 },
-// Leave course (student unsubscribe)
 leaveCourse: async (courseId) => {
   const response = await fetch(`${API_BASE_URL}/courses/${courseId}/leave_course/`, {
     method: 'DELETE',
