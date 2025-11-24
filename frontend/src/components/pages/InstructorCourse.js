@@ -680,14 +680,6 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
           {courseTerms.length === 0 ? (
             <div className="empty-state">
               <p>No terms have been created yet</p>
-              {canManageCourse && (
-                <button 
-                  className="button button-success"
-                  onClick={() => setActiveTab('create-term')}
-                >
-                  + Create First Term
-                </button>
-              )}
             </div>
           ) : (
             <div className="table-container">
