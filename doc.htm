@@ -6,6 +6,7 @@
     	table { border-collapse: collapse; }
     	td, th { border: 1px solid black; padding: 0.3em 0.5em; text-align: left; }
     	dt { font-weight: bold; margin-top: 0.5em; }
+		pre {border: 1px solid black;}
     </style>
 </head>
 <body>
@@ -76,7 +77,9 @@ git clone git@github.com/swaggermaty:IIS_25.git
 </pre>
 
 <h4>Instalace backendu</h4>
-1. Konfigurace prostředí:
+<b>1. Konfigurace prostředí:<br /></b>
+<i>1.1. Inicializace virtuálního prostředí (silně doporučeno)<br /></i>
+V terminálu zadejte tyto příkazy:
 <pre>
 cd ~/IIS_25/backend
 python3 -m venv .venv
@@ -84,23 +87,67 @@ python3 -m venv .venv
 pip install -r requirements.txt
 </pre>
 
-2. Inicializace databáze - naplní databázi ukázkovými daty
+<i>1.2. Konfigurace běhového prostředí - <code>settings.py</code> (volitelné)<br /></i>
+Pokud zprovozňujete aplikace pouze na localhostu, nejsou potřebné žádne úpravy tohoto souboru.
+Pro běh na produkci ale důrazně doporučujeme si vytvořit soubor, ve kterém budou umístěny příslušné přetížení konstant a ten pak použijeme jako soubor nastavení. Další možností je úprava 
+samotného souboru <code>settings.py</code>, ale tuto možnost spíš nedoporučujeme z důvodu možné ztráty předvolených hodnot nastavení.<br />
+Soubor pro přetížení předvolených hodnot lze vytvořit nasledujícím způsobem:
+<pre>
+vi ~/IIS_25/backend/backend_iis/backend_iis/local_settings.py
+</pre>
+a vložit do něj nasledující obsah:
+<pre>
+from settings import *		# zahrne předvolená nastavení
+
+# Bezpečnostní klíč - nahraďte řetězcem náhodných ASCII znaků o délce alespoň 50 znaků, tento klíč je používán ke zabezpečení podepsaných dat
+SECRET_KEY = 'django-insecure-m)c@0!p#gq9x&9*s-g88=8q&z*k^q8$d!q$8y!s#k!a^e(x1@v'
+
+# Debugovací režim - jeho zapnutí na produkci odhaluje citlivé údaje o běhu, silně doporučujeme vypínat pro běh na produkci!
+DEBUG = False
+
+# Konfigurace připojení do databáze
+DATABASES = {				
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',	# použitý DBMS (např. pro PostgreSQL použijte 'django.db.backends.mysql')
+        'NAME': 'django',                       # název databáze
+        'USER': 'django',                       # uživatelské jméno pro přihlášení
+        'PASSWORD': 'heslonaGITU',              # uživatelské heslo
+        'HOST': 'localhost',                    # doménové jméno nebo IP adresa DBMS
+        'PORT': '3306',                         # port, na kterém běží DBMS
+    }
+}
+
+# Seznam povolených zdrojů požadavků - zde umístíme base URL frontendu.
+CORS_ALLOWED_ORIGINS = [
+    "http://example.com:3000/"
+]
+</pre>
+Více v bodě 3b.<br />
+
+<b>2. Inicializace databáze - naplní databázi ukázkovými daty</b>
 <pre>
 python3 manage.py makemigrations
 python3 manage.py migrate
 python3 manage.py seeder
 </pre>
 
-3a. Spuštění backendu pro vývoj na localhostu:
+<b>3a. Spuštění backendu pro vývoj na localhostu:</b>
 <pre>
 python3 manage.py runserver
 </pre>
 
-3b. Spuštění backendu pro běh na produkci:
+<b>3b. Spuštění backendu pro běh na produkci:</b><br />
+Jak již bylo v bodě 1.2 zmíněno, předvolené parametry aplikace jsou definovány ve zdrojovém souboru <code>backend_iis/settings.py</code>. Pro aplikaci přetížení těchto parametrů
+je nutné nastavit proměnnou prostředí <code>DJANGO_SETTINGS_MODULE</code> tak, aby obsahovala celý název modulu, ve kterém se tato přetížení nachází. Toho můžeme docílit např. tímto zbůsobem:
 <pre>
+DJANGO_SETTINGS_MODULE=backend_iis.local_settings daphne --bind &lt;adresa&gt; --port &lt;číslo portu&gt; backend_iis.asgi:application
+</pre>
+nebo také tuto proměnnou exportovat:
+<pre>
+export DJANGO_SETTINGS_MODULE=backend_iis.local_settings 
 daphne --bind &lt;adresa&gt; --port &lt;číslo portu&gt; backend_iis.asgi:application
 </pre>
-Poznámka: Program <code>daphne</code> je standalone server, nejedná se o nástroj pro řízení běhu (jako např. <code>systemctl</code>) - je tedy možné ji spouštět např. jako systémovou službu pod <code>systemd</code>.
+Poznámka: Program <code>daphne</code> je standalone server, nejedná se o nástroj pro řízení běhu (jako např. <code>systemctl</code>) - je tedy možné ho spouštět např. jako systémovou službu pod <code>systemd</code>.
 
 <h4>Instalace frontendu</h4>
 1. Konfigurace prostředí
