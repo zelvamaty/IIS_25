@@ -1019,7 +1019,7 @@ const [editTermError, setEditTermError] = useState('');
                 className="button button-success"
                 disabled={termLoading}
               >
-                {termLoading ? '⏳ Creating...' : '✓ Create Term'}
+                {termLoading ? 'Creating...' : 'Create Term'}
               </button>
               <button 
                 type="button" 
