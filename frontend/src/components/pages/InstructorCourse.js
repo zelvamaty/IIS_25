@@ -99,7 +99,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
     
     setEditingTerm(term);
     setEditTermData({
-      title: term.title || '',
+      title: term.title || term.name || '',
       description: term.description || '',
       type: term.type,
       start_time: new Date(term.start_time).toISOString().slice(0, 16),
