@@ -115,13 +115,13 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   
     try {
       const termData = {
-        title: editTermData.title,
-        description: editTermData.description,
+        name: editTermData.title || 'default_term_name',  // Backend expects 'name', not 'title'
         type: editTermData.type,
         start_time: new Date(editTermData.start_time).toISOString(),
         end_time: new Date(editTermData.end_time).toISOString(),
         capacity: parseInt(editTermData.capacity),
-        requires_registration: editTermData.requires_registration
+        requires_registration: editTermData.requires_registration,
+        description: editTermData.description || ''
       };
   
       if (editTermData.room) {
@@ -403,13 +403,13 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
     try {
       const termData = {
         course_id: selectedCourse.id,
-        title: termFormData.title,
-        description: termFormData.description,
+        name: termFormData.title || 'default_term_name',  
         type: termFormData.type,
         start_time: new Date(termFormData.start_time).toISOString(),
         end_time: new Date(termFormData.end_time).toISOString(),
         capacity: parseInt(termFormData.capacity),
-        requires_registration: termFormData.requires_registration
+        requires_registration: termFormData.requires_registration,
+        description: termFormData.description || ''
       };
 
       if (termFormData.room) {
