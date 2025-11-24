@@ -767,7 +767,6 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                     <th>Student</th>
                     <th>Registration</th>
                     <th>Grade</th>
-                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
