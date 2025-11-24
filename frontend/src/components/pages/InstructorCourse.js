@@ -972,33 +972,34 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                   <tr>
                     <th>Student</th>
                     <th>Enrollment Date</th>
-                    {canManageCourse && <th>Actions</th>}
-                  </tr>
+                    {(canManageCourse || isLecturer) && <th>Actions</th>}                  </tr>
                 </thead>
                 <tbody>
-                  {approvedEnrollments.map(enrollment => (
-                    <tr key={enrollment.id}>
-                      <td>
+  {approvedEnrollments.map(enrollment => (
+    <tr key={enrollment.id}>
+      <td>
         {enrollment.student 
           ? truncateText(`${enrollment.student.first_name} ${enrollment.student.last_name}`, 30)
           : 'Unknown'}
       </td>
-                      <td>
-                        {new Date(enrollment.enrolled_at).toLocaleDateString('en-US')}
-                      </td>
-                      {canManageCourse && (
-                        <td>
-                          <button 
-                            className="button button-danger button-small"
-                            onClick={() => handleRemoveStudent(enrollment.id)}
-                          >
-                            Remove from Course
-                          </button>
-                        </td>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
+      <td>
+        {new Date(enrollment.enrolled_at).toLocaleDateString('en-US')}
+      </td>
+      {(canManageCourse || isLecturer) && (
+        <td>
+          {canManageCourse && (
+            <button 
+              className="button button-danger button-small"
+              onClick={() => handleRemoveStudent(enrollment.id)}
+            >
+              Remove from Course
+            </button>
+          )}
+        </td>
+      )}
+    </tr>
+  ))}
+</tbody>
               </table>
             </div>
           )}
