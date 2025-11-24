@@ -6,7 +6,7 @@
     	table { border-collapse: collapse; }
     	td, th { border: 1px solid black; padding: 0.3em 0.5em; text-align: left; }
     	dt { font-weight: bold; margin-top: 0.5em; }
-		pre {border: 1px solid black;}
+		pre {border: 1px solid black; padding: 5px 5px 5px 5px;}
     </style>
 </head>
 <body>
@@ -88,7 +88,7 @@ pip install -r requirements.txt
 </pre>
 
 <i>1.2. Konfigurace běhového prostředí - <code>settings.py</code> (volitelné)<br /></i>
-Pokud zprovozňujete aplikace pouze na localhostu, nejsou potřebné žádne úpravy tohoto souboru.
+Pokud zprovozňujete aplikaci pouze na localhostu, nejsou potřebné žádne úpravy tohoto souboru.
 Pro běh na produkci ale důrazně doporučujeme si vytvořit soubor, ve kterém budou umístěny příslušné přetížení konstant a ten pak použijeme jako soubor nastavení. Další možností je úprava 
 samotného souboru <code>settings.py</code>, ale tuto možnost spíš nedoporučujeme z důvodu možné ztráty předvolených hodnot nastavení.<br />
 Soubor pro přetížení předvolených hodnot lze vytvořit nasledujícím způsobem:
@@ -150,18 +150,19 @@ daphne --bind &lt;adresa&gt; --port &lt;číslo portu&gt; backend_iis.asgi:appli
 Poznámka: Program <code>daphne</code> je standalone server, nejedná se o nástroj pro řízení běhu (jako např. <code>systemctl</code>) - je tedy možné ho spouštět např. jako systémovou službu pod <code>systemd</code>.
 
 <h4>Instalace frontendu</h4>
-1. Konfigurace prostředí
+<b>1. Inicializace prostředí</b>
 <pre>
 cd ~/IIS_25/frontend
 npm install
 </pre>
 
-2a. Spuštění frontendu pro vývoj:
+<b>2a. Spuštění frontendu pro vývoj:</b>
 <pre>
 npm start
 </pre>
 
-2b. Spuštění frontendu pro běh na produkci:
+<b>2b. Spuštění frontendu pro běh na produkci:<br /></b>
+Před nasazením do produkce je nutné změnit základní URL pro volání backendu. Toho můžeme docílit 
 <pre>
 npm run build
 serve -s build
