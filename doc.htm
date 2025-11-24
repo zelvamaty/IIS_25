@@ -35,9 +35,9 @@
 <h2>Uživatelé systému pro testování</h2>
 <table>
 <tbody><tr><th>Login</th><th>Heslo</th><th>Role</th></tr>
-<tr><td>admin</td><td>admin</td><td>Administrátor</td></tr>
-<tr><td>prodavac</td><td>prodavac</td><td>Prodavač</td></tr>
-<tr><td>franta</td><td>franta</td><td>Zákazník</td></tr>
+<tr><td>admin_main</td><td>pass1324</td><td>Administrátor</td></tr>
+<tr><td>user1</td><td>pass1234</td><td>Registrovaný uživatel - garant kurzu </td></tr>
+<tr><td>user2</td><td>pass1234</td><td>Lektor</td></tr>
 </tbody></table>
 
 <h3>Video</h3>
@@ -49,8 +49,15 @@ Video nahrajte například na VUT Google Drive, kde ho bude možné přímo
 spustit z odkazu.</p> 
 
 <h2>Implementace</h2>
-<p>Stručná dokumentace k implementaci, která popisuje, které části 
-projektu (např. PHP skripty) implementují jednotlivé případy použití.</p>
+
+<h3>Backend</h3>
+<code>core/urls.py</code> - základ routeru<br>
+<code>core/views.py</code> - presentery<br>
+<code>core/models.py</code> - datový model<br>
+<code>core/serializers.py</code> - serializace modelu na JSON a validace<br>
+
+<h3>Frontend</h3>
+peta pls dopln, ja sa v tom nevyznam :skull:
 
 <h3>Databáze</h3>
 <img src="db.png" alt="Schéma databáze"/>
@@ -65,10 +72,7 @@ projektu (např. PHP skripty) implementují jednotlivé případy použití.</p>
 </ul>
 
 <h3>Postup instalace</h3>
-<ul>
-	<li>Git repozitář ke stažení <a href="https://github.com/swaggermaty/IIS_25">zde</a>.</li>
-	<li>Předpokládme funkční instalaci databázového serveru MariaDB, případně jinou implementaci MySQL.</li>
-</ul>
+<i>Předpokládme funkční instalaci databázového serveru MariaDB, případně jinou implementaci MySQL.</i>
 
 <h4>Klon repozitáře</h4>
 <pre>
@@ -99,7 +103,7 @@ a vložit do něj nasledující obsah:
 <pre>
 from settings import *		# zahrne předvolená nastavení
 
-# Bezpečnostní klíč - nahraďte řetězcem náhodných ASCII znaků o délce alespoň 50 znaků, tento klíč je používán ke zabezpečení podepsaných dat
+# Bezpečnostní klíč - nahraďte náhodným ASCII řetězcem o délce alespoň 50 znaků, tento klíč je používán ke zabezpečení podepsaných dat
 SECRET_KEY = 'django-insecure-m)c@0!p#gq9x&9*s-g88=8q&z*k^q8$d!q$8y!s#k!a^e(x1@v'
 
 # Debugovací režim - jeho zapnutí na produkci odhaluje citlivé údaje o běhu, silně doporučujeme vypínat pro běh na produkci!
