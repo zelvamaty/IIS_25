@@ -316,12 +316,11 @@
 .empty-state {
   text-align: center;
   padding: 60px 40px;
-  background: #f8fafc;
-  border: 2px dashed #cbd5e1;
+  background: transparent;
+  border: none;
   border-radius: 16px;
   margin: 40px 0;
 }
-
 .empty-state p {
   color: #64748b;
   font-size: 16px;

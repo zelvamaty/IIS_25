@@ -1388,7 +1388,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
               </div>
             </div>
           ) : (
-            <div className="empty-state">
+            <div className="">
               <p>The course doesn't have any lecturers yet</p>
             </div>
           )}
@@ -1400,7 +1400,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
           <h2 className="section-title">Students Waiting for Approval</h2>
           
           {pendingEnrollments.length === 0 ? (
-            <div className="empty-state">
+            <div className="">
               <p>No students are waiting for approval</p>
             </div>
           ) : (
