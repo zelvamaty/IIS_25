@@ -165,7 +165,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         if request.user.role != 'ADMIN':
             return Response({'detail': 'Only admins can reject courses.'}, status=403)
         course.approved = False
-        
+
         course.delete()
         return Response({'detail': 'Course rejected.'})
 

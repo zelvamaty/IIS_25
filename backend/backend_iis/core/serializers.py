@@ -120,14 +120,20 @@ class TermSerializer(serializers.ModelSerializer):
     registrations_count = serializers.IntegerField(source='registrations.count', read_only=True)
     class Meta:
         model = Term
-        fields = ['id', 'course', 'course_id', 'type' ,'requires_registration' ,'capacity' , 'registrations_count', 'room', 'start_time', 'end_time']
+        fields = ['id','name', 'description', 'course', 'course_id', 'type' ,'requires_registration' ,'capacity' , 'registrations_count', 'room', 'start_time', 'end_time']
 
     def validate(self, data):
-        # Use instance values for partial updates if fields are not provided
+        name = data.get('name', getattr(self.instance, 'name', None))
+        description = data.get('description', getattr(self.instance, 'description', None))
         start_time = data.get('start_time', getattr(self.instance, 'start_time', None))
         end_time = data.get('end_time', getattr(self.instance, 'end_time', None))
         capacity = data.get('capacity', getattr(self.instance, 'capacity', None))
         room = data.get('room', getattr(self.instance, 'room', None))
+
+        if not name:
+            raise serializers.ValidationError("Term name cannot be empty.")
+        if not description:
+            raise serializers.ValidationError("Term description cannot be empty.")
 
         if start_time and end_time and start_time >= end_time:
             raise serializers.ValidationError("End time must be after start time.")
