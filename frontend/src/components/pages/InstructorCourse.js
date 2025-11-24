@@ -1250,7 +1250,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                   <tr>
                     <th>Student</th>
                     <th>Enrollment Date</th>
-                    {(canManageCourse || isLecturer) && <th>Actions</th>}
+                    {(canManageCourse && <th>Actions</th>}
                   </tr>
                 </thead>
                 <tbody>
