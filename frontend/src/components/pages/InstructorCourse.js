@@ -1239,7 +1239,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
           <h2 className="section-title">Approved Students</h2>
           
           {approvedEnrollments.length === 0 ? (
-            <div className="empty-state">
+            <div className="">
               <p>No approved students yet</p>
             </div>
           ) : (
