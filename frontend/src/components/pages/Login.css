@@ -148,7 +148,27 @@
     cursor: not-allowed;
   }
   
+  .input-field.input-error {
+    border-color: #ef4444;
+  }
+  .input-field.input-error {
+    border-color: #ef4444;
+  }
   
+  .form-error {
+    color: #ef4444;
+    font-size: 12px;
+    margin-top: 4px;
+    display: block;
+  }
+  
+  .form-hint {
+    color: #64748b;
+    font-size: 12px;
+    margin-top: 4px;
+    display: block;
+  }
+ 
   /* Responsive */
   @media (max-width: 768px) {
     .login-container {

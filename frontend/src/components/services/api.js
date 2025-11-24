@@ -107,6 +107,15 @@ export const usersAPI = {
     return handleResponse(response);
   },
 
+  changeUserPassword: async (userId, passwordData) => {
+    const response = await fetch(`${API_BASE_URL}/users/${userId}/change_users_password/`, {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(passwordData)
+    });
+    const result = await handleResponse(response);
+    return result;
+  },
   // Get current user details
   getCurrentUser: async () => {
     const response = await fetch(`${API_BASE_URL}/users/me/`, {
@@ -290,7 +299,6 @@ leaveCourse: async (courseId) => {
     });
     return handleResponse(response);
   },
-  
   approveEnrollment: async (courseId, enrollmentId) => {
     const response = await fetch(`${API_BASE_URL}/courses/${courseId}/approve_enrollment/`, {
       method: 'POST',
@@ -374,6 +382,7 @@ export const termsAPI = {
     });
     return handleResponse(response);
   },
+
   getTermStudents: async (termId) => {
     const response = await fetch(`${API_BASE_URL}/terms/${termId}/list_registered_students/`, {
       method: 'GET',
@@ -472,7 +481,6 @@ export const registrationsAPI = {
 // 7. GRADES API
 // ============================================
 export const gradesAPI = {
-  // Get grades (student sees own, lecturer sees their courses)
   getGrades: async () => {
     const response = await fetch(`${API_BASE_URL}/grades/`, {
       method: 'GET',

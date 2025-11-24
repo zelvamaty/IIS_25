@@ -129,6 +129,7 @@ class UserViewSet(viewsets.ModelViewSet):
         user.save()
         return Response({'detail': 'User password changed successfully.'})
 
+
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
@@ -164,7 +165,8 @@ class CourseViewSet(viewsets.ModelViewSet):
         if request.user.role != 'ADMIN':
             return Response({'detail': 'Only admins can reject courses.'}, status=403)
         course.approved = False
-        course.save()
+
+        course.delete()
         return Response({'detail': 'Course rejected.'})
 
     @action(detail=True, methods=['patch'], permission_classes=[IsGuaranteeOrAdmin])
@@ -387,8 +389,8 @@ class TermViewSet(viewsets.ModelViewSet):
     def schedule(self, request, pk=None):
         user = request.user
         registrations = Registration.objects.filter(user=user).select_related('term')
-        term_data = [{'id': reg.term.id, 'course': reg.term.course.title,
-                      'room': reg.term.room.name if hasattr(reg, 'room') else None, 'type': reg.term.type,
+        term_data = [{'id': reg.term.id, 'title': reg.term.name, 'description': reg.term.description,'course': reg.term.course.title,
+                      'room': reg.term.room_id , 'type': reg.term.type, 'capacity': reg.term.capacity,
                       'start_time': reg.term.start_time, 'end_time': reg.term.end_time}
                      for reg in registrations]
         return Response(term_data)

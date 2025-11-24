@@ -116,43 +116,47 @@ class RoomSerializer(serializers.ModelSerializer):
 class TermSerializer(serializers.ModelSerializer):
     course = CourseSerializer(read_only=True)
     course_id = serializers.PrimaryKeyRelatedField(queryset=Course.objects.all(), source='course', write_only=True)
+    room_name = serializers.CharField(source='room.name', read_only=True)
 
     registrations_count = serializers.IntegerField(source='registrations.count', read_only=True)
     class Meta:
         model = Term
-        fields = ['id', 'course', 'course_id', 'type' ,'requires_registration' ,'capacity' , 'registrations_count', 'room', 'start_time', 'end_time']
+        fields = ['id','name', 'description', 'course', 'course_id', 'type' ,'requires_registration' ,'capacity' , 'registrations_count','room', 'room_name', 'start_time', 'end_time']
 
     def validate(self, data):
-        if data['start_time'] >= data['end_time']:
+        name = data.get('name', getattr(self.instance, 'name', None))
+        description = data.get('description', getattr(self.instance, 'description', None))
+        start_time = data.get('start_time', getattr(self.instance, 'start_time', None))
+        end_time = data.get('end_time', getattr(self.instance, 'end_time', None))
+        capacity = data.get('capacity', getattr(self.instance, 'capacity', None))
+        room = data.get('room', getattr(self.instance, 'room', None))
+
+        if not name:
+            raise serializers.ValidationError("Term name cannot be empty.")
+        if not description:
+            raise serializers.ValidationError("Term description cannot be empty.")
+
+        if start_time and end_time and start_time >= end_time:
             raise serializers.ValidationError("End time must be after start time.")
 
-        if 'capacity' in data and data['capacity'] <= 0:
+        if capacity is not None and capacity <= 0:
             raise serializers.ValidationError("Capacity must be a positive integer.")
 
-        if 'room' in data and 'capacity' in data:
-            room = data['room']
-            capacity = data['capacity']
-            if capacity > room.capacity:
-                raise serializers.ValidationError("Term capacity cannot exceed room capacity.")
+        if room and capacity and capacity > room.capacity:
+            raise serializers.ValidationError("Term capacity cannot exceed room capacity.")
 
-
-
-        if self.instance and 'capacity' in data:
-            new_capacity = data['capacity']
+        if self.instance and capacity is not None:
             current_registrations = self.instance.registrations.count()
-            if new_capacity < current_registrations:
-                raise serializers.ValidationError("Term capacity cannot be less than the number of existing registrations.")
+            if capacity < current_registrations:
+                raise serializers.ValidationError(
+                    "Term capacity cannot be less than the number of existing registrations.")
 
         if data.get('requires_registration') is False:
-            course = data.get('course')
-            if course and 'capacity' in data:
-                if data['capacity'] < course.capacity:
-                    raise serializers.ValidationError("Term capacity cannot be less than the capacity of the course.")
+            course = data.get('course', getattr(self.instance, 'course', None))
+            if course and capacity is not None and capacity < course.capacity:
+                raise serializers.ValidationError("Term capacity cannot be less than the capacity of the course.")
 
-        if 'room' in data:
-            room = data['room']
-            start_time = data['start_time']
-            end_time = data['end_time']
+        if room and start_time and end_time:
             overlapping_terms = Term.objects.filter(
                 room=room,
                 start_time__lt=end_time,

@@ -21,12 +21,18 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
     password2: ''
   });
 
+  const [fieldErrors, setFieldErrors] = useState({});
+
   const handleLoginChange = (e) => {
     setLoginData({
       ...loginData,
       [e.target.name]: e.target.value
     });
     setError('');
+    setFieldErrors(prev => ({
+      ...prev,
+      [e.target.name]: null
+    }));
   };
 
   const handleRegisterChange = (e) => {
@@ -35,12 +41,101 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
       [e.target.name]: e.target.value
     });
     setError('');
+    setFieldErrors(prev => ({
+      ...prev,
+      [e.target.name]: null
+    }));
+  };
+
+  const validateLoginForm = () => {
+    const errors = {};
+    
+    if (!loginData.username || loginData.username.trim() === '') {
+      errors.username = 'Please enter your username';
+    }
+    
+    if (!loginData.password || loginData.password.trim() === '') {
+      errors.password = 'Please enter your password';
+    }
+    
+    return errors;
+  };
+
+  const validateRegisterForm = () => {
+    const errors = {};
+    
+    // Username validation
+    if (!registerData.username || registerData.username.trim() === '') {
+      errors.username = 'Username is required';
+    } else if (registerData.username.length < 3) {
+      errors.username = 'Username must be at least 3 characters';
+    } else if (registerData.username.length > 150) {
+      errors.username = 'Username cannot exceed 150 characters';
+    } else if (!/^[a-zA-Z0-9_]+$/.test(registerData.username)) {
+      errors.username = 'Username can only contain letters, numbers, and underscores';
+    }
+    
+    // Email validation
+    if (!registerData.email || registerData.email.trim() === '') {
+      errors.email = 'Email address is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(registerData.email)) {
+      errors.email = 'Please enter a valid email address (e.g., name@example.com)';
+    }
+    
+    // First name validation
+    if (!registerData.first_name || registerData.first_name.trim() === '') {
+      errors.first_name = 'First name is required';
+    } else if (registerData.first_name.length < 2) {
+      errors.first_name = 'First name must be at least 2 characters';
+    } else if (registerData.first_name.length > 30) {
+      errors.first_name = 'First name cannot exceed 30 characters';
+    }
+    
+    // Last name validation
+    if (!registerData.last_name || registerData.last_name.trim() === '') {
+      errors.last_name = 'Last name is required';
+    } else if (registerData.last_name.length < 2) {
+      errors.last_name = 'Last name must be at least 2 characters';
+    } else if (registerData.last_name.length > 30) {
+      errors.last_name = 'Last name cannot exceed 30 characters';
+    }
+    
+    // Password validation
+    if (!registerData.password1 || registerData.password1.trim() === '') {
+      errors.password1 = 'Password is required';
+    } else if (registerData.password1.length < 8) {
+      errors.password1 = 'Password must be at least 8 characters long';
+    } else if (!/(?=.*[a-z])/.test(registerData.password1)) {
+      errors.password1 = 'Password must contain at least one lowercase letter';
+    } else if (!/(?=.*[A-Z])/.test(registerData.password1)) {
+      errors.password1 = 'Password must contain at least one uppercase letter';
+    } else if (!/(?=.*\d)/.test(registerData.password1)) {
+      errors.password1 = 'Password must contain at least one number';
+    }
+    
+    // Confirm password validation
+    if (!registerData.password2 || registerData.password2.trim() === '') {
+      errors.password2 = 'Please confirm your password';
+    } else if (registerData.password1 !== registerData.password2) {
+      errors.password2 = 'Passwords do not match ';
+    }
+    
+    return errors;
   };
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
+    
+    const errors = validateLoginForm();
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setError('Please complete all required fields to continue');
+      return;
+    }
+    
     setLoading(true);
     setError('');
+    setFieldErrors({});
 
     try {
       const response = await authAPI.login(loginData);
@@ -50,7 +145,7 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
       onLoginSuccess(userInfo);
       
     } catch (err) {
-      setError(err.message || 'Login failed. Please check your credentials.');
+      setError('Invalid username or password. Please try again.');
       console.error('Login error:', err);
     } finally {
       setLoading(false);
@@ -59,20 +154,17 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
 
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
+    
+    const errors = validateRegisterForm();
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setError('Please fix the errors below before continuing');
+      return;
+    }
+    
     setLoading(true);
     setError('');
-
-    if (registerData.password1 !== registerData.password2) {
-      setError('Passwords do not match! Please check your passwords.');
-      setLoading(false);
-      return;
-    }
-
-    if (registerData.password1.length < 8) {
-      setError('Password must be at least 8 characters long!');
-      setLoading(false);
-      return;
-    }
+    setFieldErrors({});
 
     try {
       await authAPI.register(registerData);
@@ -86,7 +178,13 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
       onLoginSuccess(userInfo);
       
     } catch (err) {
-      setError(err.message || 'Registration failed. Please try again.');
+      if (err.message && err.message.includes('username')) {
+        setError('This username is already taken. Please choose a different one.');
+      } else if (err.message && err.message.includes('email')) {
+        setError('This email is already registered. Please use a different email or try logging in.');
+      } else {
+        setError('Registration failed. Please check your information and try again.');
+      }
       console.error('Registration error:', err);
     } finally {
       setLoading(false);
@@ -106,6 +204,7 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
             onClick={() => {
               setIsLogin(true);
               setError('');
+              setFieldErrors({});
             }}
           >
             Login
@@ -115,6 +214,7 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
             onClick={() => {
               setIsLogin(false);
               setError('');
+              setFieldErrors({});
             }}
           >
             Register
@@ -125,7 +225,6 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
           <div className="error-alert">
             <div className="error-icon">⚠️</div>
             <div className="error-content">
-              <strong>Error!</strong>
               <p>{error}</p>
             </div>
           </div>
@@ -138,12 +237,14 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
               <input
                 type="text"
                 name="username"
-                className="input-field"
+                className={`input-field ${fieldErrors.username ? 'input-error' : ''}`}
                 placeholder="Enter your username"
                 value={loginData.username}
                 onChange={handleLoginChange}
-                required
               />
+              {fieldErrors.username && (
+                <small className="form-error">{fieldErrors.username}</small>
+              )}
             </div>
 
             <div className="form-group">
@@ -151,12 +252,14 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
               <input
                 type="password"
                 name="password"
-                className="input-field"
+                className={`input-field ${fieldErrors.password ? 'input-error' : ''}`}
                 placeholder="Enter your password"
                 value={loginData.password}
                 onChange={handleLoginChange}
-                required
               />
+              {fieldErrors.password && (
+                <small className="form-error">{fieldErrors.password}</small>
+              )}
             </div>
 
             <button
@@ -174,12 +277,14 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
               <input
                 type="text"
                 name="username"
-                className="input-field"
-                placeholder="Choose a username"
+                className={`input-field ${fieldErrors.username ? 'input-error' : ''}`}
+                placeholder="Choose a unique username"
                 value={registerData.username}
                 onChange={handleRegisterChange}
-                required
               />
+              {fieldErrors.username && (
+                <small className="form-error">{fieldErrors.username}</small>
+              )}
             </div>
 
             <div className="form-group">
@@ -187,12 +292,14 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
               <input
                 type="email"
                 name="email"
-                className="input-field"
+                className={`input-field ${fieldErrors.email ? 'input-error' : ''}`}
                 placeholder="your.email@example.com"
                 value={registerData.email}
                 onChange={handleRegisterChange}
-                required
               />
+              {fieldErrors.email && (
+                <small className="form-error">{fieldErrors.email}</small>
+              )}
             </div>
 
             <div className="form-row">
@@ -201,12 +308,14 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
                 <input
                   type="text"
                   name="first_name"
-                  className="input-field"
+                  className={`input-field ${fieldErrors.first_name ? 'input-error' : ''}`}
                   placeholder="First name"
                   value={registerData.first_name}
                   onChange={handleRegisterChange}
-                  required
                 />
+                {fieldErrors.first_name && (
+                  <small className="form-error">{fieldErrors.first_name}</small>
+                )}
               </div>
 
               <div className="form-group">
@@ -214,12 +323,14 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
                 <input
                   type="text"
                   name="last_name"
-                  className="input-field"
+                  className={`input-field ${fieldErrors.last_name ? 'input-error' : ''}`}
                   placeholder="Last name"
                   value={registerData.last_name}
                   onChange={handleRegisterChange}
-                  required
                 />
+                {fieldErrors.last_name && (
+                  <small className="form-error">{fieldErrors.last_name}</small>
+                )}
               </div>
             </div>
 
@@ -228,14 +339,17 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
               <input
                 type="password"
                 name="password1"
-                className="input-field"
-                placeholder="At least 8 characters"
+                className={`input-field ${fieldErrors.password1 ? 'input-error' : ''}`}
+                placeholder="Create a strong password"
                 value={registerData.password1}
                 onChange={handleRegisterChange}
-                required
-                minLength={8}
               />
-              <small className="form-hint">Password must contain at least 8 characters</small>
+              {fieldErrors.password1 && (
+                <small className="form-error">{fieldErrors.password1}</small>
+              )}
+              {!fieldErrors.password1 && (
+                <small className="form-hint">Must be 8+ characters </small>
+              )}
             </div>
 
             <div className="form-group">
@@ -243,13 +357,14 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
               <input
                 type="password"
                 name="password2"
-                className="input-field"
-                placeholder="Enter password again"
+                className={`input-field ${fieldErrors.password2 ? 'input-error' : ''}`}
+                placeholder="Re-enter your password"
                 value={registerData.password2}
                 onChange={handleRegisterChange}
-                required
-                minLength={8}
               />
+              {fieldErrors.password2 && (
+                <small className="form-error">{fieldErrors.password2}</small>
+              )}
             </div>
 
             <button
@@ -257,7 +372,7 @@ const Login = ({ onLoginSuccess, onSkipLogin }) => {
               className="button button-primary"
               disabled={loading}
             >
-              {loading ? 'Registering...' : 'Register'}
+              {loading ? 'Creating account...' : 'Create Account'}
             </button>
           </form>
         )}

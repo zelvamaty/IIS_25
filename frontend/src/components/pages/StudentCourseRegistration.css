@@ -173,7 +173,32 @@
   font-size: 18px;
   font-weight: 700;
 }
+.term-type {
+  margin: 0;
+  font-size: 14px;
+  color: #64748b;
+}
 
+.term-badges {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.term-description {
+  margin-bottom: 12px;
+  padding: 12px;
+  background-color: #f8fafc;
+  border-radius: 6px;
+  border-left: 3px solid #3b82f6;
+}
+
+.term-description p {
+  margin: 0;
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.5;
+}
 .term-card-body {
   padding: 25px;
 }

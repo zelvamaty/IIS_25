@@ -25,8 +25,22 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   const [selectedRegistrationId, setSelectedRegistrationId] = useState('');
   const [gradeValue, setGradeValue] = useState('');
   const [gradeError, setGradeError] = useState('');
-  
+  const [editingTerm, setEditingTerm] = useState(null);
+  const [editTermData, setEditTermData] = useState({
+    title: '',
+    description: '',
+    type: '',
+    start_time: '',
+    end_time: '',
+    room: '',
+    capacity: '',
+    requires_registration: true
+  });
+  const [editTermLoading, setEditTermLoading] = useState(false);
+  const [editTermError, setEditTermError] = useState('');
   const [termFormData, setTermFormData] = useState({
+    title: '',
+    description: '',
     type: '',
     start_time: '',
     end_time: '',
@@ -77,6 +91,80 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
     } catch (err) {
       console.error('Error loading users:', err);
     }
+  };
+
+  const handleEditTerm = (term) => {
+    console.log('Editing term:', term); // Debug log
+    console.log('Term room value:', term.room, 'Type:', typeof term.room); // Debug log
+    
+    setEditingTerm(term);
+    setEditTermData({
+      title: term.title || '',
+      description: term.description || '',
+      type: term.type,
+      start_time: new Date(term.start_time).toISOString().slice(0, 16),
+      end_time: new Date(term.end_time).toISOString().slice(0, 16),
+      room: term.room || '', // This should be the room ID
+      capacity: term.capacity.toString(),
+      requires_registration: term.requires_registration
+    });
+    setActiveTab('edit-term');
+  };
+  
+  const handleUpdateTerm = async (e) => {
+    e.preventDefault();
+    setEditTermLoading(true);
+    setEditTermError('');
+  
+    try {
+      const termData = {
+        name: editTermData.title || 'default_term_name',  
+        type: editTermData.type,
+        start_time: new Date(editTermData.start_time).toISOString(),
+        end_time: new Date(editTermData.end_time).toISOString(),
+        capacity: parseInt(editTermData.capacity),
+        requires_registration: editTermData.requires_registration,
+        description: editTermData.description || ''
+      };
+  
+      if (editTermData.room) {
+        termData.room = parseInt(editTermData.room);
+      } else {
+        termData.room = null;
+      }
+  
+      await termsAPI.updateTerm(editingTerm.id, termData);
+      alert('Term has been successfully updated!');
+      
+      setEditingTerm(null);
+      setEditTermData({
+        title: '',
+        description: '',
+        type: '',
+        start_time: '',
+        end_time: '',
+        room: '',
+        capacity: '',
+        requires_registration: true
+      });
+      
+      await loadCourseDetails(selectedCourse.id);
+      setActiveTab('terms');
+    } catch (err) {
+      setEditTermError(err.message || 'Updating term failed');
+      console.error('Error updating term:', err);
+    } finally {
+      setEditTermLoading(false);
+    }
+  };
+  
+  const handleEditTermFormChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setEditTermData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+    setEditTermError('');
   };
 
   const loadCurrentUserAndCourses = async () => {
@@ -236,22 +324,19 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       try {
         const students = await coursesAPI.getEnrollments(courseId);
         
-        const enrollments = students
-          .filter(student => student.role !== 'REJECTED')
-          .map(student => ({
-            id: student.enrollment_id,
-            student: {
-              id: student.id,
-              username: student.username,
-              first_name: student.first_name,
-              last_name: student.last_name,
-              email: student.email || ''
-            },
-            approved: student.role === 'APPROVED',
-            role: student.role,
-            enrolled_at: new Date().toISOString()
-          }));
-        
+        const enrollments = students.map(student => ({
+          id: student.enrollment_id,
+          student: {
+            id: student.id,
+            username: student.username,
+            first_name: student.first_name,
+            last_name: student.last_name,
+            email: student.email || ''
+          },
+          approved: student.role === 'APPROVED' || !student.role, 
+          role: student.role || 'APPROVED', 
+          enrolled_at: student.enrolled_at || new Date().toISOString()
+        }));
         setCourseEnrollments(enrollments);
       } catch (err) {
         console.log('Error loading students:', err);
@@ -290,7 +375,12 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       console.error('Error deleting registration:', err);
     }
   };
-  
+
+  const truncateText = (text, maxLength) => {
+    if (!text || text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  };
+
   const handleRemoveStudent = async (enrollmentId) => {
     if (!selectedCourse) return;
     
@@ -316,11 +406,13 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
     try {
       const termData = {
         course_id: selectedCourse.id,
+        name: termFormData.title || 'default_term_name',  
         type: termFormData.type,
         start_time: new Date(termFormData.start_time).toISOString(),
         end_time: new Date(termFormData.end_time).toISOString(),
         capacity: parseInt(termFormData.capacity),
-        requires_registration: termFormData.requires_registration
+        requires_registration: termFormData.requires_registration,
+        description: termFormData.description || ''
       };
 
       if (termFormData.room) {
@@ -331,6 +423,8 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       alert('Term has been successfully created!');
       
       setTermFormData({
+        title: '',
+        description: '',
         type: '',
         start_time: '',
         end_time: '',
@@ -397,7 +491,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
   };
 
   const getRoomName = (roomId) => {
-    if (!roomId) return 'Not specified';
+    if (!roomId) return 'Unknown';
     const room = rooms.find(r => r.id === roomId);
     return room ? (room.name || `Room ${room.id}`) : 'Not specified';
   };
@@ -605,13 +699,16 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                     <th>Room</th>
                     <th>Capacity</th>
                     <th>Registrations</th>
-                    {(canManageCourse || isLecturer) && <th>Actions</th>}
+                   
                   </tr>
                 </thead>
                 <tbody>
                   {courseTerms.map(term => (
                     <tr key={term.id}>
-                      <td>{getTermTypeName(term.type)}</td>
+                      <td>
+                        {term.title && <div><strong>{term.title}</strong></div>}
+                        {getTermTypeName(term.type)}
+                      </td>
                       <td>
                         {new Date(term.start_time).toLocaleString('en-US', {
                           day: '2-digit',
@@ -634,12 +731,20 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                               Detail
                             </button>
                             {canManageCourse && (
-                              <button 
-                                className="button button-danger button-small"
-                                onClick={() => handleDeleteTerm(term.id)}
-                              >
-                                Delete
-                              </button>
+                              <>
+                                <button 
+                                  className="button button-small"
+                                  onClick={() => handleEditTerm(term)}
+                                >
+                                  Edit
+                                </button>
+                                <button 
+                                  className="button button-danger button-small"
+                                  onClick={() => handleDeleteTerm(term.id)}
+                                >
+                                  Delete
+                                </button>
+                              </>
                             )}
                           </div>
                         </td>
@@ -671,6 +776,8 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
             <p><strong>Date:</strong> {new Date(selectedTerm.start_time).toLocaleString('en-US')}</p>
             <p><strong>Room:</strong> {getRoomName(selectedTerm.room)}</p>
             <p><strong>Capacity:</strong> {selectedTerm.registrations_count || 0}/{selectedTerm.capacity}</p>
+            {selectedTerm.title && <p><strong>Title:</strong> {selectedTerm.title}</p>}
+            {selectedTerm.description && <p><strong>Description:</strong> {selectedTerm.description}</p>}
           </div>
 
           <div className="section-header">
@@ -710,7 +817,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                           key={student.registration_id} 
                           value={student.registration_id}
                         >
-                          {student.first_name} {student.last_name} ({student.username})
+                          {truncateText(`${student.first_name} ${student.last_name}`, 25)} ({truncateText(student.username, 15)})
                         </option>
                       ))
                     }
@@ -771,7 +878,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                   {termStudents.map(student => (
                     <tr key={student.registration_id}>
                       <td>
-                        {student.first_name} {student.last_name}
+                        {truncateText(`${student.first_name} ${student.last_name}`, 30)}
                         <br />
                         <small style={{ color: '#64748b' }}>({student.username})</small>
                       </td>
@@ -834,10 +941,38 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
       {activeTab === 'create-term' && canManageCourse && (
         <div className="tab-content">
           <div className="section-header">
-          
+            <h2 className="section-title">Create New Term</h2>
           </div>
 
           <form onSubmit={handleCreateTerm} className="term-form">
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Term Title</label>
+                <input
+                  type="text"
+                  name="title"
+                  className="input-field"
+                  placeholder="e.g., Week 1 - Introduction"
+                  value={termFormData.title}
+                  onChange={handleTermFormChange}
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Term Description *</label>
+                <textarea
+                  name="description"
+                  className="input-field textarea"
+                  rows="3"
+                  placeholder="Additional details about this term..."
+                  value={termFormData.description}
+                  onChange={handleTermFormChange}
+                />
+              </div>
+            </div>
+
             <div className="form-row">
               <div className="form-group">
                 <label className="form-label">Term Type *</label>
@@ -940,12 +1075,166 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                 className="button button-success"
                 disabled={termLoading}
               >
-                {termLoading ? '⏳ Creating...' : '✓ Create Term'}
+                {termLoading ? 'Creating...' : 'Create Term'}
               </button>
               <button 
                 type="button" 
                 className="button button-secondary"
                 onClick={() => setActiveTab('terms')}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {activeTab === 'edit-term' && canManageCourse && editingTerm && (
+        <div className="tab-content">
+          <div className="section-header">
+            <h2 className="section-title">Edit Term</h2>
+          </div>
+
+          {editTermError && (
+            <div className="error-message">
+              {editTermError}
+            </div>
+          )}
+
+          <form onSubmit={handleUpdateTerm} className="term-form">
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Term Title *</label>
+                <input
+                  type="text"
+                  name="title"
+                  className="input-field"
+                  placeholder="e.g., Week 1 - Introduction"
+                  value={editTermData.title}
+                  onChange={handleEditTermFormChange}
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Term Description</label>
+                <textarea
+                  name="description"
+                  className="input-field textarea"
+                  rows="3"
+                  placeholder="Additional details about this term..."
+                  value={editTermData.description}
+                  onChange={handleEditTermFormChange}
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label className="form-label">Term Type *</label>
+                <select
+                  name="type"
+                  className="input-field"
+                  value={editTermData.type}
+                  onChange={handleEditTermFormChange}
+                  required
+                >
+                  <option value="">Select type</option>
+                  <option value="LECTURE">Lecture</option>
+                  <option value="EXERCISE">Exercise</option>
+                  <option value="EXAM">Exam</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-row two-columns">
+              <div className="form-group">
+                <label className="form-label">Start Date and Time *</label>
+                <input
+                  type="datetime-local"
+                  name="start_time"
+                  className="input-field"
+                  value={editTermData.start_time}
+                  onChange={handleEditTermFormChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">End Date and Time *</label>
+                <input
+                  type="datetime-local"
+                  name="end_time"
+                  className="input-field"
+                  value={editTermData.end_time}
+                  onChange={handleEditTermFormChange}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="form-row two-columns">
+              <div className="form-group">
+                <label className="form-label">Room</label>
+                <select
+                  name="room"
+                  className="input-field"
+                  value={editTermData.room}
+                  onChange={handleEditTermFormChange}
+                >
+                  <option value="">No room</option>
+                  {rooms.map(room => (
+                    <option key={room.id} value={room.id}>
+                      {room.name || `Room ${room.id}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Capacity *</label>
+                <input
+                  type="number"
+                  name="capacity"
+                  className="input-field"
+                  min="1"
+                  value={editTermData.capacity}
+                  onChange={handleEditTermFormChange}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="checkbox-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    name="requires_registration"
+                    checked={editTermData.requires_registration}
+                    onChange={handleEditTermFormChange}
+                  />
+                  Requires student registration
+                </label>
+              </div>
+            </div>
+
+            <div className="form-actions">
+              <button 
+                type="submit" 
+                className="button button-success"
+                disabled={editTermLoading}
+              >
+                {editTermLoading ? '⏳ Updating...' : '✓ Update Term'}
+              </button>
+              <button 
+                type="button" 
+                className="button button-secondary"
+                onClick={() => {
+                  setEditingTerm(null);
+                  setActiveTab('terms');
+                }}
               >
                 Cancel
               </button>
@@ -969,7 +1258,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                   <tr>
                     <th>Student</th>
                     <th>Enrollment Date</th>
-                    {canManageCourse && <th>Actions</th>}
+                    {(canManageCourse || isLecturer) && <th>Actions</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -977,20 +1266,22 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                     <tr key={enrollment.id}>
                       <td>
                         {enrollment.student 
-                          ? `${enrollment.student.first_name} ${enrollment.student.last_name}`
+                          ? truncateText(`${enrollment.student.first_name} ${enrollment.student.last_name}`, 30)
                           : 'Unknown'}
                       </td>
                       <td>
                         {new Date(enrollment.enrolled_at).toLocaleDateString('en-US')}
                       </td>
-                      {canManageCourse && (
+                      {(canManageCourse || isLecturer) && (
                         <td>
-                          <button 
-                            className="button button-danger button-small"
-                            onClick={() => handleRemoveStudent(enrollment.id)}
-                          >
-                            Remove from Course
-                          </button>
+                          {canManageCourse && (
+                            <button 
+                              className="button button-danger button-small"
+                              onClick={() => handleRemoveStudent(enrollment.id)}
+                            >
+                              Remove from Course
+                            </button>
+                          )}
                         </td>
                       )}
                     </tr>
@@ -1109,8 +1400,6 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
               <p>The course doesn't have any lecturers yet</p>
             </div>
           )}
-
-          
         </div>
       )}
 
@@ -1128,7 +1417,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                 <div key={enrollment.id} className="waiting-student-item">
                   <span className="student-info">
                     {enrollment.student 
-                      ? `${enrollment.student.first_name} ${enrollment.student.last_name} (${enrollment.student.username})`
+                      ? `${truncateText(`${enrollment.student.first_name} ${enrollment.student.last_name}`, 25)} (${truncateText(enrollment.student.username, 15)})`
                       : 'Unknown'}
                   </span>
                   <div className="student-actions">
@@ -1154,7 +1443,6 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
 
       {activeTab === 'edit-course' && canManageCourse && (
         <div className="tab-content">
-       
           {editError && (
             <div className="error-message">
               {editError}

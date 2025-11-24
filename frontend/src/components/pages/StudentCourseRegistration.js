@@ -19,14 +19,8 @@ const StudentCourseRegistration = () => {
   useEffect(() => {
     loadCourseDetails();
   }, [id]);
+
   const handleUnregisterFromTerm = async (registrationId) => {
-    
-    // const confirmed = window.confirm('Do you really want to unregister from this term?');
-    
-    // if (!confirmed) {
-    //   return;
-    // }
-  
     try {
       setRegistering(true);
       console.log('Calling API to delete registration:', registrationId);
@@ -41,6 +35,7 @@ const StudentCourseRegistration = () => {
       setRegistering(false);
     }
   };
+
   const loadCourseDetails = async () => {
     try {
       setLoading(true);
@@ -89,10 +84,6 @@ const StudentCourseRegistration = () => {
   };
 
   const handleLeaveCourse = async () => {
-    // if (!window.confirm(`Do you really want to leave the course "${course.title}"? This action is irreversible.`)) {
-    //   return;
-    // }
-  
     try {
       setRegistering(true);
       await coursesAPI.leaveCourse(id);
@@ -107,10 +98,6 @@ const StudentCourseRegistration = () => {
   };
 
   const handleRegisterTerm = async (termId) => {
-    // if (!window.confirm('Do you really want to register for this term?')) {
-    //   return;
-    // }
-
     try {
       setRegistering(true);
       await registrationsAPI.registerForTerm(termId);
@@ -129,10 +116,6 @@ const StudentCourseRegistration = () => {
   };
 
   const handleEnrollCourse = async () => {
-    // if (!window.confirm(`Do you really want to enroll in the course "${course.title}"?`)) {
-    //   return;
-    // }
-
     try {
       setRegistering(true);
       await coursesAPI.enrollCourse(id);
@@ -177,6 +160,7 @@ const StudentCourseRegistration = () => {
     const reg = myRegistrations.find(reg => reg.term === termId);
     return reg;
   };
+
   const getGradeDisplay = (grade) => {
     if (!grade) return null;
     return (
@@ -259,7 +243,7 @@ const StudentCourseRegistration = () => {
               onClick={handleEnrollCourse}
               disabled={registering || course.enrolled_count >= course.capacity}
             >
-              {registering ? '⏳ Enrolling...' : '📝 Enroll in Course'}
+              {registering ? 'Enrolling...' : ' Enroll in Course'}
             </button>
           )}
         </div>
@@ -274,6 +258,7 @@ const StudentCourseRegistration = () => {
       ) : (
         <div className="terms-grid">
           {terms.map(term => {
+            console.log('Rendering term:', term);
             const { date, time } = formatDateTime(term.start_time);
             const isFull = isTermFull(term);
             const myRegistration = getMyRegistrationForTerm(term.id);
@@ -281,11 +266,33 @@ const StudentCourseRegistration = () => {
             
             return (
               <div key={term.id} className={`term-card ${isRegistered ? 'registered' : ''}`}>
-                <div className="term-card-header">
-                  <h3>{getTermTypeName(term.type)}</h3>
-                  {isFull && <span className="badge badge-warning">Full</span>}
-                  {isRegistered && <span className="badge badge-success">✓ Registered</span>}
-                </div>
+              <div className="term-card-header">
+  <div>
+    {term.title ? (
+      
+      <>
+        <h3>{term.title}</h3>
+        <p className="term-type">{getTermTypeName(term.type)}</p>
+      </>
+    ) : (
+      <h3>{getTermTypeName(term.type)}</h3>
+    )}
+  </div>
+  <div className="term-badges">
+    {isFull && <span className="badge badge-warning">Full</span>}
+    {isRegistered && <span className="badge badge-success">✓ Registered</span>}
+  </div>
+</div>
+{term.name && (
+                  <div className="term-description">
+                    <p>{term.name}</p>
+                  </div>
+                )}
+                {term.description && (
+                  <div className="term-description">
+                    <p>{term.description}</p>
+                  </div>
+                )}
                 
                 <div className="term-card-body">
                   <div className="term-info-item">
@@ -298,7 +305,7 @@ const StudentCourseRegistration = () => {
                   </div>
                   <div className="term-info-item">
                     <span className="term-icon">📍</span>
-                    <span>Room: {term.room || 'Not specified'}</span>
+                    <span>Room: {term.room_name || 'Not specified'}</span>
                   </div>
                   <div className="term-info-item">
                     <span className="term-icon">👥</span>
@@ -328,7 +335,7 @@ const StudentCourseRegistration = () => {
                         onClick={() => handleRegisterTerm(term.id)}
                         disabled={registering || isFull}
                       >
-                        {isFull ? 'Full' : '✓ Register'}
+                        {isFull ? 'Full' : 'Register'}
                       </button>
                     )
                   )}
