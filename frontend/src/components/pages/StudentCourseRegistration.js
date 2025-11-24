@@ -283,7 +283,11 @@ const StudentCourseRegistration = () => {
     {isRegistered && <span className="badge badge-success">✓ Registered</span>}
   </div>
 </div>
-                
+{term.name && (
+                  <div className="term-description">
+                    <p>{term.name}</p>
+                  </div>
+                )}
                 {term.description && (
                   <div className="term-description">
                     <p>{term.description}</p>

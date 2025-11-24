@@ -1,16 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import './MySchedule.css';
-import { termsAPI } from '../services/api';
+import { termsAPI, roomsAPI } from '../services/api';
 
 const MySchedule = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [scheduleEvents, setScheduleEvents] = useState([]);
+  const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     loadSchedule();
+    loadRooms();
   }, []);
+
+  const loadRooms = async () => {
+    try {
+      const roomsData = await roomsAPI.getRooms();
+      setRooms(roomsData);
+    } catch (err) {
+      console.error('Error loading rooms:', err);
+    }
+  };
+
+  const getRoomName = (roomId) => {
+    if (!roomId) return 'Not specified';
+    const room = rooms.find(r => r.id === roomId);
+    return room ? (room.name || `Room ${room.id}`) : 'Unknown';
+  };
 
   const loadSchedule = async () => {
     try {
@@ -23,6 +40,8 @@ const MySchedule = () => {
           id: term.id,
           courseName: term.course || 'Untitled',
           termType: getTermTypeName(term.type),
+          termTitle: term.title || '',
+          termDescription: term.description || '',
           date: term.start_time.split('T')[0],
           startTime: new Date(term.start_time).toLocaleTimeString('en-US', { 
             hour: '2-digit', 
@@ -34,7 +53,7 @@ const MySchedule = () => {
             minute: '2-digit',
             hour12: false
           }),
-          room: term.room || 'Unknown',
+          roomId: term.room,
           courseCode: '',
           capacity: term.capacity || 0,
           requiresRegistration: term.requires_registration || false
@@ -183,6 +202,9 @@ const MySchedule = () => {
                         <div className="event-time">
                           {event.startTime} - {event.endTime}
                         </div>
+                        {event.termTitle && (
+                          <div className="event-title">{event.termTitle}</div>
+                        )}
                         <div className="event-course">{event.courseName}</div>
                         {event.courseCode && (
                           <div className="event-code">{event.courseCode}</div>
@@ -191,7 +213,7 @@ const MySchedule = () => {
                           {event.termType}
                         </div>
                         <div className="event-details">
-                          <span>📍 Room {event.room}</span>
+                          <span>📍 {getRoomName(event.roomId)}</span>
                         </div>
                         {event.requiresRegistration && (
                           <div className="requires-registration">
@@ -225,12 +247,12 @@ const MySchedule = () => {
                   </div>
                 </div>
                 <div className="upcoming-info">
+                  {event.termTitle && <h4>{event.termTitle}</h4>}
                   <h4>{event.courseName}</h4>
                   <p>{event.termType}</p>
                   <div className="upcoming-details">
                     <span>🕐 {event.startTime} - {event.endTime}</span>
-                    <span>📍 Room {event.room}</span>
-                    <span>👨‍🏫 {event.instructor}</span>
+                    <span>📍 {getRoomName(event.roomId)}</span>
                   </div>
                 </div>
                 <div className="upcoming-type">
