@@ -1217,7 +1217,7 @@ const InstructorCourse = ({ userRole = 'Student' }) => {
                 className="button button-success"
                 disabled={editTermLoading}
               >
-                {editTermLoading ? '⏳ Updating...' : '✓ Update Term'}
+                {editTermLoading ? 'Updating...' : 'Update Term'}
               </button>
               <button 
                 type="button" 
